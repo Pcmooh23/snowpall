@@ -132,6 +132,8 @@ const UserForms = () => {
             const data = await response.json();
             if (response.ok) {
                 setAccessToken(data.accessToken);
+                setUserId(data.userId)
+                localStorage.setItem('currentUserId', data.userId); 
                 resetRegisterForm();
                 navigate('/home');
                 setRegisterError('');

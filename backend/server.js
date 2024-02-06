@@ -43,7 +43,6 @@ const credentials = { key: privateKey, cert: certificate };
 // Create HTTPS server
 const httpsServer = https.createServer(credentials, app);
 
-
 // Serve static files from 'public' directory
 app.use(express.static(path.join(__dirname, '../public')));
 
@@ -210,6 +209,7 @@ app.post('/users', async (req, res) => {
             valid: true,
             message: 'User successfully created.',
             accessToken: accessToken, // Consider omitting if you want to enforce a login after registration
+            userId: newUser.id
         });
     } catch (err) {
         console.error("Error processing request:", err);
@@ -271,8 +271,9 @@ app.post('/refresh-token', async (req, res) => {
 });
 
 // POST endpoint for the requests
-app.post('/submit-request', async (req, res) => {
+app.post('/submit-request', verifyToken, async (req, res) => {
     const { stripeToken, amount, cart, selectedAddress } = req.body;
+    const userId = req.authData.id; // Extract userId from authenticated token
 
     try {
         // Create a charge: this will charge the user's card
@@ -292,43 +293,29 @@ app.post('/submit-request', async (req, res) => {
             created: new Date(charge.created * 1000), // Convert to milliseconds
         };
 
-        // Read the existing data from the file
-        fs.readFile(ORDER_REQUEST_FILE, (err, data) => {
-            let orders = [];
-            if (!err) {
-                try {
-                    orders = JSON.parse(data.toString());
-                } catch (parseErr) {
-                    console.error('Error parsing JSON:', parseErr);
-                    res.status(500).json({ success: false, message: 'Failed to parse existing data.' });
-                    return;
-                }
-            }
+        // Assume ORDER_REQUEST_FILE contains JSON array of orders
+        const data = await fsPromises.readFile(ORDER_REQUEST_FILE, 'utf8');
+        const orders = data ? JSON.parse(data) : [];
 
-            // Append the new order with charge details
-            const newOrder = {
-                id: uuidv4(),
-                orderDate: new Date(),
-                cart: cart,
-                selectedAddress: selectedAddress,
-                charge: chargeInfo, // Include the charge details in the order
-            };
-            orders.push(newOrder);
+        // Append the new order with charge details, including userId for user-specific data handling
+        const newOrder = {
+            id: uuidv4(),
+            userId: userId, // Associate order with the user
+            orderDate: new Date(),
+            cart: cart,
+            selectedAddress: selectedAddress,
+            charge: chargeInfo, // Include the charge details in the order
+        };
+        orders.push(newOrder);
 
-            // Write the updated data back to the file
-            fs.writeFile(ORDER_REQUEST_FILE, JSON.stringify(orders, null, 2), (writeErr) => {
-                if (writeErr) {
-                    console.error('Error writing to file:', writeErr);
-                    res.status(500).json({ success: false, message: 'Failed to save the order and charge data.' });
-                    return;
-                }
+        // Write the updated data back to the file
+        await fsPromises.writeFile(ORDER_REQUEST_FILE, JSON.stringify(orders, null, 2));
 
-                // Respond to the client that the order and charge were successfully processed and saved
-                res.status(200).json({
-                    success: true,
-                    message: "Charge processed and order saved successfully!"
-                });
-            });
+        // Respond to the client that the order and charge were successfully processed and saved
+        res.status(200).json({
+            success: true,
+            message: "Charge processed and order saved successfully!",
+            orderId: newOrder.id, // Return the order ID to the client
         });
     } catch (error) {
         console.error("Charge failed or saving failed:", error);
@@ -1048,7 +1035,6 @@ app.delete('/other/:id', verifyToken, async (req, res) => {
         res.status(500).send('An error occurred processing your request.');
     }
 });
-
 
 // Start the server
 // app.listen(port, () => {

@@ -2,36 +2,26 @@ import React, { useState, useRef, useEffect, useContext } from 'react';
 import { CircleUserRound, Cog, History, HelpCircle, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SnowPallContext } from './SnowPallContext';
+import { useApi } from '../useApi';
 
 const MainHeader = () => {
 
-    const {baseUrl, setAccessToken} = useContext(SnowPallContext)
+    const { setUserId } = useContext(SnowPallContext);
+    const { logout } = useApi(); // Use the logout function from the custom hook
     const navigate = useNavigate();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [activeItem, setActiveItem] = useState('');
     const dropdownRef = useRef(null);
 
-    const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
-
     const handleLogout = async () => {
         try {
-            // Inform the server to invalidate the refresh token
-            // Since the refresh token is HttpOnly, you don't need to send it manually; the browser handles it.
-            const response = await fetch(`${baseUrl}/logout`, {
-                method: 'POST',
-                credentials: 'include', // This is important to include the cookie in the request
-            });
-    
-            if (!response.ok) {
-                throw new Error('Logout failed');
-            }
-    
+            await logout(); // Call the logout function from useApi
             console.log('User logged out successfully');
+            setUserId(''); // Clear user-specific state if any
+            localStorage.setItem('currentUserId', ''); 
+            navigate('/'); // Redirect to home or login page
         } catch (error) {
             console.error('Logout error:', error);
-        } finally {
-            setAccessToken(null);  // Remove the access token from memory/state
-            navigate('/');
         }
     };  
 
@@ -45,6 +35,8 @@ const MainHeader = () => {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [dropdownRef]);
+
+    const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
   return (
     <>

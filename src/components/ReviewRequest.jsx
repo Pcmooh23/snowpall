@@ -1,12 +1,14 @@
 import React, { useState, useContext } from 'react';
 import { SnowPallContext } from './SnowPallContext';
+import { useApi } from '../useApi';
 
 const ReviewRequest = () => {
 
-    const {baseUrl, cart, total, estimatedTax, grandTotal, paymentRef} = useContext(SnowPallContext);
+    const { cart, setCart, total, estimatedTax, grandTotal, paymentRef, userId } = useContext(SnowPallContext);
     const numberOfItems = cart.length;
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
+    const { customFetch } = useApi();
 
     const handleSubmit = async () => {
         setIsLoading(true);
@@ -20,7 +22,8 @@ const ReviewRequest = () => {
             return;
         }
         
-        const selectedAddressString = localStorage.getItem('selectedAddressForUse');
+         // Retrieve selected address information
+        const selectedAddressString = localStorage.getItem(`${userId}_selectedAddressForUse`); 
         let selectedAddress;
 
         try {
@@ -37,6 +40,7 @@ const ReviewRequest = () => {
             return;
         }
         
+        // Prepare order details including the cart, total amounts, selected address, and Stripe token
         const orderDetails = {
             cart: cart,
             amount: Math.round(grandTotal * 100),  // Total charge in cents
@@ -45,24 +49,30 @@ const ReviewRequest = () => {
             grandTotal: grandTotal
         };
         
-        try {
-            const response = await fetch(`${baseUrl}/submit-request`, {
+        const url = '/submit-request';
+        const options = {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(orderDetails),
-            });
+          };
+
+          try {
+            const response = await customFetch(url, options);
+            const data = await response.json(); // Parse the response data for both success and error scenarios
         
-            const data = await response.json();
             if (response.ok) {
-            setMessage('Submission successful, request is now live.');
-            // Here, consider clearing the cart or redirecting the user
+                setMessage('Submission successful, request is now live.');
+                setCart([]); // Clear the cart on successful submission
             } else {
-            throw new Error(data.error || 'An error occurred while submitting the order.');
+                // Use the server-provided error message if available, otherwise a generic error message
+                const errorMessage = data.message || 'An error occurred while submitting the order.';
+                throw new Error(errorMessage);
             }
         } catch (error) {
             console.error('Error:', error);
+            // Ensure `error.message` is used, as it now contains either server-provided or generic error message
             setMessage(error.message);
         } finally {
             setIsLoading(false);

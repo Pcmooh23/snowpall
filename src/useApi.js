@@ -22,7 +22,7 @@ export function useApi() {
         return null;
     }, [baseUrl, setAccessToken]);
 
-    const customFetch = useCallback(async (url, options = {}) => {
+    const customFetch = useCallback(async (url, options = {}, skipRefresh = false) => {
         const authOptions = {
             ...options,
             headers: {
@@ -34,8 +34,8 @@ export function useApi() {
 
         let response = await fetch(`${baseUrl}${url}`, authOptions);
 
-        // If access token was expired or invalid
-        if (response.status === 401) {
+        // If access token was expired or invalid and not skipping refresh
+        if (response.status === 401 && !skipRefresh) {
             const newAccessToken = await refreshToken();
             if (newAccessToken) {
                 authOptions.headers['Authorization'] = `Bearer ${newAccessToken}`;
@@ -46,5 +46,17 @@ export function useApi() {
         return response;
     }, [baseUrl, accessToken, refreshToken]);
 
-    return { customFetch };
+    const logout = useCallback(async () => {
+        // Using customFetch for logout, skipping token refresh on failure
+        const response = await customFetch('/logout', { method: 'POST' }, true);
+
+        if (!response.ok) {
+            throw new Error('Logout failed');
+        }
+
+        // Handle post-logout logic here, such as clearing local state or redirecting the user
+        setAccessToken(null);
+    }, [customFetch, setAccessToken]);
+
+    return { customFetch, logout };
 }
