@@ -1,0 +1,143 @@
+footer {
+    display: flex;
+    flex-direction: column;
+    .top-footer {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        .top-footer-details {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            height: 180px;
+            position: relative;
+            left: 2%;
+            .footer-logo {
+                font-size: xx-large;
+                margin-right: 60px;
+                &:after {
+                    content: '';
+                    position: absolute;
+                    width: 1px;
+                    background-color: rgb(175, 175, 175);
+                    left: 30%;
+                    top: 25%;
+                    bottom: 25%;
+                }
+            }
+            .extra-info {
+                font-size: smaller;            
+            }
+        }
+        .top-footer-links {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            right: 5%;
+            .app-store, .google-play {
+                width: 155px;
+                height: 50px;
+            }
+            .app-store {
+                margin-bottom: 15px;
+            }
+        }
+    }
+    .middle-footer {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        margin-bottom: 45px;
+        .middle-one, .middle-two, .middle-three, .middle-four, .middle-five {
+            .middle-footer-header {
+                font-weight: bold;
+                font-size: large;
+            }
+            ul {
+                list-style-type: none;
+                padding-left: 0;
+                li {
+                    margin-bottom: 20px;
+                    font-size: small;
+                }
+            }
+        }
+        .middle-five {
+            display: flex;
+            flex-direction: column;
+            .email-form {
+                width: 220px;
+                display: flex;
+                flex-direction: column;
+                .input-email {
+                    padding: 10px;
+                    border-radius: 5px;
+                    border: 1px solid rgb(220, 220, 220);
+                }
+                .submit-email {
+                    cursor: pointer;
+                    margin-top: 25px;
+                    padding: 10px;
+                    font-weight: bold;
+                    color: white;
+                    background-color: rgb(0, 85, 255);
+                    border: none;
+                    border-radius: 5px;
+                }
+            }
+        }
+    }
+    .bottom-footer {
+        display: flex;
+        flex-direction: row;
+        margin-bottom: 25px;
+        justify-content: space-between;
+        .bottom-links {
+            display: flex;
+            flex-direction: row;
+            position: relative;
+            left: 2%;
+            button {
+                margin-right: 60px;
+                display: flex;
+                align-items: center;
+                padding: 5px 5px;
+                border-radius: 50%;
+                border: none;
+                cursor: pointer;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                transition: box-shadow 0.3s ease-in-out;
+                &:hover {
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                  }
+                img {
+                    background-color: white;
+                    border-radius: 50%;
+                    padding: 4px 4px;
+                    width: 40px;
+                    height: 40px;
+                    object-fit: scale-down;
+                }
+            }
+            .youtube {
+                img { 
+                    padding-inline: 8px 8px;
+                }
+            }
+        }
+        .language {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            position: relative;
+            right: 6.8%;
+            .globe {
+                margin-right: 8px;
+            }
+            .active-language {
+                font-size: small;
+            }
+        }
+    }
+}

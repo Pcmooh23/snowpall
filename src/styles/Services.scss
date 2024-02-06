@@ -1,0 +1,76 @@
+.service-provided {
+    background-color: rgb(0, 85, 255);
+    padding: 50px 100px;
+    position: relative;
+    h5 {
+        color: white;
+        font-size: 40px;
+        margin: 0px 0px 25px 0px;
+    }
+    .service-details {
+        display: flex;
+        flex-direction: row;
+        .left-side-buttons {
+            margin-right: 50px;
+            .snow-services {
+                .snowJob {
+                    background-color: white;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 10px;
+                    border-radius: 10px;
+                    width: 400px;
+                    cursor: pointer;
+                    transition: all 0.1s ease-in-out;
+                    margin-bottom: 5px;
+                    border: none;
+                    .job-cover {
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                        img {
+                            width: 50px;
+                            height: 50px;
+                            margin-right: 10px;
+                        }
+                    }
+                    &:hover {
+                        .expand-on {
+                            padding: 2px 2px;
+                            border-radius: 50%;
+                            color: white;
+                            background-color: black;
+                        }
+                    }
+                }
+                .car-cleaning.active, .sidewalk-cleaning.active, .lawn-caring.active, .clear-driveway.active, .other-work.active {
+                    .expand-on {
+                        background-color: black;
+                        color: white;
+                        padding: 2px 2px;
+                        border-radius: 50%;
+                    }
+                }
+            }
+        }
+        .right-side-details {
+            .car-details, .sidewalk-details, .lawn-details, .driveway-details, .other-details {
+                display: none;
+                p {
+                    margin-top: -4px;
+                    color: white;
+                }
+            } 
+            .car-details.active, .sidewalk-details.active, .lawn-details.active, .driveway-details.active, .other-details.active {
+                display: block;
+                img {
+                    width: 320px;
+                    height: 290px;
+                    border-radius: 10px;
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,95 @@
+.checkout {
+    background-color: #808080;
+    border-radius: 10px;
+    width: 400px;
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-left: 50px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    box-shadow: 0 10px 15px 0 rgba(0, 0, 0, 0.1);
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    .content-container {
+        flex-grow: 1;
+        width: 100%;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 10px;
+        &::-webkit-scrollbar {
+          display: none; // Hide scrollbar
+        }
+        .checked-service {
+          border:  1px solid black;
+          border-radius: 15px;
+          padding: 10px 20px;
+          position: relative;
+          background-color: white;
+          width: 350px;
+          p {
+            margin: 0px;
+            font-family: sans-serif;
+            .price{
+              margin-left: 20px;
+            }
+          }
+          margin-bottom: 15px;
+          .image-cover {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+          }
+          .trash-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            &:hover {
+              opacity: 0.5;
+            }
+          }
+          .pencil-icon {
+            position: absolute;
+            top: 40px;
+            right: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            &:hover {
+              opacity: 0.5;
+            }
+          }
+        }
+    }
+    .button-container {
+        background-color: white;
+        position: sticky;
+        bottom: 0px;
+        width: 100%;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: center;
+        .checkout-button {
+          padding: 10px 50px;
+          border-radius: 50px;
+          border: 1px solid rgb(0, 85, 255);
+          background-color: rgb(193, 221, 255);
+          transition: all 0.2s ease-in-out;
+          font-weight: bold;
+          cursor: pointer;
+          width: 300px;
+          margin: 0px 0px;
+          &:hover {
+            background-color: rgb(0, 85, 255);
+            color: white;
+          }
+        }
+    }
+}

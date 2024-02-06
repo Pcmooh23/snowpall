@@ -1,0 +1,59 @@
+.snowfall-cover {
+    margin-top: 60px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    background-color: transparent;
+    padding: 50px 100px;
+    position: relative;
+    z-index: 1;
+    ::before, ::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            0deg,
+            var(--color-2),
+            var(--color-3),
+            var(--color-4),
+            var(--color-5),
+            var(--color-6),
+        );
+        z-index: -1;
+    }
+    ::before {
+        filter: blur(0.5rem);
+    }
+    .cover-title {
+        z-index: 2;
+        h1, h2 {
+            color: black;
+            margin: 0px;
+        }
+        h1 {
+            font-size: 55px;
+            margin-bottom: 30px;
+        }
+        .try-out {
+            box-sizing: content-box;
+            font-weight: bold;
+            font-size: large;
+            padding: 1rem 2rem;
+            cursor: pointer;
+            position: relative;
+            border: 5px solid transparent;
+            background: linear-gradient(white, white) padding-box,
+                        linear-gradient( to right, #5ddcff, #3c67e3 43%, #4e00c2) border-box;
+            border-radius: 15px;
+            margin-top: 20px;
+            overflow: hidden; 
+            transition: transform 0.5s ease; 
+        }
+    }
+    .cleaningSnow {
+        border-radius: 10px;
+        width: 520px;
+        z-index: 2;
+    }
+}

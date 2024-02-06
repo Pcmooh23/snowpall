@@ -1,0 +1,37 @@
+.payment-area {
+    border: solid 1px #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    
+    .payment-top {
+      h1 {
+        margin: 0;
+        font-size: 25px;
+        font-weight: bold; 
+      }
+    }
+    
+    .card-info {
+      margin-top: 20px; 
+  
+      .cardNumber, .cardExpiry, .cardcvc, .holderName {
+        border: solid 1px #ccc;
+        border-radius: 4px;
+        padding: 10px;
+        margin-bottom: 15px;
+        width: 100%;
+        box-sizing: border-box;
+        font-size: 16px;
+      }
+  
+      .cvcAndExpiry {
+        display: flex;
+        gap: 10px;
+  
+        .cardExpiry, .cardcvc {
+          flex: 1;
+        }
+      }
+    }
+  }
+  

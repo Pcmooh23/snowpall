@@ -1,24 +1,26 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import './styles/styles.scss';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Homepage from './components/Homepage';
+import SubmitRequest from './components/SubmitRequest';
+import { SnowPallProvider } from './components/SnowPallContext';
+import LoginPage from './components/LoginPage';
+
+
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <SnowPallProvider>
+        <div className='App'>
+          <Routes>
+            <Route exact path='/' element={<LoginPage/>}/>
+            <Route exact path='/home' element={<Homepage />}/>
+            <Route exact path='/submit-request' element={<SubmitRequest/>}/>
+          </Routes>
+        </div>
+      </SnowPallProvider>
+    </Router>
   );
 }
 

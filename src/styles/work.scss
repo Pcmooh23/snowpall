@@ -1,0 +1,68 @@
+.snow-tech {
+    padding: 60px 100px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    img {
+        width: 500px;
+        border-radius: 10px;
+    }
+    .work-details {
+        margin-left: 150px;
+        .work-title {
+            font-weight: bold;
+            font-size: 42px;
+            font-family: Roboto;
+        }
+        .work-info {
+            font-family: Roboto;
+        }
+        .work-bottom {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            .start-button {
+                color: black;
+                background-color: transparent ;
+                border: solid;
+                margin-right: 20px;
+                font-weight: bold;
+                border-radius: 15px;
+                padding: 15px 30px;
+                transition: all  0.2s ease-in-out;
+                position: relative;
+                cursor: pointer;
+                &:hover {
+                   background-color: black;
+                   color: white;
+                }
+            }
+            .work-sign-in {
+                cursor: pointer;
+                font-family: Roboto;
+                position: relative;
+                &:before {
+                    content: '';
+                    background: rgb(210, 210, 210);
+                    height: 1px; 
+                    position: absolute; 
+                    bottom: -5px;
+                    width: 100%;
+                }
+                &:after {
+                    content: ''; 
+                    position: absolute; 
+                    bottom: -5px;
+                    left: 0; 
+                    width: 0%; 
+                    height: 1px; 
+                    transition: all 0.3s ease; 
+                }
+                &:hover::after {
+                    background-color: black;
+                    width: 100%;
+                }
+            }
+        }
+    }
+}

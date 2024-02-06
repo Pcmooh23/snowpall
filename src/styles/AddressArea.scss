@@ -1,0 +1,236 @@
+.address-area {
+    border: solid 1px #ccc;;
+    width: 400px;
+    padding: 15px 15px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    .order-top {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        h1 {
+            margin: 0px 0px;
+            font-size: 25px;
+        }
+        .change-address {
+            color: rgb(0, 85, 255);
+            cursor: pointer;
+            &:hover {
+                color: orangered;
+                text-decoration: underline;
+            }
+        }
+    }
+    .user-location {
+        p {
+            margin: 10px 0px 0px 0px;
+        }
+    }
+    .overlay {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 99;
+        .change-address-area {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 700px;
+            position: relative;
+            .change-top {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                position: relative;
+                padding: 10px 10px 0px 10px;
+                h1 {
+                    margin: 0px 0px;
+                }
+                .x-out {
+                    cursor: pointer;
+                }
+            }
+            .divider {
+                content: ''; 
+                position: relative; 
+                left: 0; 
+                right: 0; 
+                height: 1px; 
+                background: #000; 
+                margin: 5px;
+            }
+            .addresses-container {
+                .user-addresses {
+                    .address-radio {
+                       display: none;
+                    }
+                    .address-label {
+                        padding: 5px 5px;
+                        margin: 5px 10px;
+                        border-radius: 10px;
+                        cursor: pointer;
+                        display: flex; 
+                        justify-content: center; 
+                        align-items: center; 
+                        border: 2px solid rgb(209, 209, 209);
+                        &:hover {
+                            background-color: #f8f8f8; 
+                        }
+                        .address-holder {
+                            display: flex;
+                            flex-direction: row;
+                            align-items: center;
+                            .circle {
+                                height: 25px;
+                                background: white;
+                                border-radius: 50%;
+                                margin-right: 15px;
+                                border: 5px solid rgb(209, 209, 209);
+                                width: 25px;
+                            }
+                            .location-container {
+                                .address-on-file {
+                                    width: 600px;
+                                    overflow: hidden;
+                                    white-space: nowrap; 
+                                    text-overflow: ellipsis;
+                                    margin: 0px 0px;
+                                }
+                                .address-choices {
+                                    display: flex;
+                                    flex-direction: row;
+                                    .edit-address, .delete-address {
+                                        margin: 0px 0px;
+                                        color:rgb(0, 85, 255);
+                                        &:hover {
+                                            color: orangered;
+                                            text-decoration: underline;
+                                        }
+                                    }
+                                    .edit-address {
+                                        width: 100px;
+                                        margin-right: 25px;
+                                    }
+                                    .delete-address {
+                                        width: 120px;
+                                    }
+                                }
+                                
+                            }
+                        }
+                    }
+                    .address-radio:checked + .address-label {
+                        border-color: rgb(0, 85, 255);
+                        background-color: rgb(238, 244, 255);
+                        .circle {
+                            border-color: rgb(0, 85, 255); 
+                        }
+                    }
+                    &.hide-element {
+                        display: none;
+                    }
+                }
+                .add-new-address {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    cursor: pointer;
+                    color: rgb(0, 85, 255);
+                    width: 170px;
+                    margin: 10px 0px 0px 10px;
+                    .newly-added {
+                        margin: 0px 0px;
+                    }
+                    &:hover {
+                        text-decoration: underline;
+                        color: orangered;
+                    }
+                }
+                .use-this-address {
+                    margin: 10px 0px 10px 10px;
+                    padding: 10px 10px;
+                    border: none;
+                    border-radius: 5px;
+                    color: white;
+                    font-weight: bold;
+                    background-color: rgb(0, 85, 255);
+                    transition: all 0.2s ease-in-out;
+                    cursor: pointer;
+                    &:hover {
+                        background-color: rgb(0, 62, 187);
+                    }
+                }
+                .new-address-overlay {
+                    position: fixed;
+                    left: 0;
+                    right: 0;
+                    top: 0;
+                    bottom: 0;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    .new-address-container {
+                        background-color: white;
+                        width: 700px;
+                        border-radius: 10px;
+                        .new-address-header {
+                            display: flex;
+                            flex-direction: row;
+                            align-items: center;
+                            justify-content: space-between;
+                            padding: 10px 10px 0px 10px;
+                            h2 {
+                                margin: 0px 0px;
+                            }
+                            .x-out {
+                                cursor: pointer;
+                            }
+                        }
+                        .divider {
+                            content: ''; 
+                            position: relative; 
+                            left: 0; 
+                            right: 0; 
+                            height: 1px; 
+                            background: #000; 
+                            margin: 5px;
+                        }
+                        .new-address-form {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            padding: 10px 10px;
+                            .detail {
+                                margin-top: 10px;
+                                width: 400px;
+                                padding: 5px 5px;
+                            }
+                            .save-address {
+                                margin-top: 10px;
+                                padding: 10px 10px;
+                                border: none;
+                                border-radius: 5px;
+                                color: white;
+                                font-weight: bold;
+                                background-color: rgb(0, 85, 255);
+                                transition: all 0.2s ease-in-out;
+                                cursor: pointer;
+                                &:hover {
+                                    background-color: rgb(0, 62, 187);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

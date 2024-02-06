@@ -1,0 +1,228 @@
+.form-container {
+    display: flex;
+    position: absolute;
+    top: 0;    
+    right: 0;     
+    bottom: 0;   
+    left: 0; 
+    justify-content: center;
+    .page-form {
+        position: absolute;
+        width: 400px;
+        height: 440px;
+        background-color: white;
+        border: 2px solid rgba(255,255,255,.5);
+        border-radius: 10px;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: all .2s ease-in-out;
+        overflow: hidden;
+        z-index: 10;
+        transform: scale(0);
+        margin-top: 90px;
+        .close-icon {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 45px;
+            height: 45px;
+            font-size: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 5;
+        }
+        .form-box {
+            width: 100%;
+            padding: 40px;
+            position: absolute;
+            transition: transform 0.2s ease-in-out, z-index 0s linear 0.2s;
+            backface-visibility: hidden;
+            h2, h3 {
+                font-size: 2rem;
+                color: black;
+                text-align: center;
+            }
+            .input-box {
+                position: relative;
+                width: 100%;
+                height: 45px;
+                border-bottom: 2px solid black;
+                input {
+                    width: 100%;
+                    height: 100%;
+                    background: transparent;
+                    border: none;
+                    outline: none;
+                    font-size: 0.8rem;
+                    color: black;
+                    font-weight: 600;
+                    padding: 0px 30px 0px 5px;
+                }
+                .icon {
+                    position: absolute;
+                    right: 8px;
+                    font-size: 2.5rem;
+                }
+            }
+            .top-register {
+                display: flex;
+                flex-direction: row;
+                .username.input-box{
+                 margin-right: 15px;
+                }
+            }
+            .register-mid-p1 {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-around;
+
+                #snowTech:checked + .accountType-label, 
+                #customer:checked + .accountType-label {
+                    border-color: black;
+                }
+                #snowTech:checked + .accountType-label .circle,
+                #customer:checked + .accountType-label .circle {
+                    border-color: black;
+                }
+                .accountType-label {
+                    display: flex;
+                    padding: 10px 12px;
+                    border-radius: 10px;
+                    border: 2px solid rgb(204, 204, 204);
+                    transition: all 0.2s ease-in-out;
+                    width: 280px;
+                    background-color: white;
+                    cursor: pointer;
+                    margin: 15px 0px 0px 0px;
+                    .accountType-button {
+                      display: flex;
+                      width: 100%;
+                      align-items: center;
+                      .circle {
+                        height: 20px;
+                        width: 20px;
+                        background: white;
+                        display: inline-block;
+                        border-radius: 50%;
+                        margin-right: 15px;
+                        border: 5px solid rgb(209, 209, 209);
+                      }
+                      .subject{
+                        color: black;
+                      }
+                    }
+                }
+            }
+            .address-info {
+              display: grid;
+              grid-template-columns: repeat(3, 1fr); 
+              grid-gap: 1rem;
+
+            } 
+            .register-bottom {
+                display: flex;
+                flex-direction: row;
+                margin-top: 15px;
+                .pass.input-box {
+                    margin-right: 15px;
+                }
+            }
+            .remember-forgot, .terms-conditions {
+                font-size: 0.9rem;
+                color: black;
+                font-weight: 500;
+                margin: 15px 0px 15px;
+                display: flex;
+                a {
+                    margin-left: 5px;
+                    margin-right: 5px;
+                    color: black;
+                    text-decoration: none;
+                    &:hover {
+                        text-decoration: underline;
+                    }
+                }
+            }
+            .remember-forgot {
+                justify-content: space-between;
+                label input {
+                    margin-right: 5px;
+                    cursor: pointer;
+                }
+            }
+            .terms-conditions {
+                input{
+                    cursor: pointer;
+                }
+            }
+            .submit-button {
+                height: 45px; 
+                background-color: black;
+                border: none;
+                outline: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 1rem;
+                color: white;
+                font-weight: 500;
+            }
+            .login.submit-button {
+                width: 100%;
+            }
+            .register.submit-button {
+                width: 250px;
+            }
+            .login-register {
+                font-size: 0.9rem;
+                color: black;
+                text-align: center;
+                font-weight: 500;
+                margin: 25px 0px 10px;
+                p a {
+                    color: black;
+                    text-decoration: none;
+                    font-weight: 600;
+                }
+                a {
+                    margin-left: 5px;
+                    &:hover {
+                        text-decoration: underline;
+                    }
+                }
+            }
+        }
+        .form-box.login, .form-box.register {
+            z-index: 1;
+            transform: translateX(-100%);
+            .error-message {
+                height: 20px;
+                visibility: hidden; 
+                opacity: 0;
+                transition: visibility 0s, opacity 0.2s ease-in-out;
+                &.visible {
+                    visibility: visible;
+                    opacity: 1;
+                }
+            }
+        }
+  
+        .form-box.active {
+            z-index: 2;
+            transform: translateX(0%);
+            transition-delay: 0s;
+        }
+        &.active-popup {
+            transform: scale(1);
+        }
+        &.register-active {
+            height: 550px;
+            width: 700px;
+        }
+    }
+}

@@ -1,0 +1,43 @@
+.street.service-box {
+    .service-box {
+        &__detail {
+            .street-service-top {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                margin-bottom: 15px;
+                .from-to {
+                  margin-right: 25px;
+                  .address-word {
+                    margin: 5px 0px 5px 0px;
+                    font-weight: bold;
+                    color: black;
+                  }
+                  .address {
+                    padding: 5px 10px;
+                    border: 1px solid black;
+                    border-radius: 10px;
+                  }
+                }
+                .street-upload-area {
+                  margin-top: 25px;
+                  .street-upload-label {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    .words {
+                      margin: 0px 0px;
+                      font-size: 12px;
+                    }
+                  }
+                }
+            }
+            .street-message {
+                border: 1px solid black;
+                border-radius: 10px;
+                font-family: sans-serif;
+                padding: 5px 5px;
+            }
+        }
+    }
+}

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<!-- saved from url=(0022)http://localhost:3000/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <link rel="icon" href="http://localhost:3000/snowflake.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Web site created using create-react-app">
+    <link rel="apple-touch-icon" href="http://localhost:3000/logo192.png">
+    <link rel="manifest" href="http://localhost:3000/manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+    <link href="./SnowPall_files/css2" rel="stylesheet">
+    <title>SnowPall</title>
+  <script defer="" src="./SnowPall_files/bundle.js"></script><style>*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+html {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIndlYnBhY2s6Ly8uL3NyYy9pbmRleC5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBO0VBQXdCLG1CQUFBO0FBRXhCOztBQUFBO0VBQ0Usc0JBQUE7QUFHRjs7QUFBQTtFQUNFLFNBQUE7RUFDQSxVQUFBO0VBQ0EsOEpBQUE7RUFHQSxtQ0FBQTtFQUNBLGtDQUFBO0FBQ0YiLCJzb3VyY2VzQ29udGVudCI6WyIqLCAqOjpiZWZvcmUsICo6OmFmdGVyIHtib3gtc2l6aW5nOiBpbmhlcml0O31cblxuaHRtbCB7XG4gIGJveC1zaXppbmc6IGJvcmRlci1ib3g7XG59XG5cbmJvZHkge1xuICBtYXJnaW46IDA7XG4gIHBhZGRpbmc6IDA7XG4gIGZvbnQtZmFtaWx5OiAtYXBwbGUtc3lzdGVtLCBCbGlua01hY1N5c3RlbUZvbnQsICdTZWdvZSBVSScsICdSb2JvdG8nLCAnT3h5Z2VuJyxcbiAgICAnVWJ1bnR1JywgJ0NhbnRhcmVsbCcsICdGaXJhIFNhbnMnLCAnRHJvaWQgU2FucycsICdIZWx2ZXRpY2EgTmV1ZScsXG4gICAgc2Fucy1zZXJpZjtcbiAgLXdlYmtpdC1mb250LXNtb290aGluZzogYW50aWFsaWFzZWQ7XG4gIC1tb3otb3N4LWZvbnQtc21vb3RoaW5nOiBncmF5c2NhbGU7XG59XG4iXSwic291cmNlUm9vdCI6IiJ9 */</style><style>
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsInNvdXJjZVJvb3QiOiIifQ== */</style><style>header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  background-color: rgb(0, 85, 255);
+  position: fixed;
+  width: 100%;
+  top: 0%;
+}
+header h1 {
+  font-size: x-large;
+  font-family: Roboto;
+  color: white;
+  margin-left: 1%;
+}
+header .register-buttons {
+  margin-right: 1%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+header .register-buttons .login, header .register-buttons .sign-up {
+  padding: 10px 20px;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+header .register-buttons .login {
+  background-color: white;
+  color: rgb(0, 85, 255);
+  border: none;
+  margin-right: 10px;
+}
+header .register-buttons .login:hover {
+  border: solid white;
+  background-color: transparent;
+  color: white;
+}
+header .register-buttons .sign-up {
+  border: none;
+  background-color: transparent;
+  border: solid white;
+  color: white;
+}
+header .register-buttons .sign-up:hover {
+  background-color: white;
+  color: rgb(0, 85, 255);
+}
+
+.container {
+  position: relative;
+  margin-top: 75px;
+}
+
+.login-form {
+  position: relative;
+  width: 400px;
+  height: 440px;
+  background-color: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 20px;
+  -webkit-backdrop-filter: blur(20px);
+          backdrop-filter: blur(20px);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.login-form .form-box {
+  width: 100%;
+  padding: 40px;
+}
+.login-form .form-box h2 {
+  font-size: 2rem;
+  color: black;
+  text-align: center;
+}
+.login-form .form-box .input-box {
+  position: relative;
+  width: 100%;
+  height: 50px;
+  border-bottom: 2px solid black;
+  margin: 30px 0px;
+}
+.login-form .form-box .input-box label {
+  position: absolute;
+  top: 50%;
+  left: 5px;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  color: black;
+  font-weight: 500;
+  pointer-events: none;
+}
+.login-form .form-box .input-box input {
+  width: 100%;
+  height: 100%;
+}
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIndlYnBhY2s6Ly8uL3NyYy9jb21wb25lbnRzL0xvZ2luUGFnZS9Mb2dpblBhZ2Uuc2NzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTtFQUNJLGFBQUE7RUFDQSxtQkFBQTtFQUNBLG1CQUFBO0VBQ0EsOEJBQUE7RUFDQSxpQ0FBQTtFQUNBLGVBQUE7RUFDQSxXQUFBO0VBQ0EsT0FBQTtBQUNKO0FBQUk7RUFDSSxrQkFBQTtFQUNBLG1CQUFBO0VBQ0EsWUFBQTtFQUNBLGVBQUE7QUFFUjtBQUFJO0VBQ0ksZ0JBQUE7RUFDQSxhQUFBO0VBQ0EsbUJBQUE7RUFDQSw4QkFBQTtBQUVSO0FBRFE7RUFDSSxrQkFBQTtFQUNBLGlCQUFBO0VBQ0Esa0JBQUE7RUFDQSxlQUFBO0VBQ0EsZ0NBQUE7QUFHWjtBQURRO0VBQ0ksdUJBQUE7RUFDQSxzQkFBQTtFQUNBLFlBQUE7RUFDQSxrQkFBQTtBQUdaO0FBRlk7RUFDSSxtQkFBQTtFQUNBLDZCQUFBO0VBQ0EsWUFBQTtBQUloQjtBQURRO0VBQ0ksWUFBQTtFQUNBLDZCQUFBO0VBQ0EsbUJBQUE7RUFDQSxZQUFBO0FBR1o7QUFGWTtFQUNJLHVCQUFBO0VBQ0Esc0JBQUE7QUFJaEI7O0FBQ0E7RUFDSSxrQkFBQTtFQUNBLGdCQUFBO0FBRUo7O0FBQ0E7RUFDSSxrQkFBQTtFQUNBLFlBQUE7RUFDQSxhQUFBO0VBQ0EsNkJBQUE7RUFDQSwwQ0FBQTtFQUNBLG1CQUFBO0VBQ0EsbUNBQUE7VUFBQSwyQkFBQTtFQUNBLHVDQUFBO0VBQ0EsYUFBQTtFQUNBLHVCQUFBO0VBQ0EsbUJBQUE7QUFFSjtBQURJO0VBQ0ksV0FBQTtFQUNBLGFBQUE7QUFHUjtBQUZRO0VBQ0ksZUFBQTtFQUNBLFlBQUE7RUFDQSxrQkFBQTtBQUlaO0FBRlE7RUFDSSxrQkFBQTtFQUNBLFdBQUE7RUFDQSxZQUFBO0VBQ0EsOEJBQUE7RUFDQSxnQkFBQTtBQUlaO0FBSFk7RUFDSSxrQkFBQTtFQUNBLFFBQUE7RUFDQSxTQUFBO0VBQ0EsMkJBQUE7RUFDQSxlQUFBO0VBQ0EsWUFBQTtFQUNBLGdCQUFBO0VBQ0Esb0JBQUE7QUFLaEI7QUFIWTtFQUNJLFdBQUE7RUFDQSxZQUFBO0FBS2hCIiwic291cmNlc0NvbnRlbnQiOlsiaGVhZGVyIHtcbiAgICBkaXNwbGF5OiBmbGV4O1xuICAgIGZsZXgtZGlyZWN0aW9uOiByb3c7XG4gICAgYWxpZ24taXRlbXM6IGNlbnRlcjtcbiAgICBqdXN0aWZ5LWNvbnRlbnQ6IHNwYWNlLWJldHdlZW47XG4gICAgYmFja2dyb3VuZC1jb2xvcjogcmdiKDAsIDg1LCAyNTUpO1xuICAgIHBvc2l0aW9uOiBmaXhlZDtcbiAgICB3aWR0aDogMTAwJTtcbiAgICB0b3A6IDAlO1xuICAgIGgxe1xuICAgICAgICBmb250LXNpemU6IHgtbGFyZ2U7XG4gICAgICAgIGZvbnQtZmFtaWx5OiBSb2JvdG87XG4gICAgICAgIGNvbG9yOiB3aGl0ZTtcbiAgICAgICAgbWFyZ2luLWxlZnQ6IDElO1xuICAgIH1cbiAgICAucmVnaXN0ZXItYnV0dG9ucyB7XG4gICAgICAgIG1hcmdpbi1yaWdodDogMSU7XG4gICAgICAgIGRpc3BsYXk6IGZsZXg7XG4gICAgICAgIGZsZXgtZGlyZWN0aW9uOiByb3c7XG4gICAgICAgIGp1c3RpZnktY29udGVudDogc3BhY2UtYmV0d2VlbjtcbiAgICAgICAgLmxvZ2luLCAuc2lnbi11cCB7XG4gICAgICAgICAgICBwYWRkaW5nOiAxMHB4IDIwcHg7XG4gICAgICAgICAgICBmb250LXdlaWdodDogYm9sZDtcbiAgICAgICAgICAgIGJvcmRlci1yYWRpdXM6IDVweDtcbiAgICAgICAgICAgIGN1cnNvcjogcG9pbnRlcjtcbiAgICAgICAgICAgIHRyYW5zaXRpb246IGFsbCAwLjNzIGVhc2UtaW4tb3V0O1xuICAgICAgICB9XG4gICAgICAgIC5sb2dpbiB7XG4gICAgICAgICAgICBiYWNrZ3JvdW5kLWNvbG9yOiB3aGl0ZTtcbiAgICAgICAgICAgIGNvbG9yOiByZ2IoMCwgODUsIDI1NSk7XG4gICAgICAgICAgICBib3JkZXI6IG5vbmU7XG4gICAgICAgICAgICBtYXJnaW4tcmlnaHQ6IDEwcHg7IFxuICAgICAgICAgICAgJjpob3ZlciB7XG4gICAgICAgICAgICAgICAgYm9yZGVyOiBzb2xpZCB3aGl0ZTtcbiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kLWNvbG9yOiB0cmFuc3BhcmVudDtcbiAgICAgICAgICAgICAgICBjb2xvcjogd2hpdGU7XG4gICAgICAgICAgICB9ICBcbiAgICAgICAgfVxuICAgICAgICAuc2lnbi11cCB7XG4gICAgICAgICAgICBib3JkZXI6IG5vbmU7XG4gICAgICAgICAgICBiYWNrZ3JvdW5kLWNvbG9yOiB0cmFuc3BhcmVudDtcbiAgICAgICAgICAgIGJvcmRlcjogc29saWQgd2hpdGU7XG4gICAgICAgICAgICBjb2xvcjogd2hpdGU7XG4gICAgICAgICAgICAmOmhvdmVyIHtcbiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kLWNvbG9yOiB3aGl0ZTtcbiAgICAgICAgICAgICAgICBjb2xvcjogcmdiKDAsIDg1LCAyNTUpO1xuICAgICAgICAgICAgfVxuICAgICAgICB9XG4gICAgfVxufVxuLmNvbnRhaW5lciB7XG4gICAgcG9zaXRpb246IHJlbGF0aXZlO1xuICAgIG1hcmdpbi10b3A6IDc1cHg7XG59XG5cbi5sb2dpbi1mb3JtIHtcbiAgICBwb3NpdGlvbjogcmVsYXRpdmU7XG4gICAgd2lkdGg6IDQwMHB4O1xuICAgIGhlaWdodDogNDQwcHg7XG4gICAgYmFja2dyb3VuZC1jb2xvcjogdHJhbnNwYXJlbnQ7XG4gICAgYm9yZGVyOiAycHggc29saWQgcmdiYSgyNTUsMjU1LDI1NSwuNSk7XG4gICAgYm9yZGVyLXJhZGl1czogMjBweDtcbiAgICBiYWNrZHJvcC1maWx0ZXI6IGJsdXIoMjBweCk7XG4gICAgYm94LXNoYWRvdzogMCAwIDE1cHggcmdiYSgwLDAsMCwwLjUpO1xuICAgIGRpc3BsYXk6IGZsZXg7XG4gICAganVzdGlmeS1jb250ZW50OiBjZW50ZXI7XG4gICAgYWxpZ24taXRlbXM6IGNlbnRlcjtcbiAgICAuZm9ybS1ib3gge1xuICAgICAgICB3aWR0aDogMTAwJTtcbiAgICAgICAgcGFkZGluZzogNDBweDtcbiAgICAgICAgaDIge1xuICAgICAgICAgICAgZm9udC1zaXplOiAycmVtO1xuICAgICAgICAgICAgY29sb3I6IGJsYWNrO1xuICAgICAgICAgICAgdGV4dC1hbGlnbjogY2VudGVyO1xuICAgICAgICB9XG4gICAgICAgIC5pbnB1dC1ib3gge1xuICAgICAgICAgICAgcG9zaXRpb246IHJlbGF0aXZlO1xuICAgICAgICAgICAgd2lkdGg6IDEwMCU7XG4gICAgICAgICAgICBoZWlnaHQ6IDUwcHg7XG4gICAgICAgICAgICBib3JkZXItYm90dG9tOiAycHggc29saWQgYmxhY2s7XG4gICAgICAgICAgICBtYXJnaW46IDMwcHggMHB4O1xuICAgICAgICAgICAgbGFiZWwge1xuICAgICAgICAgICAgICAgIHBvc2l0aW9uOiBhYnNvbHV0ZTtcbiAgICAgICAgICAgICAgICB0b3A6IDUwJTtcbiAgICAgICAgICAgICAgICBsZWZ0OiA1cHg7XG4gICAgICAgICAgICAgICAgdHJhbnNmb3JtOiB0cmFuc2xhdGVZKC01MCUpO1xuICAgICAgICAgICAgICAgIGZvbnQtc2l6ZTogMXJlbTtcbiAgICAgICAgICAgICAgICBjb2xvcjogYmxhY2s7XG4gICAgICAgICAgICAgICAgZm9udC13ZWlnaHQ6IDUwMDtcbiAgICAgICAgICAgICAgICBwb2ludGVyLWV2ZW50czogbm9uZTtcbiAgICAgICAgICAgIH1cbiAgICAgICAgICAgIGlucHV0IHtcbiAgICAgICAgICAgICAgICB3aWR0aDogMTAwJTtcbiAgICAgICAgICAgICAgICBoZWlnaHQ6IDEwMCU7XG4gICAgICAgIFxuICAgICAgICBcbiAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgIH1cbiAgICAgICAgfVxuICAgIH1cbn0iXSwic291cmNlUm9vdCI6IiJ9 */</style></head>
+  <body>
+    <div id="root"><div class="App"><div><header><h1>SnowPall</h1><div class="register-buttons"><button class="login">Login</button><button class="sign-up">Sign Up</button></div></header><div class="container"><button>Locate Me</button><div><p>No weather data available.</p></div></div><div class="login-form"><div class="form-box"><h2>Login</h2><form action="http://localhost:3000/#"><div class="input-box"><span class="mail-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail "><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg></span><input type="email" required=""><label>Email</label></div><div class="input-box"><span class="password-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock-keyhole "><circle cx="12" cy="16" r="1"></circle><rect x="3" y="10" width="18" height="12" rx="2"></rect><path d="M7 10V7a5 5 0 0 1 10 0v3"></path></svg></span><input type="password" required=""><label>Password</label></div><div class="remember-forget"><label><input type="checkbox">Remember me</label><a href="http://localhost:3000/#">Forgot Password?</a></div><button type="submit" class="submit-button">Login</button><div class="login-register"><p>Don't have an account?<a href="http://localhost:3000/#" class="register-link">Register</a></p></div></form></div></div></div></div></div>
+  
+
+</body></html>

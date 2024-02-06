@@ -1,0 +1,51 @@
+.login-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgb(0, 85, 255);
+    position: fixed;
+    width: 100%;
+    top: 0%;
+    z-index: 99;
+    h1{
+        font-size: x-large;
+        font-family: Roboto;
+        color: white;
+        margin-left: 2%;
+    }
+    .register-buttons {
+        margin-right: 2%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        .login, .sign-up {
+            padding: 10px 20px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+        .login {
+            background-color: white;
+            color: rgb(0, 85, 255);
+            border: none;
+            margin-right: 15px; 
+            &:hover {
+                border: solid white;
+                background-color: transparent;
+                color: white;
+            }  
+        }
+        .sign-up {
+            border: none;
+            background-color: black;
+            color: white;
+            &:hover {
+                background-color: transparent;
+                color: white;
+                border: white solid;
+            }
+        }
+    }
+}

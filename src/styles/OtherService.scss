@@ -1,0 +1,95 @@
+.other.service-box {
+    .service-box {
+        &__detail {
+            .other-service-top {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                position: relative;
+                margin-bottom: 10px;
+                width: 450px;
+                .other-size-options {
+                  .other-header {
+                    margin: 0px 0px 10px 0px;
+                    color: black;
+                  }
+                  .other-options {
+                  
+                    height: 100px;
+                    overflow-y: scroll;
+                    border-radius: 10px;
+                    padding: 10px 5px;
+                    
+                    border: solid 3px black;
+                    input {
+                      display: none;
+                    }
+                    #job1:checked + .other-service-label, 
+                    #job2:checked + .other-service-label, 
+                    #job3:checked + .other-service-label, 
+                    #job4:checked + .other-service-label {
+                      border-color: rgb(0, 85, 255);
+                    }
+                    #job1:checked + .other-service-label .circle,
+                    #job2:checked + .other-service-label .circle,
+                    #job3:checked + .other-service-label .circle,
+                    #job4:checked + .other-service-label .circle {
+                      border-color: rgb(0, 85, 255);
+                    }
+                    .other-service-label {
+                      display: flex;
+                      padding: 10px 12px;
+                      border-radius: 50px;
+                      border: 2px solid rgb(204, 204, 204);
+                      transition: all 0.2s ease-in-out;
+                      width: 280px;
+                      margin-bottom: 5px;
+                      background-color: white;
+                      cursor: pointer;
+                      .service-button {
+                        display: flex;
+                        width: 100%;
+                        align-items: center;
+                        .circle {
+                          height: 20px;
+                          width: 20px;
+                          background: white;
+                          display: inline-block;
+                          border-radius: 50%;
+                          margin-right: 15px;
+                          border: 5px solid rgb(209, 209, 209);
+                        }
+                        .subject{
+                          color: black;
+                        }
+                      }
+                      .price {
+                          color: black;
+                      }
+                    }
+                  }
+                }
+                .other-upload-area {
+                  margin-top: 30px;
+                  .other-upload-label {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    .words {
+                      font-family: sans-serif;
+                      margin: 0px 0px;
+                      font-size: 12px;
+                    }
+                  }
+                }
+              }
+              .other-message {
+                border: 1px solid black;
+                border-radius: 10px;
+                font-family: sans-serif;
+                padding: 5px 5px;
+            }
+        }
+    }
+}

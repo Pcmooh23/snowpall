@@ -1,0 +1,120 @@
+.main-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    align-items: center;
+    .navbar-header {
+        margin: 0% 2%;
+    }
+    .right-header-area {
+        margin-right: 2%;
+        ul {
+          font-family: sans-serif;
+            list-style-type: none;
+            display: flex;
+            flex-direction: row;
+            .header-list-item {
+                font-weight: bold;
+                margin-right: 1rem;
+                cursor: pointer;
+                .about-anchor {
+                    text-decoration: none;
+                    color: black;
+                    &.active {
+                        color: rgb(0, 85, 255);
+                    }
+                }
+                &.active {
+                    color: rgb(0, 85, 255); 
+                }
+            }
+            .user.header-list-item {
+                position: relative;
+                color: black;
+                cursor: pointer;
+                &.active {
+                    color: rgb(0, 85, 255); 
+                }
+                .dropdown-menu {
+                    position: absolute;
+                    background-color: #fff;
+                    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+                    z-index: 1;
+                    right: -15px;
+                    top: 30px;
+                    width: 250px;
+                    border-radius: 5px;
+                    cursor: default;
+                    .dropdown-menu-top, .dropdown-menu-bottom {
+                        .dropdown-bar:after {
+                            content: '';
+                            display: block;
+                            margin: 8px 0;
+                            height: 1px;
+                            width: 100%;
+                            background-color: #eee;
+                        }
+                    }
+                    .dropdown-menu-top { 
+                        .username {
+                            font-weight: bold;
+                            color: black;
+                            margin: 15px 30px;
+                            font-size: 20px;
+                        }
+                    }
+                    .dropdown-menu-bottom {
+                        .dropdown-bottom {
+                            display: flex;
+                            flex-direction: row;
+                            align-items: center;
+                            margin: 15px 0px 15px 30px;
+                            color: black;
+                            cursor: pointer;
+                            .dropdown-icon {
+                                margin-right: 10px;
+                            }
+                            .dropdown-exit {
+                                margin: 0px 0px;
+                            }
+                        }
+                    }
+                    .dropdown-links {
+                        display: flex;
+                        flex-direction: column;
+                        padding: 0px 0px;
+                        .list-item {
+                            &:first-child {
+                                margin-top: 15px;
+                              }
+                            &:last-child {
+                                margin-bottom: 15px;
+                            }
+                            margin: 0px 0px;
+                            .anchor {
+                                text-decoration: none;
+                                color: black;
+                                display: flex;
+                                flex-direction: row;
+                                align-items: center;
+                                font-size: 13px;
+                                width: 100%;
+                                padding: 10px 0px 10px 30px;
+                                &:hover {
+                                    background-color: #ececec;
+                                }
+                                .dropdown-icon {
+                                    margin-right: 10px;
+                                }
+                                p {
+                                    margin: 0px;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

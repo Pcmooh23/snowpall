@@ -1,0 +1,32 @@
+[
+  {
+    "id": "0994ceb5-f1d0-4dd7-b14a-29f961e13a1b",
+    "userName": "John Doe",
+    "userNumber": "",
+    "userStreet": "3384 Towers Loop Road",
+    "userUnit": "Towers Residence Halls (TRH)",
+    "userCity": "STORRS MANSFIELD",
+    "userState": "CT",
+    "userZip": "06268-6900"
+  },
+  {
+    "id": "d00d6a2b-c735-4f2c-b951-a67a5ca2a40b",
+    "userName": "paul",
+    "userNumber": "18455052893",
+    "userStreet": "445 Main Street",
+    "userUnit": "Apt 346",
+    "userCity": "Arlington",
+    "userState": "New York",
+    "userZip": "12601"
+  },
+  {
+    "id": "46fb8657-2e2b-4780-9f36-08bc4a0c527d",
+    "userName": "Jane Doe",
+    "userNumber": "18455052893",
+    "userStreet": "445 Main Street",
+    "userUnit": "Apt 346",
+    "userCity": "Poughkeepsie",
+    "userState": "New York",
+    "userZip": "12601"
+  }
+]
