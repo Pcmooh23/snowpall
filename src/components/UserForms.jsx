@@ -7,14 +7,11 @@ import { useApi } from '../useApi';
 const UserForms = () => {
 
     const {
-        pageFormRef, iconCloseRef, baseUrl,
+        pageFormRef, iconCloseRef, baseUrl, accessToken,
         loginFormRef, registerLinkRef, 
         registerFormRef, loginLinkRef,
-        setAccessToken, userId, setUserId,
-        setAddressLog, setSelectedAddressForUse,
-        setSelectedAddressIndex
+        setAccessToken, userId, setUserId, setLoginName
     } = useContext(SnowPallContext);
-    const { customFetch } = useApi();
 
     const navigate = useNavigate();
     const [loginError, setLoginError] = useState('');
@@ -83,33 +80,35 @@ const UserForms = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userEmail: userForm.userEmail, userPassword: userForm.userPassword }),
-                credentials: 'include', // Necessary to include the cookie
+                credentials: 'include', // Necessary to include the cookie for the refresh token
             });
-
+    
             const data = await response.json();
             if (response.ok) {
-                setAccessToken(data.accessToken); // Store accessToken in memory instead of localStorage
-                setUserId(data.userId)
-                localStorage.setItem('currentUserId', data.userId); 
+                const combinedToken = `${data.userId}:${data.accessToken}`; // Combine userId and accessToken
+                localStorage.setItem('combinedToken', combinedToken); // Store combinedToken in local storage for session persistence
+                setAccessToken(data.accessToken); // Update access token in state/context
+                setUserId(data.userId); // Update user ID in state/context
                 resetLoginForm();
                 navigate('/home');
+                setLoginName(data.username); // Assuming you handle the user's display name in state/context
             } else {
-                setLoginError(data.message);
+                setLoginError(data.message); // Handle login errors, e.g., wrong credentials
             }
         } catch (error) {
             console.error('Error:', error);
             setLoginError('An unexpected error occurred.');
         }
-    };
+    };    
 
     const registerUser = async (event) => {
         event.preventDefault();
-      
+     
         if (registerForm.userPassword !== registerForm.confirmPassword) {
             setRegisterError('Passwords do not match.');
             return;
         }
-      
+     
         // Data for user registration
         const registerData = {
           userName: registerForm.userName,
@@ -123,8 +122,7 @@ const UserForms = () => {
           userZip: registerForm.userZip,
           userPassword: registerForm.userPassword,
         }
-      
-        // First fetch: User Registration
+     
         try {
           const registrationResponse = await fetch(`${baseUrl}/users`, {
             method: 'POST',
@@ -132,71 +130,38 @@ const UserForms = () => {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(registerData),
-            credentials: 'include', 
+            credentials: 'include',
            });
-      
+     
             if (!registrationResponse.ok) {
                 throw new Error('Registration failed');
             }
-      
+     
             const registrationData = await registrationResponse.json();
-            // After successful registration, set access token and user ID as needed
-            setAccessToken(registrationData.accessToken);
-            setUserId(registrationData.userId);
-            localStorage.setItem('currentUserId', registrationData.userId);
-      
-            // Second fetch: Create address for the user using customFetch
-            await createAddressForUser();
-      
-            // Reset form, navigate or update UI as needed
-            resetRegisterForm();
-            navigate('/home');
-            setRegisterError('');
-      
+    
+            if (registrationData.valid && registrationData.accessToken) {
+                // Prefix user's ID with the accessToken
+                const combinedToken = `${registrationData.user.id}:${registrationData.accessToken}`;
+    
+                // Store the combined string in local storage
+                localStorage.setItem('combinedToken', combinedToken);
+                console.log('User Object:', registrationData.user); // Log the full user object
+    
+                setAccessToken(registrationData.accessToken);
+                setUserId(registrationData.user.id);
+                localStorage.setItem('currentUserId', registrationData.user.id);
+                localStorage.setItem('currentUserName', registrationData.user.userName);
+                resetRegisterForm();
+                navigate('/home');
+               
+                setRegisterError('');
+            } else {
+                throw new Error(registrationData.message || 'Registration succeeded but no access token provided.');
+            }
         } catch (error) {
             console.error('Registration error:', error);
             setRegisterError(error.message || 'An unexpected error occurred during registration.');
         }
-    };
-      
-    const createAddressForUser = async () => {
-    // Prepare address data from the registration form
-    const addressData = {
-        userName: registerForm.userName,
-        userNumber: registerForm.userNumber,
-        userStreet: registerForm.userStreet,
-        userUnit: registerForm.userUnit ? registerForm.userUnit : '',
-        userCity: registerForm.userCity,
-        userState: registerForm.userState,
-        userZip: registerForm.userZip,
-    };
-    
-    // Endpoint for address creation
-    const url = `/address`;
-    const options = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(addressData),
-    };
-    
-    try {
-        const response = await customFetch(url, options);
-        if (!response.ok) {
-            throw new Error('Address creation failed');
-        }
-    
-        // Expecting the backend to return the created address
-        const { newEntry } = await response.json();
-        
-        // Update the context and localStorage with the new address
-        setAddressLog([newEntry]);
-        setSelectedAddressForUse(newEntry);
-        setSelectedAddressIndex(0);
-        localStorage.setItem(`${userId}_selectedAddressIndex`, '0');
-        localStorage.setItem(`${userId}_selectedAddressForUse`, JSON.stringify(newEntry));
-    } catch (error) {
-        console.error('Address creation error:', error);
-    }
     };
     
   return (

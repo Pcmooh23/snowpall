@@ -2,7 +2,6 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
-const fs = require('fs')
 const fsPromises = require('fs').promises;
 const path = require('path');
 const cors = require('cors');
@@ -26,22 +25,43 @@ const upload = multer({
     },
 });
 const corsOptions = {
-    origin: 'http://localhost:3000', // Allow only your frontend to make requests
+    origin: 'https://localhost:3000', // Allow only your frontend to make requests
     credentials: true, // Allow cookies to be sent and received
     methods: 'GET,POST,PUT,DELETE,OPTIONS', // Specify allowed methods
-    allowedHeaders: 'Content-Type,Authorization', // Specify allowed headers
+    allowedHeaders: 'Content-Type, Authorization', // Specify allowed headers
 };
 
 const app = express();
-const port = 3500;
 
 // SSL certificate paths
-const privateKey = fs.readFileSync(path.join(__dirname, '../localhost-key.pem'), 'utf8');
-const certificate = fs.readFileSync(path.join(__dirname, '../localhost.pem'), 'utf8');
-const credentials = { key: privateKey, cert: certificate };
+async function loadCredentials() {
+    const privateKeyPath = path.join(__dirname, '../localhost-key.pem');
+    const certificatePath = path.join(__dirname, '../localhost.pem');
+  
+    try {
+      const privateKey = await fsPromises.readFile(privateKeyPath, 'utf8');
+      const certificate = await fsPromises.readFile(certificatePath, 'utf8');
+      return { key: privateKey, cert: certificate };
+    } catch (error) {
+      console.error('Error loading credentials:', error);
+      throw error; // Rethrow or handle as needed
+    }
+}
 
 // Create HTTPS server
-const httpsServer = https.createServer(credentials, app);
+async function startHttpsServer() {
+    try {
+      const credentials = await loadCredentials();
+      const httpsServer = https.createServer(credentials, app);
+  
+      const PORT = 3500; // Default port for HTTPS is 443, but you can choose another port
+      httpsServer.listen(PORT, () => {
+        console.log(`HTTPS Server running on port ${PORT}`);
+      });
+    } catch (error) {
+      console.error('Failed to start HTTPS server:', error);
+    }
+}
 
 // Serve static files from 'public' directory
 app.use(express.static(path.join(__dirname, '../public')));
@@ -58,66 +78,90 @@ app.use(express.json());
 // a line that serves static files from the 'uploads' directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Middleware for verifying user's token
-const verifyToken = (req, res, next) => {
-    const bearerHeader = req.headers['authorization'];
-    if (typeof bearerHeader !== 'undefined') {
-        const bearerToken = bearerHeader.split(' ')[1];
-        jwt.verify(bearerToken, process.env.JWT_SECRET, (err, authData) => {
-            if (err) {
-                return res.sendStatus(403); // Forbidden
-            } else {
-                req.authData = authData; // authData includes the decoded JWT payload
-                next();
-            }
-        });
-    } else {
-        res.sendStatus(401); // Unauthorized
-    }
-};
-
 // The file that stores user info.
 const USERS_FILE = path.join(__dirname, './usersDB.json');
 
-// The file service data of what users want done.
-const CART_FILE = path.join(__dirname, './cartDB.json');
+// verify token middleware
+const verifyToken = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    
+    if (authHeader)  {
+        const token = authHeader.split(' ')[1] // Extract the token from the Authorization header
 
-// The file that stores user address data.
-const ADDRESS_FILE = path.join(__dirname, './addressDB.json')
+        jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+            if (err) {
+                return res.status(403).json({ error: 'Token is not valid or has expired' });
+            }
 
-// The file that stores user's order requests.
-const ORDER_REQUEST_FILE = path.join(__dirname, './requestsDB.json')
-
-// GET route for all services
-app.get('/services', verifyToken, async (req, res) => {
-    try {
-        const userId = req.authData.id; // Extract userId from authData set by verifyToken
-        const data = await fsPromises.readFile(CART_FILE, 'utf8');
-        const services = JSON.parse(data);
-
-        // Filter services to return only those belonging to the authenticated user
-        const userServices = services.filter(service => service.userId === userId);
-
-        res.json(userServices); // Send filtered services as JSON
-    } catch (err) {
-        console.error("Error reading services file:", err);
-        res.status(500).send('An error occurred while fetching services.');
+            req.user = user; // Attach the user to the request for further use
+            next();
+        });
+    } else {
+        res.status(401).json({ error: 'Access token is missing' });
     }
-});
+}
 
-// GET route for saved addresses
-app.get('/addresses', verifyToken, async (req, res) => {
+// POST route for new users
+app.post('/users', async (req, res) => {
     try {
-        const userId = req.authData.id;
-        const data = await fsPromises.readFile(ADDRESS_FILE, 'utf8');
-        const addresses = JSON.parse(data);
+        const data = await fsPromises.readFile(USERS_FILE, 'utf8');
+        let users = JSON.parse(data);
 
-        const userAddresses = addresses.filter(address => address.userId === userId);
+        if (users.some(user => user.userEmail === req.body.userEmail)) {
+            return res.status(400).send('User already exists.');
+        }
 
-        res.json(userAddresses);
+        const hashedPassword = await bcrypt.hash(req.body.userPassword, 10);
+
+        const newUser = {
+            id: uuidv4(),
+            userName: req.body.userName,
+            userEmail: req.body.userEmail,
+            accountType: req.body.accountType,
+            userNumber: req.body.userNumber,
+            userStreet: req.body.userStreet,
+            userUnit: req.body.userUnit,
+            userCity: req.body.userCity,
+            userState: req.body.userState,
+            userZip: req.body.userZip,
+            userPasswordHash: hashedPassword,
+            userCart: [],
+            userAddresses: [],
+            userRequests: []
+        };
+
+        const tokenPayload = { id: newUser.id, userEmail: newUser.userEmail };
+        const accessToken = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '15m' });
+        const refreshToken = jwt.sign(tokenPayload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
+
+        newUser.refreshToken = refreshToken;
+
+        users.push(newUser);
+
+        await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+
+        res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 7 * 24 * 60 * 60 * 1000 });
+
+        res.status(201).json({ valid: true, message: 'User successfully created.', accessToken: accessToken, 
+            user: {
+                id: newUser.id,
+                userName: newUser.userName,
+                userEmail: newUser.userEmail,
+                accountType: newUser.accountType,
+                userNumber: newUser.userNumber,
+                userStreet: newUser.userStreet,
+                userUnit: newUser.userUnit,
+                userCity: newUser.userCity,
+                userState: newUser.userState,
+                userZip: newUser.userZip,
+                userCart: newUser.userCart,
+                userAddresses: newUser.userAddresses,
+                userRequests: newUser.userRequests
+            }
+        });
     } catch (err) {
-        console.error("Error reading addresses file:", err);
-        res.status(500).send('An error occurred while fetching addresses.');
+        console.error("Error processing request:", err);
+        res.status(500).send('An error occurred during account creation.');
     }
 });
 
@@ -142,11 +186,14 @@ app.post('/validateLogin', async (req, res) => {
         const accessToken = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '15m' });
         const refreshToken = jwt.sign(tokenPayload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
-        // Send refreshToken as a secure HttpOnly cookie
+        user.refreshToken = refreshToken;
+        await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+
+        // Send refresh token as secure HttpOnly cookie
         res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 7 * 24 * 60 * 60 * 1000 });
 
-        // The JSON response body sent back to the client.
-        res.json({ valid: true, message: 'Login successful.', accessToken, userId: user.id });
+        // The JSON response body sent back to the client, including the accessToken
+        res.status(200).json({ valid: true, message: 'Login successful.', userId: user.id, username: user.userName, accessToken: accessToken });
 
     } catch (err) {
         console.error("Error handling login:", err);
@@ -154,73 +201,10 @@ app.post('/validateLogin', async (req, res) => {
     }
 });
 
-// POST route for new users
-app.post('/users', async (req, res) => {
-    try {
-        const data = await fsPromises.readFile(USERS_FILE, 'utf8');
-        let users = JSON.parse(data);
-
-        // Check if user already exists to prevent duplicate registrations
-        if (users.some(user => user.userEmail === req.body.userEmail)) {
-            return res.status(400).send('User already exists.');
-        }
-
-        const hashedPassword = await bcrypt.hash(req.body.userPassword, 10);
-
-        // Create new user entry
-        const newUser = {
-            id: uuidv4(),
-            userName: req.body.userName,
-            userEmail: req.body.userEmail,
-            accountType: req.body.accountType,
-            userNumber: req.body.userNumber,
-            userStreet: req.body.userStreet,
-            userUnit: req.body.userUnit,
-            userCity: req.body.userCity,
-            userState: req.body.userState,
-            userZip: req.body.userZip,
-            userPasswordHash: hashedPassword,
-        };
-
-        // Add new user to the database
-        users.push(newUser);
-
-        // Generate tokens
-        const tokenPayload = { id: newUser.id, userEmail: newUser.userEmail };
-        const accessToken = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '15m' });
-        const refreshToken = jwt.sign(tokenPayload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
-
-        // Ideally, save the refresh token in a secure way (e.g., in a database) associated with the user
-        // For simplicity, this example just updates the in-memory object
-        newUser.refreshToken = refreshToken;
-
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
-
-        // Send refreshToken as a secure HttpOnly cookie
-        res.cookie('refreshToken', refreshToken, {
-            httpOnly: true, 
-            secure: true, // set to false if not using https
-            sameSite: 'None', // 'Strict' or 'Lax' if not cross-site
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-        });
-
-        // Send accessToken in response body
-        res.status(201).json({
-            valid: true,
-            message: 'User successfully created.',
-            accessToken: accessToken, // Consider omitting if you want to enforce a login after registration
-            userId: newUser.id
-        });
-    } catch (err) {
-        console.error("Error processing request:", err);
-        res.status(500).send('An error occurred during account creation.');
-    }
-});
-
 // POST route to logout current user
 app.post('/logout', verifyToken, async (req, res) => {
     try {
-        const userId = req.authData.id; // Use userId to identify the user more reliably
+        const userId = req.user.id; // Use userId to identify the user more reliably
 
         // Read the current users data
         const data = await fsPromises.readFile(USERS_FILE, 'utf8');
@@ -243,10 +227,54 @@ app.post('/logout', verifyToken, async (req, res) => {
     }
 });
 
+// GET route for all services
+app.get('/services', verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id; // Extract userId from authData set by verifyToken
+        const data = await fsPromises.readFile(USERS_FILE, 'utf8');
+        const users = JSON.parse(data);
+
+        const user = users.find(user => user.id === userId);
+        if (!user) {
+            return res.status(404).send('User not found.');
+        }
+    
+        const userServices = user.userCart;
+
+        res.json(userServices); // Send filtered services as JSON
+    } catch (err) {
+        console.error("Error reading services file:", err);
+        res.status(500).send('An error occurred while fetching services.');
+    }
+});
+
+// GET route for saved addresses
+app.get('/addresses', verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id; // Extract userId from the verified token
+        const data = await fsPromises.readFile(USERS_FILE, 'utf8');
+        const users = JSON.parse(data);
+
+        // Find the user by their ID
+        const user = users.find(user => user.id === userId);
+        if (!user) {
+            return res.status(404).send('User not found.');
+        }
+
+        // Retrieve the user's addresses
+        const userAddresses = user.userAddresses;
+
+        res.json(userAddresses);
+    } catch (err) {
+        console.error("Error reading users file:", err);
+        res.status(500).send('An error occurred while fetching addresses.');
+    }
+});
+
 // Refresh token endpoint
 app.post('/refresh-token', async (req, res) => {
-    const refreshToken = req.cookies['refreshToken']; // Access the refresh token from cookies
-    if (!refreshToken) return res.sendStatus(401); // Unauthorized if no refresh token is provided
+    const refreshToken = req.cookies.refreshToken; // Access the refresh token from cookies
+    if (!refreshToken) return res.status(401).json({ error: 'No refresh token provided' });
 
     try {
         const data = await fsPromises.readFile(USERS_FILE, 'utf8');
@@ -254,26 +282,44 @@ app.post('/refresh-token', async (req, res) => {
 
         // Find the user with the matching refresh token
         const user = users.find(user => user.refreshToken === refreshToken);
-        if (!user) return res.sendStatus(403); // Forbidden if no matching user or refresh token is found
+        if (!user) {
+            return res.status(403).json({ error: 'No matching user for provided refresh token' });
+        }
 
         jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
-            if (err || user.id !== decoded.id) return res.sendStatus(403); // Forbidden if token is invalid or user ID mismatch
+            if (err) {
+                return res.status(403).json({ error: 'Token verification failed', details: err.message });
+            }
+            if (user.id !== decoded.id) {
+                return res.status(403).json({ error: 'Token user ID mismatch' });
+            }
 
             // Generate a new access token
-            const accessToken = jwt.sign({ id: user.id, userEmail: user.userEmail }, process.env.JWT_SECRET, { expiresIn: '15m' });
+            const accessToken = jwt.sign(
+                { id: user.id, userEmail: user.userEmail },
+                process.env.JWT_SECRET,
+                { expiresIn: '15m' }
+            );
 
-            res.json({ accessToken }); // Send the new access token back to the client
+            res.cookie('accessToken', accessToken, {
+                httpOnly: true,
+                secure: true, // set to false if not using https
+                sameSite: 'None', // Use 'Strict' or 'Lax' if not cross-site
+                maxAge: 15 * 60 * 1000 // 15 minutes
+            }).json({
+                message: 'Access token refreshed successfully'
+            });
         });
     } catch (error) {
         console.error("Error during token refresh:", error);
-        res.status(500).send('Failed to process token refresh.');
+        res.status(500).json({ error: 'Failed to process token refresh', details: error.message });
     }
 });
 
 // POST endpoint for the requests
 app.post('/submit-request', verifyToken, async (req, res) => {
     const { stripeToken, amount, cart, selectedAddress } = req.body;
-    const userId = req.authData.id; // Extract userId from authenticated token
+    const userId = req.user.id; // Assuming verifyToken middleware correctly sets req.user
 
     try {
         // Create a charge: this will charge the user's card
@@ -293,29 +339,36 @@ app.post('/submit-request', verifyToken, async (req, res) => {
             created: new Date(charge.created * 1000), // Convert to milliseconds
         };
 
-        // Assume ORDER_REQUEST_FILE contains JSON array of orders
-        const data = await fsPromises.readFile(ORDER_REQUEST_FILE, 'utf8');
-        const orders = data ? JSON.parse(data) : [];
+        // Read user data from USERS_FILE
+        const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
+        let users = JSON.parse(usersData);
 
-        // Append the new order with charge details, including userId for user-specific data handling
-        const newOrder = {
+        // Find the user by their ID
+        const userIndex = users.findIndex(user => user.id === userId);
+        if (userIndex === -1) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        // Construct the new request to add to the user's userRequests array
+        const newRequest = {
             id: uuidv4(),
-            userId: userId, // Associate order with the user
             orderDate: new Date(),
             cart: cart,
             selectedAddress: selectedAddress,
-            charge: chargeInfo, // Include the charge details in the order
+            charge: chargeInfo, // Include the charge details in the request
         };
-        orders.push(newOrder);
 
-        // Write the updated data back to the file
-        await fsPromises.writeFile(ORDER_REQUEST_FILE, JSON.stringify(orders, null, 2));
+        // Add the new request to the user's userRequests array
+        users[userIndex].userRequests.push(newRequest);
 
-        // Respond to the client that the order and charge were successfully processed and saved
+        // Write the updated users data back to the USERS_FILE
+        await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
+
+        // Respond to the client that the charge was processed and the request was saved successfully
         res.status(200).json({
             success: true,
-            message: "Charge processed and order saved successfully!",
-            orderId: newOrder.id, // Return the order ID to the client
+            message: "Charge processed and request saved successfully!",
+            requestId: newRequest.id, // Return the request ID to the client
         });
     } catch (error) {
         console.error("Charge failed or saving failed:", error);
@@ -324,7 +377,7 @@ app.post('/submit-request', verifyToken, async (req, res) => {
 });
 
 // POST route for new address
-app.post('/address', verifyToken, 
+app.post('/address', verifyToken,
     [
         body('userName').trim().notEmpty().withMessage('User name is required'),
         body('userNumber').trim().optional().notEmpty().withMessage('Number can be empty but should be valid if provided'),
@@ -342,14 +395,19 @@ app.post('/address', verifyToken,
         }
 
         try {
-            const userId = req.authData.id; // Extract userId from the verified token
-            const data = await fsPromises.readFile(ADDRESS_FILE, 'utf8');
-            let DB = JSON.parse(data);
+            const userId = req.user.id; // Extract userId from the verified token
+            const data = await fsPromises.readFile(USERS_FILE, 'utf8');
+            let users = JSON.parse(data);
 
-            // New address entry includes userId for associating with the authenticated user
-            const newEntry = {
+            // Find the user by their ID
+            const userIndex = users.findIndex(user => user.id === userId);
+            if (userIndex === -1) {
+                return res.status(404).send({ message: 'User not found.' });
+            }
+
+            // New address entry
+            const newAddress = {
                 id: uuidv4(),
-                userId: userId,
                 userName: req.body.userName,
                 userNumber: req.body.userNumber,
                 userStreet: req.body.userStreet,
@@ -359,16 +417,15 @@ app.post('/address', verifyToken,
                 userZip: req.body.userZip,
             };
 
-            // Add the new address entry to the database
-            DB.push(newEntry);
-
-            // Save the updated addresses back to the file
-            await fsPromises.writeFile(ADDRESS_FILE, JSON.stringify(DB, null, 2), 'utf8');
-
+            // Add the new address to the user's addresses array
+            users[userIndex].userAddresses.push(newAddress);
+            // Save the updated users back to the file
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
             // Respond with the newly created address entry
-            res.status(201).json({ message: 'New address object added to the DB: ', newEntry });
+            res.status(201).json({ message: 'New address added to user profile', newAddress });
+        
         } catch (err) {
-            console.error("Error accessing or modifying the address file:", err);
+            console.error("Error accessing or modifying the users file:", err);
             res.status(500).send('An error occurred while processing your request.');
         }
     }
@@ -391,13 +448,18 @@ app.post('/car', verifyToken, upload.single('image'),
         }
 
         try {
-            const userId = req.authData.id; // Extract userId from the verified token
-            const data = await fsPromises.readFile(CART_FILE, 'utf8');
-            let cartDB = JSON.parse(data);
-        
-            const newEntry = {
+            const userId = req.user.id; // Extract userId from the verified token
+            const data = await fsPromises.readFile(USERS_FILE, 'utf8');
+            let users = JSON.parse(data);
+            
+            const userIndex = users.findIndex(user => user.id === userId);
+            if (userIndex === -1) {
+                return res.status(404).json({ message: 'User not found.' });
+            }
+            
+            // Create the new car service object
+            const newCarService = {
                 id: uuidv4(),
-                userId: userId, // Include userId to associate the car service object with the user
                 checkedService: req.body.checkedService === 'true', // Convert string to boolean
                 makeAndModel: req.body.makeAndModel,
                 color: req.body.color,
@@ -406,11 +468,11 @@ app.post('/car', verifyToken, upload.single('image'),
                 objectType: req.body.objectType,
                 imagePath: req.file ? req.file.path : null, // Include image path if file uploaded
             };
-        
-            cartDB.push(newEntry);
-            await fsPromises.writeFile(CART_FILE, JSON.stringify(cartDB, null, 2), 'utf8');
             
-            res.status(201).json({ message: 'New car service object added to the DB: ', newEntry });
+            users[userIndex].userCart.push(newCarService);
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            res.status(201).json({ message: 'New car service object added to the user cart.', newCarService });
+       
         } catch (err) {
             console.error("Error handling car service submission:", err);
             res.status(500).send('Failed to process car service submission.');
@@ -432,23 +494,27 @@ app.post('/driveway', verifyToken, upload.single('image'),
         }
 
         try {
-            const userId = req.authData.id;
-            const data = await fsPromises.readFile(CART_FILE, 'utf8');
-            let DB = JSON.parse(data);
+            const userId = req.user.id; 
+            const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
+            let users = JSON.parse(usersData);
 
-            const newEntry = {
+            const userIndex = users.findIndex(user => user.id === userId);
+            if (userIndex === -1) {
+                return res.status(404).json({ message: 'User not found.' });
+            }
+
+            const newDrivewayService = {
                 id: uuidv4(),
-                userId: userId,
                 selectedSize: req.body.selectedSize,
-                drivewayMessage: req.body.drivewayMessage,
+                drivewayMessage: req.body.drivewayMessage || '',
                 objectType: req.body.objectType,
                 imagePath: req.file ? req.file.path : null,
             };
 
-            DB.push(newEntry);
-
-            await fsPromises.writeFile(CART_FILE, JSON.stringify(DB, null, 2), 'utf8');
-            res.status(201).json({message: 'New driveway service object added to the DB: ', newEntry });
+            users[userIndex].userCart.push(newDrivewayService);
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            res.status(201).json({ message: 'New driveway service object added to the user cart.', newDrivewayService });
+      
         } catch (error) {
             console.error("Error processing request:", error);
             res.status(500).send('An error occurred processing your request.');
@@ -472,24 +538,29 @@ app.post('/lawn', verifyToken, upload.single('image'),
         }
 
         try {
-            const userId = req.authData.id;
-            const data = await fsPromises.readFile(CART_FILE, 'utf8');
-            let DB = JSON.parse(data);
+            const userId = req.user.id;
+            const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
+            let users = JSON.parse(usersData);
 
-            const newEntry = {
+            const userIndex = users.findIndex(user => user.id === userId);
+            if (userIndex === -1) {
+                return res.status(404).json({ message: 'User not found.' });
+            }
+
+            const newLawnService = {
                 id: uuidv4(),
-                userId: userId,
                 walkway: req.body.walkway === 'true',
                 frontYard: req.body.frontYard === 'true',
-                backyard: req.body.backyard === 'true',
-                lawnMessage: req.body.lawnMessage,
+                backyard: req.body.backyard === 'true', 
+                lawnMessage: req.body.lawnMessage || '',
                 objectType: req.body.objectType,
-                imagePath: req.file ? req.file.path : null,
+                imagePath: req.file ? req.file.path : null, 
             };
 
-            DB.push(newEntry);
-            await fsPromises.writeFile(CART_FILE, JSON.stringify(DB, null, 2), 'utf8');
-            res.status(201).json({message: 'New lawn service object added to the DB: ', newEntry });
+            users[userIndex].userCart.push(newLawnService);
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            res.status(201).json({ message: 'New lawn service object added to the user cart.', newLawnService });
+
         } catch (error) {
             console.error("Error processing request:", error);
             res.status(500).send('An error occurred processing your request.');
@@ -512,11 +583,16 @@ app.post('/street', verifyToken, upload.single('image'),
         }
 
         try {
-            const userId = req.authData.id;
-            const data = await fsPromises.readFile(CART_FILE, 'utf8');
-            let DB = JSON.parse(data);
+            const userId = req.user.id;
+            const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
+            let users = JSON.parse(usersData);
 
-            const newEntry = {
+            const userIndex = users.findIndex(user => user.id === userId);
+            if (userIndex === -1) {
+                return res.status(404).json({ message: 'User not found.' });
+            }
+
+            const newStreetService = {
                 id: uuidv4(),
                 userId: userId,
                 from: req.body.from,
@@ -526,10 +602,10 @@ app.post('/street', verifyToken, upload.single('image'),
                 imagePath: req.file ? req.file.path : null,
             };
 
-            DB.push(newEntry);
+            users[userIndex].userCart.push(newStreetService);
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            res.status(201).json({ message: 'New street service object added to the DB: ', newStreetService });
 
-            await fsPromises.writeFile(CART_FILE, JSON.stringify(DB, null, 2), 'utf8');
-            res.status(201).json({ message: 'New street service object added to the DB: ', newEntry });
         } catch (error) {
             console.error("Error processing request:", error);
             res.status(500).send('An error occurred processing your request.');
@@ -551,11 +627,16 @@ app.post('/other', verifyToken, upload.single('image'),
         }
 
         try {
-            const userId = req.authData.id;
-            const data = await fsPromises.readFile(CART_FILE, 'utf8');
-            let DB = JSON.parse(data);
+            const userId = req.user.id;
+            const data = await fsPromises.readFile(USERS_FILE, 'utf8');
+            let users = JSON.parse(data);
 
-            const newEntry = {
+            const userIndex = users.findIndex(user => user.id === userId);
+            if (userIndex === -1) {
+                return res.status(404).send('User not found.');
+            }
+
+            const newOtherService = {
                 id: uuidv4(),
                 userId: userId,
                 selectedSize: req.body.selectedSize,
@@ -564,10 +645,10 @@ app.post('/other', verifyToken, upload.single('image'),
                 imagePath: req.file ? req.file.path : null,
             };
 
-            DB.push(newEntry);
+            users[userIndex].userCart.push(newOtherService);
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            res.status(201).json({ message: 'New other service object added to the DB: ', newOtherService });
 
-            await fsPromises.writeFile(CART_FILE, JSON.stringify(DB, null, 2), 'utf8');
-            res.status(201).json({ message: 'New other service object added to the DB: ', newEntry });
         } catch (error) {
             console.error("Error processing request:", error);
             res.status(500).send('An error occurred processing your request.');
@@ -578,13 +659,13 @@ app.post('/other', verifyToken, upload.single('image'),
 // PUT route to update an existing address
 app.put('/address/:id', verifyToken, 
     [
-        body('userName').trim().notEmpty().withMessage('User name is required'),
-        body('userNumber').trim().notEmpty().withMessage('User number is required'),
-        body('userStreet').trim().notEmpty().withMessage('Street is required'),
-        body('userUnit').trim().optional().notEmpty().withMessage('Unit can be empty but should be valid if provided'),
-        body('userCity').trim().notEmpty().withMessage('City is required'),
-        body('userState').trim().notEmpty().withMessage('State is required'),
-        body('userZip').trim().notEmpty().isPostalCode('any').withMessage('Valid ZIP/Postal code is required'),
+    body('userName').trim().notEmpty().withMessage('User name is required'),
+    body('userNumber').trim().notEmpty().withMessage('User number is required'),
+    body('userStreet').trim().notEmpty().withMessage('Street is required'),
+    body('userUnit').trim().optional().notEmpty().withMessage('Unit can be empty but should be valid if provided'),
+    body('userCity').trim().notEmpty().withMessage('City is required'),
+    body('userState').trim().notEmpty().withMessage('State is required'),
+    body('userZip').trim().notEmpty().isPostalCode('any').withMessage('Valid ZIP/Postal code is required'),
     ], 
     async (req, res) => {
         const errors = validationResult(req);
@@ -593,39 +674,42 @@ app.put('/address/:id', verifyToken,
         }
 
         try {
-            const userId = req.authData.id;
+            const userId = req.user.id; // Make sure verifyToken sets req.user
             const addressId = req.params.id;
-            const data = await fsPromises.readFile(ADDRESS_FILE, 'utf8');
-            let DB = JSON.parse(data);
-            let updatedItem = null;
-            let found = false;
+            const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
+            let users = JSON.parse(usersData);
 
-            const updatedDB = DB.map(item => {
-                if (item.id === addressId && item.userId === userId) {
-                    found = true;
-                    updatedItem = { 
-                        ...item,
-                        userName: req.body.userName,
-                        userNumber: req.body.userNumber,
-                        userStreet: req.body.userStreet,
-                        userUnit: req.body.userUnit,
-                        userCity: req.body.userCity,
-                        userState: req.body.userState,
-                        userZip: req.body.userZip,
-                    };
-                    return updatedItem;
-                }
-                return item;
-            });
-
-            if (!found) {
-                return res.status(404).send({message: 'Address not found or you do not have permission to edit it.'});
+            // Find the user by their ID
+            const user = users.find(u => u.id === userId);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found.' });
             }
 
-            await fsPromises.writeFile(ADDRESS_FILE, JSON.stringify(updatedDB, null, 2), 'utf8');
-            res.status(200).send({message: 'Address object updated in the DB: ', updatedItem});
+            // Find the address by its ID within the user's address array
+            const addressIndex = user.userAddresses.findIndex(addr => addr.id === addressId);
+            if (addressIndex === -1) {
+                return res.status(404).json({ message: 'Address not found.' });
+            }
+
+            // Update the address
+            const updatedAddress = {
+                ...user.userAddresses[addressIndex],
+                userName: req.body.userName,
+                userNumber: req.body.userNumber,
+                userStreet: req.body.userStreet,
+                userUnit: req.body.userUnit || '',
+                userCity: req.body.userCity,
+                userState: req.body.userState,
+                userZip: req.body.userZip,
+            };
+            user.userAddresses[addressIndex] = updatedAddress;
+
+            // Write the updated users data back to the USERS_FILE
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            
+            res.status(200).json({ message: 'Address updated successfully.', updatedAddress });
         } catch (err) {
-            console.error("Error accessing or modifying the address file:", err);
+            console.error("Error processing request:", err);
             res.status(500).send('An error occurred while processing your request.');
         }
     }
@@ -644,47 +728,46 @@ app.put('/car/:id', verifyToken, upload.single('image'),
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            // Return validation errors to the client
             return res.status(400).json({ errors: errors.array() });
         }
 
         try {
-            const userId = req.authData.id;
-            const carId = req.params.id;
-            const data = await fsPromises.readFile(CART_FILE, 'utf8');
-            let DB = JSON.parse(data);
-            let updatedItem = null;
-            let found = false;
+            const userId = req.user.id; // Assuming your verifyToken middleware sets req.user
+            const carId = req.params.id; // The ID of the car service object to update
+            const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
+            let users = JSON.parse(usersData);
 
-            const updatedDB = DB.map(item => {
-                if (item.id === carId && item.userId === userId) {
-                    found = true;
-                    updatedItem = {
-                        ...item,
-                        checkedService: req.body.checkedService === 'true' || req.body.checkedService === true,
-                        makeAndModel: req.body.makeAndModel,
-                        color: req.body.color,
-                        licensePlate: req.body.licensePlate || item.licensePlate, // Retain old value if not provided
-                        carMessage: req.body.carMessage || item.carMessage, // Retain old value if not provided
-                        objectType: req.body.objectType,
-                        imagePath: req.file ? req.file.path : item.imagePath, // Update or retain old image path
-                    };
-                    return updatedItem;
-                }
-                return item;
-            });
-
-            if (!found) {
-                // Car service object not found
-                return res.status(404).send('Car service object not found in the DB.');
+            // Find the user by their ID
+            const user = users.find(u => u.id === userId);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found.' });
             }
 
-            // Write the updated data back to the cart file
-            await fsPromises.writeFile(CART_FILE, JSON.stringify(updatedDB, null, 2), 'utf8');
-            res.status(200).json({ message: 'Car service object updated in the DB: ', updatedItem });
+            // Find the index of the car service object by its ID within the user's cart
+            const carIndex = user.userCart.findIndex(car => car.id === carId);
+            if (carIndex === -1) {
+                return res.status(404).json({ message: 'Car service object not found.' });
+            }
+
+            // Update the car service object
+            user.userCart[carIndex] = {
+                ...user.userCart[carIndex],
+                checkedService: req.body.checkedService,
+                makeAndModel: req.body.makeAndModel,
+                color: req.body.color,
+                licensePlate: req.body.licensePlate || user.userCart[carIndex].licensePlate,
+                carMessage: req.body.carMessage || user.userCart[carIndex].carMessage,
+                objectType: req.body.objectType,
+                imagePath: req.file ? req.file.path : user.userCart[carIndex].imagePath,
+            };
+
+            // Write the updated users data back to the USERS_FILE
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            res.status(200).json({ message: 'Car service object updated.', car: user.userCart[carIndex] });
+
         } catch (err) {
-            console.error("Error handling car service update:", err);
-            res.status(500).send('Failed to process car service update');
+            console.error("Error updating car service object:", err);
+            res.status(500).send('An error occurred while updating the car service object.');
         }
     }
 );
@@ -703,34 +786,32 @@ app.put('/driveway/:id', verifyToken, upload.single('image'),
         }
 
         try {
-            const userId = req.authData.id;
+            const userId = req.user.id;
             const drivewayId = req.params.id;
-            const data = await fsPromises.readFile(CART_FILE, 'utf8');
-            let DB = JSON.parse(data);
-            let updatedItem = null;
-            let found = false;
+            const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
+            let users = JSON.parse(usersData);
 
-            const updatedDB = DB.map(item => {
-                if (item.id === drivewayId && item.userId === userId) {
-                    found = true;
-                    updatedItem = {
-                        ...item,
-                        selectedSize: req.body.selectedSize || item.selectedSize,
-                        drivewayMessage: req.body.drivewayMessage || item.drivewayMessage,
-                        objectType: req.body.objectType,
-                        imagePath: req.file ? req.file.path : item.imagePath, 
-                    };
-                    return updatedItem;
-                }
-                return item;
-            });
-
-            if (!found) {
-                return res.status(404).send({ message: 'Driveway service object not found.' });
+            const user = users.find(u => u.id === userId);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found.' });
             }
 
-            await fsPromises.writeFile(CART_FILE, JSON.stringify(updatedDB, null, 2), 'utf8');
-            res.status(200).json({ message: 'Driveway service object updated in the DB: ', updatedItem });
+            const drivewayIndex = user.userCart.findIndex(car => driveway.id === drivewayId);
+            if (drivewayIndex === -1) {
+                return res.status(404).json({ message: 'Driveway service object not found.' });
+            }
+
+            user.userCart[drivewayIndex] = {
+                ...user.userCart[drivewayIndex],
+                selectedSize: req.body.selectedSize || user.userCart[drivewayIndex].selectedSize,
+                drivewayMessage: req.body.drivewayMessage || user.userCart[drivewayIndex].drivewayMessage,
+                objectType: req.body.objectType,
+                imagePath: req.file ? req.file.path : user.userCart[drivewayIndex].imagePath, 
+            }
+
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            res.status(200).json({ message: 'Driveway service object updated in the DB: ', driveway: user.userCart[drivewayIndex]});
+        
         } catch (error) {
             console.error("Error processing request:", error);
             res.status(500).send('An error occurred processing your request.');
@@ -754,36 +835,34 @@ app.put('/lawn/:id', verifyToken, upload.single('image'),
         }
 
         try {
-            const userId = req.authData.id;
+            const userId = req.user.id;
             const lawnId = req.params.id;
-            const data = await fsPromises.readFile(CART_FILE, 'utf8');
-            let DB = JSON.parse(data);
-            let updatedItem = null;
-            let found = false;
+            const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
+            let users = JSON.parse(usersData);
 
-            const updatedDB = DB.map(item => {
-                if (item.id === lawnId && item.userId === userId) {
-                    found = true;
-                    updatedItem = {
-                        ...item,
-                        walkway: req.body.walkway ? req.body.walkway === 'true' : item.walkway,
-                        frontYard: req.body.frontYard ? req.body.frontYard === 'true' : item.frontYard,
-                        backyard: req.body.backyard ? req.body.backyard === 'true' : item.backyard,
-                        lawnMessage: req.body.lawnMessage || item.lawnMessage,
-                        objectType: req.body.objectType || item.objectType,
-                        imagePath: req.file ? req.file.path : item.imagePath,
-                    };
-                    return updatedItem;
-                }
-                return item;
-            });
-
-            if (!found) {
-                return res.status(404).send({ message: 'Lawn service object not found.' });
+            const user = users.find(u => u.id === userId);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found.' });
             }
 
-            await fsPromises.writeFile(CART_FILE, JSON.stringify(updatedDB, null, 2), 'utf8');
-            res.status(200).json({ message: 'Lawn service object updated in the DB: ', updatedItem });
+            const lawnIndex = user.userCart.findIndex(lawn => lawn.id === lawnId);
+            if (lawnIndex === -1) {
+                return res.status(404).json({ message: 'Lawn service object not found.' });
+            }
+
+            user.userCart[lawnIndex] = {
+                ...user.userCart[lawnIndex],
+                walkway: req.body.walkway !== undefined ? req.body.walkway : lawnService.walkway,
+                frontYard: req.body.frontYard !== undefined ? req.body.frontYard : lawnService.frontYard,
+                backyard: req.body.backyard !== undefined ? req.body.backyard : lawnService.backyard,
+                lawnMessage: req.body.lawnMessage !== undefined ? req.body.lawnMessage : lawnService.lawnMessage,
+                objectType: req.body.objectType,
+                imagePath: req.file ? req.file.path : user.userCart[lawnIndex].imagePath,
+            };
+
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            res.status(200).json({ message: 'Lawn service object updated.', lawn: user.userCart[lawnIndex] });
+
         } catch (error) {
             console.error("Error processing request:", error);
             res.status(500).send('An error occurred processing your request.');
@@ -806,35 +885,34 @@ app.put('/street/:id', verifyToken, upload.single('image'),
         }
 
         try {
-            const userId = req.authData.id;
+            const userId = req.user.id;
             const streetId = req.params.id;
-            const data = await fsPromises.readFile(CART_FILE, 'utf8');
-            let DB = JSON.parse(data);
-            let updatedItem = null;
-            let found = false;
+            const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
+            let users = JSON.parse(usersData);
 
-            const updatedDB = DB.map(item => {
-                if (item.id === streetId && item.userId === userId) {
-                    found = true;
-                    updatedItem = {
-                        ...item,
-                        from: req.body.from,
-                        to: req.body.to || item.to, // Keep existing value if 'to' is not provided
-                        streetMessage: req.body.streetMessage || item.streetMessage,
-                        objectType: req.body.objectType,
-                        imagePath: req.file ? req.file.path : item.imagePath,
-                    };
-                    return updatedItem;
-                }
-                return item;
-            });
-
-            if (!found) {
-                return res.status(404).send({ message: 'Street service object not found.' });
+            const user = users.find(u => u.id === userId);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found.' });
             }
 
-            await fsPromises.writeFile(CART_FILE, JSON.stringify(updatedDB, null, 2), 'utf8');
-            res.status(200).json({ message: 'Street service object updated in the DB: ', updatedItem });
+            const streetIndex = user.userCart.findIndex(street => street.id === streetId);
+            if (streetIndex === -1) {
+                return res.status(404).json({ message: 'Street service object not found.' });
+            }
+
+            user.userCart[streetIndex] = {
+                ...user.userCart[streetIndex],
+                from: req.body.from,
+                to: req.body.to || user.userCart[streetIndex].to, 
+                streetMessage: req.body.streetMessage || user.userCart[streetIndex].streetMessage,
+                objectType: req.body.objectType,
+                imagePath: req.file ? req.file.path : user.userCart[streetIndex].imagePath,
+            }
+
+
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            res.status(200).json({ message: 'Street service object updated in the DB: ', street: user.userCart[streetIndex] });
+
         } catch (error) {
             console.error("Error processing request:", error);
             res.status(500).send('An error occurred processing your request.');
@@ -856,34 +934,32 @@ app.put('/other/:id', verifyToken, upload.single('image'),
         }
 
         try {
-            const userId = req.authData.id;
+            const userId = req.user.id;
             const otherId = req.params.id;
-            const data = await fsPromises.readFile(CART_FILE, 'utf8');
-            let DB = JSON.parse(data);
-            let updatedItem = null;
-            let found = false;
+            const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
+            let users = JSON.parse(usersData);
 
-            const updatedDB = DB.map(item => {
-                if (item.id === otherId && item.userId === userId) {
-                    found = true;
-                    updatedItem = {
-                        ...item,
-                        selectedSize: req.body.selectedSize,
-                        otherMessage: req.body.otherMessage,
-                        objectType: req.body.objectType,
-                        imagePath: req.file ? req.file.path : item.imagePath,
-                    };
-                    return updatedItem;
-                }
-                return item;
-            });
-
-            if (!found) {
-                return res.status(404).send({ message: 'Other service object not found.' });
+            const user = users.find(u => u.id === userId);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found.' });
             }
 
-            await fsPromises.writeFile(CART_FILE, JSON.stringify(updatedDB, null, 2), 'utf8');
-            res.status(200).json({ message: 'Other service object updated in the DB: ', updatedItem });
+            const otherIndex = user.userCart.findIndex(other => other.id === otherId);
+            if (otherIndex === -1) {
+                return res.status(404).json({ message: 'Other service object not found.' });
+            }
+
+            user.userCart[otherIndex] = {
+                ...user.userCart[otherIndex],
+                selectedSize: req.body.selectedSize,
+                otherMessage: req.body.otherMessage,
+                objectType: req.body.objectType,
+                imagePath: req.file ? req.file.path : user.userCart[otherIndex].imagePath,
+            }
+
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            res.status(200).json({ message: 'Other service object updated in the DB: ', other: user.userCart[otherIndex] });
+
         } catch (error) {
             console.error("Error processing request:", error);
             res.status(500).send('An error occurred processing your request.');
@@ -894,25 +970,32 @@ app.put('/other/:id', verifyToken, upload.single('image'),
 // DELETE route for other service object
 app.delete('/address/:id', verifyToken, async (req, res) => {
     try {
-        const userId = req.authData.id; // Extract userId from verifyToken.
-        const addressId = req.params.id; // The unique identifier of the address.
-        const data = await fsPromises.readFile(ADDRESS_FILE, 'utf8');
-        let DB = JSON.parse(data);
+        const userId = req.user.id; 
+        const addressId = req.params.id;
+        const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
+        let users = JSON.parse(usersData);
 
-        // Directly find the address ensuring it belongs to the user
-        const addressToDelete = DB.find(item => item.id === addressId && item.userId === userId);
-        if (!addressToDelete) {
-            // If the address doesn't exist or doesn't belong to the user, provide a generic error response
-            return res.status(404).send({message: 'Address not found or you do not have permission to delete this address.'});
+        // Find the user by their ID
+        const userIndex = users.findIndex(u => u.id === userId);
+        if (userIndex === -1) {
+            return res.status(404).json({ message: 'User not found.' });
         }
 
-        // Proceed to filter out the address to be deleted
-        const updatedDB = DB.filter(item => item.id !== addressId);
+        // Find the index of the address in the user's address array
+        const addressIndex = users[userIndex].userAddresses.findIndex(addr => addr.id === addressId);
+        if (addressIndex === -1) {
+            return res.status(404).json({ message: 'Address not found.' });
+        }
 
-        await fsPromises.writeFile(ADDRESS_FILE, JSON.stringify(updatedDB, null, 2), 'utf8');
-        res.status(200).send({message: 'Address object deleted from the DB.'});
-    } catch (err) {
-        console.error("Error accessing or modifying the address file:", err);
+        // Remove the address from the user's address array
+        users[userIndex].userAddresses.splice(addressIndex, 1);
+
+        // Write the updated users data back to the USERS_FILE
+        await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+        
+        res.status(200).json({ message: 'Address deleted successfully.' });
+    } catch (error) {
+        console.error("Error processing request:", error);
         res.status(500).send('An error occurred while processing your request.');
     }
 });
@@ -920,47 +1003,53 @@ app.delete('/address/:id', verifyToken, async (req, res) => {
 // DELETE route for car service
 app.delete('/car/:id', verifyToken, async (req, res) => {
     try {
-        const userId = req.authData.id; // Extract userId from verifyToken.
-        const carId = req.params.id; // The unique identifier of the car.
-        const data = await fsPromises.readFile(CART_FILE, 'utf8');
-        let DB = JSON.parse(data);
+        const userId = req.user.id; 
+        const carId = req.params.id; 
+        const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
+        let users = JSON.parse(usersData);
 
-        // Find the car service object to verify existence and ownership
-        const carServiceToDelete = DB.find(item => item.id === carId && item.userId === userId);
-        if (!carServiceToDelete) {
-            // If the car service object does not exist, or if it does not belong to the user, return a 404 or 403 error
-            return res.status(404).send({ message: 'Car service object not found or you do not have permission to delete it.' });
+        const userIndex = users.findIndex(user => user.id === userId);
+        if (userIndex === -1) {
+            return res.status(404).json({ message: 'User not found.' });
         }
 
-        // Filter out the car service object to be deleted
-        const updatedDB = DB.filter(item => item.id !== carId);
+        const carIndex = users[userIndex].userCart.findIndex(car => car.id === carId);
+        if (carIndex === -1) {
+            return res.status(404).json({ message: 'Car service object not found.' });
+        }
 
-        // Write the updated data back to the cart file
-        await fsPromises.writeFile(CART_FILE, JSON.stringify(updatedDB, null, 2), 'utf8');
-        res.status(200).send({ message: 'Car service object deleted from the DB.' });
-    } catch (err) {
-        console.error("Error during deletion of car service object:", err);
-        res.status(500).send('An error occurred processing the deletion request.');
+        users[userIndex].userCart.splice(carIndex, 1);
+        await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+        res.status(200).json({ message: 'Car service object deleted successfully.' });
+
+    } catch (error) {
+        console.error("Error processing the deletion request:", error);
+        res.status(500).send('An error occurred while processing the deletion request.');
     }
 });
 
 // DELETE route for driveway service object
 app.delete('/driveway/:id', verifyToken, async (req, res) => {
     try {
-        const userId = req.authData.id; 
+        const userId = req.user.id; 
         const drivewayId = req.params.id;
-        const data = await fsPromises.readFile(CART_FILE, 'utf8');
-        let DB = JSON.parse(data);
+        const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
+        let users = JSON.parse(usersData);
         
-        const drivewayServiceToDelete = DB.find(item => item.id === drivewayId && item.userId === userId);
-        if (!drivewayServiceToDelete) {
-            return res.status(404).send({ message: 'Driveway service object not found or you do not have permission to delete this item.' });
+        const userIndex = users.findIndex(user => user.id === userId);
+        if (userIndex === -1) {
+            return res.status(404).json({ message: 'User not found.' });
         }
 
-        const updatedDB = DB.filter(item => item.id !== drivewayId);
+        const drivewayIndex = users[userIndex].userCart.findIndex(driveway => driveway.id === drivewayId);
+        if (drivewayIndex === -1) {
+            return res.status(404).json({ message: 'Driveway service object not found.' });
+        }
 
-        await fsPromises.writeFile(CART_FILE, JSON.stringify(updatedDB, null, 2), 'utf8');
+        users[userIndex].userCart.splice(drivewayIndex, 1);
+        await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
         res.status(200).json({ message: 'Driveway service object deleted from the DB.' });
+
     } catch (error) {
         console.error("Error processing request:", error);
         res.status(500).send('An error occurred processing your request.');
@@ -970,20 +1059,25 @@ app.delete('/driveway/:id', verifyToken, async (req, res) => {
 // DELETE route for lawn service object
 app.delete('/lawn/:id', verifyToken, async (req, res) => {
     try {
-        const userId = req.authData.id; 
+        const userId = req.user.id; 
         const lawnId = req.params.id;
-        const data = await fsPromises.readFile(CART_FILE, 'utf8');
-        let DB = JSON.parse(data);
+        const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
+        let users = JSON.parse(usersData);
         
-        const lawnServiceToDelete = DB.find(item => item.id === lawnId && item.userId === userId);
-        if (!lawnServiceToDelete) {
-            return res.status(404).send({ message: 'Lawn service object not found or you do not have permission to delete this item.' });
+        const userIndex = users.findIndex(user => user.id === userId);
+        if (userIndex === -1) {
+            return res.status(404).json({ message: 'User not found.' });
         }
 
-        const updatedDB = DB.filter(item => item.id !== lawnId);
+        const lawnIndex = users[userIndex].userCart.findIndex(lawn => lawn.id === lawnId);
+        if (lawnIndex  === -1) {
+            return res.status(404).json({ message: 'Lawn service object not found.' });
+        }
 
-        await fsPromises.writeFile(CART_FILE, JSON.stringify(updatedDB, null, 2), 'utf8');
+        users[userIndex].userCart.splice(lawnIndex, 1);
+        await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
         res.status(200).json({ message: 'Lawn service object deleted from the DB.' });
+
     } catch (error) {
         console.error("Error processing request:", error);
         res.status(500).send('An error occurred processing your request.');
@@ -993,20 +1087,25 @@ app.delete('/lawn/:id', verifyToken, async (req, res) => {
 // DELETE route for street service
 app.delete('/street/:id', verifyToken, async (req, res) => {
     try {
-        const userId = req.authData.id;
+        const userId = req.user.id; 
         const streetId = req.params.id;
-        const data = await fsPromises.readFile(CART_FILE, 'utf8');
-        let DB = JSON.parse(data);
+        const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
+        let users = JSON.parse(usersData);
         
-        const streetServiceToDelete = DB.find(item => item.id === streetId && item.userId === userId);
-        if (!streetServiceToDelete) {
-            return res.status(404).send({ message: 'Street service object not found or you do not have permission to delete this item.' });
+        const userIndex = users.findIndex(user => user.id === userId);
+        if (userIndex === -1) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+  
+        const streetIndex = users[userIndex].userCart.findIndex(street => street.id === streetId);
+        if (streetIndex === -1) {
+            return res.status(404).json({ message: 'Street service object not found.' });
         }
 
-        const updatedDB = DB.filter(item => item.id !== streetId);
-
-        await fsPromises.writeFile(CART_FILE, JSON.stringify(updatedDB, null, 2), 'utf8');
+        users[userIndex].userCart.splice(streetIndex, 1);
+        await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');        
         res.status(200).json({ message: 'Street service object deleted from the DB.' });
+
     } catch (error) {
         console.error("Error processing request:", error);
         res.status(500).send('An error occurred processing your request.');
@@ -1016,20 +1115,25 @@ app.delete('/street/:id', verifyToken, async (req, res) => {
 // DELETE route for other service object
 app.delete('/other/:id', verifyToken, async (req, res) => {
     try {
-        const userId = req.authData.id; 
+        const userId = req.user.id; 
         const otherId = req.params.id;
-        const data = await fsPromises.readFile(CART_FILE, 'utf8');
-        let DB = JSON.parse(data);
+        const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
+        let users = JSON.parse(usersData);
         
-        const otherServiceToDelete = DB.find(item => item.id === otherId && item.userId === userId);
-        if (!otherServiceToDelete) {
-            return res.status(404).send({ message: 'Other service object not found or you do not have permission to delete this item.' });
+        const userIndex = users.findIndex(user => user.id === userId);
+        if (userIndex === -1) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+  
+        const otherIndex = users[userIndex].userCart.findIndex(other => other.id === otherId);
+        if (otherIndex === -1) {
+            return res.status(404).json({ message: 'Other service object not found.' });
         }
 
-        const updatedDB = DB.filter(item => item.id !== otherId);
-
-        await fsPromises.writeFile(CART_FILE, JSON.stringify(updatedDB, null, 2), 'utf8');
+        users[userIndex].userCart.splice(otherIndex, 1);
+        await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
         res.status(200).json({ message: 'Other service object deleted from the DB.' });
+
     } catch (error) {
         console.error("Error processing request:", error);
         res.status(500).send('An error occurred processing your request.');
@@ -1042,6 +1146,4 @@ app.delete('/other/:id', verifyToken, async (req, res) => {
 // });
 
 // Start the server
-httpsServer.listen(port, () => {
-    console.log(`HTTPS Server running on port ${port}`);
-});
+startHttpsServer();

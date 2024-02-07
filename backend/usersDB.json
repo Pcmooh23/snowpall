@@ -1,42 +1,197 @@
 [
   {
-    "id": "c5da0d94-cfff-4e8e-97be-d640ab8785a8",
-    "userName": "Tom Keen",
-    "userEmail": "TomKeen123@gmail.com",
-    "accountType": "snowTech",
-    "userNumber": "555-555-5555",
-    "userStreet": "123 main street",
-    "userUnit": "Unit 01",
-    "userCity": "New York",
-    "userState": "NY",
-    "userZip": "10001",
-    "userPasswordHash": "$2b$10$VakOFITyTpnyiGwyxGtvme37LM6mp0TBQRtU4GI9bcmUp1NZJzMBi"
-  },
-  {
-    "id": "bf366d1e-6c52-4d3a-932a-d70ef2f14fc4",
+    "id": "253a2c9c-1ea2-44b1-86fa-3e127ff2e5a0",
     "userName": "Kim Possible",
     "userEmail": "kim.possible@gmail.com",
     "accountType": "customer",
     "userNumber": "8455052893",
     "userStreet": "3384 Towers Loop Road",
-    "userUnit": "Unit 101",
+    "userUnit": "Unit 100",
     "userCity": "Storrs",
     "userState": "Connecticut",
     "userZip": "06269",
-    "userPasswordHash": "$2b$10$sr7Bkq0U2GrbGQo38SzByuEdlpb2EUjjAw4yyhvBE/9M33BPblhRK"
+    "userPasswordHash": "$2b$10$/gc/JkQzJMlbbFJPlcLn3uGQ/clDdXOZ1PqHAjxcyZ9KJzxl6sj4q",
+    "userCart": [
+      {
+        "id": "41e5b9cd-1df9-4df1-9807-ad6e428f18b0",
+        "checkedService": true,
+        "makeAndModel": "jeep wrangler",
+        "color": "dsds",
+        "licensePlate": "dsds",
+        "carMessage": "ijjijijiji",
+        "objectType": "car",
+        "imagePath": "uploads/078807d3373aa44b8661847487254463"
+      },
+      {
+        "id": "36249905-34e4-4f5f-9b42-42b8dc3b6ab6",
+        "selectedSize": "size2",
+        "drivewayMessage": "djijsdisjdisd",
+        "objectType": "driveway",
+        "imagePath": "uploads/cc17d2ee8c2fcb3a9cb1e1b860cebdb7"
+      },
+      {
+        "id": "a8d1bd7d-c74b-492f-bb91-900e5cb60409",
+        "walkway": false,
+        "frontYard": true,
+        "backyard": true,
+        "lawnMessage": "",
+        "objectType": "lawn",
+        "imagePath": "uploads/64c806b57db5cee13192d711d684971b"
+      },
+      {
+        "id": "77fd970b-5b36-4106-948c-426fff3f39d7",
+        "userId": "253a2c9c-1ea2-44b1-86fa-3e127ff2e5a0",
+        "from": "123 main ",
+        "to": "124 main",
+        "streetMessage": "your mom",
+        "objectType": "street",
+        "imagePath": "uploads/a995c5e50cc9895fed06a1b2efed7abd"
+      },
+      {
+        "id": "cc7a1dd6-9870-4456-b1dc-e9fac8d9c9c5",
+        "userId": "253a2c9c-1ea2-44b1-86fa-3e127ff2e5a0",
+        "selectedSize": "job4",
+        "otherMessage": "hola",
+        "objectType": "other",
+        "imagePath": "uploads/1007b8ed7158068b686490a1b6f495de"
+      }
+    ],
+    "userAddresses": [
+      {
+        "id": "a7591beb-926c-4a63-8361-68e8f4a324b0",
+        "userName": "Kim Possible",
+        "userNumber": "8455052893",
+        "userStreet": "3384 Towers Loop Road",
+        "userUnit": "Unit 214",
+        "userCity": "Storrs",
+        "userState": "Connecticut",
+        "userZip": "06269"
+      },
+      {
+        "id": "60cd3be4-bb7e-4b83-995d-b7444b766f31",
+        "userName": "ron stoppable",
+        "userNumber": "8455052893",
+        "userStreet": "3384 Towers Loop Road",
+        "userUnit": "Unit 214",
+        "userCity": "Storrs",
+        "userState": "Connecticut",
+        "userZip": "06269"
+      }
+    ],
+    "userRequests": [
+      {
+        "id": "b9602614-8dd5-4642-9051-b94edddd7241",
+        "orderDate": "2024-02-07T21:00:18.823Z",
+        "cart": [
+          {
+            "id": "41e5b9cd-1df9-4df1-9807-ad6e428f18b0",
+            "checkedService": true,
+            "makeAndModel": "jeep wrangler",
+            "color": "dsds",
+            "licensePlate": "dsds",
+            "carMessage": "ijjijijiji",
+            "objectType": "car",
+            "imagePath": "uploads/078807d3373aa44b8661847487254463"
+          },
+          {
+            "id": "36249905-34e4-4f5f-9b42-42b8dc3b6ab6",
+            "selectedSize": "size2",
+            "drivewayMessage": "djijsdisjdisd",
+            "objectType": "driveway",
+            "imagePath": "uploads/cc17d2ee8c2fcb3a9cb1e1b860cebdb7"
+          },
+          {
+            "id": "a8d1bd7d-c74b-492f-bb91-900e5cb60409",
+            "walkway": false,
+            "frontYard": true,
+            "backyard": true,
+            "lawnMessage": "",
+            "objectType": "lawn",
+            "imagePath": "uploads/64c806b57db5cee13192d711d684971b"
+          },
+          {
+            "id": "77fd970b-5b36-4106-948c-426fff3f39d7",
+            "userId": "253a2c9c-1ea2-44b1-86fa-3e127ff2e5a0",
+            "from": "123 main ",
+            "to": "124 main",
+            "streetMessage": "your mom",
+            "objectType": "street",
+            "imagePath": "uploads/a995c5e50cc9895fed06a1b2efed7abd"
+          },
+          {
+            "id": "cc7a1dd6-9870-4456-b1dc-e9fac8d9c9c5",
+            "userId": "253a2c9c-1ea2-44b1-86fa-3e127ff2e5a0",
+            "selectedSize": "job4",
+            "otherMessage": "hola",
+            "objectType": "other",
+            "imagePath": "uploads/1007b8ed7158068b686490a1b6f495de"
+          }
+        ],
+        "selectedAddress": {
+          "id": "a7591beb-926c-4a63-8361-68e8f4a324b0",
+          "userName": "Kim Possible",
+          "userNumber": "8455052893",
+          "userStreet": "3384 Towers Loop Road",
+          "userUnit": "Unit 214",
+          "userCity": "Storrs",
+          "userState": "Connecticut",
+          "userZip": "06269"
+        },
+        "charge": {
+          "id": "ch_3OhIEABWC1e9EDXY0x4nzDH4",
+          "amount": 23100,
+          "currency": "usd",
+          "description": "Charge for order",
+          "created": "2024-02-07T21:00:18.000Z"
+        }
+      }
+    ],
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjI1M2EyYzljLTFlYTItNDRiMS04NmZhLTNlMTI3ZmYyZTVhMCIsInVzZXJFbWFpbCI6ImtpbS5wb3NzaWJsZUBnbWFpbC5jb20iLCJpYXQiOjE3MDczMzk5MjksImV4cCI6MTcwNzk0NDcyOX0.CIch6UsRxj-SSwshMLLVY0qQvA1EQ_yAX-rDFevj5Zk"
   },
   {
-    "id": "40e36958-b8c3-4024-97c7-b25b9b2feab8",
+    "id": "342e2433-4b86-4537-b7ee-067479c49fdf",
     "userName": "Raymond Reddington",
     "userEmail": "Reddington0207@gmail.com",
-    "accountType": "customer",
-    "userNumber": "555-555-5555",
-    "userStreet": "3384 Towers Loop Road",
-    "userUnit": "Unit 01",
-    "userCity": "Storrs",
-    "userState": "Connecticut",
-    "userZip": "06269",
-    "userPasswordHash": "$2b$10$fPHwdb4/vCBonAPATDa5deeK4EQSmcS4MLJWiFUbJpALAewfRgqYa",
+    "accountType": "snowTech",
+    "userNumber": "18455052893",
+    "userStreet": "445 Main Street",
+    "userUnit": "Unit 100",
+    "userCity": "Poughkeepsie",
+    "userState": "New York",
+    "userZip": "12601",
+    "userPasswordHash": "$2b$10$OT1wYLTDwkOyFtv/BTXtA.Py5a2oeQjpjxTE1oLxaqmxN9T7rqHPO",
+    "userCart": [
+      {
+        "id": "15c94f08-eaf2-4037-bffa-8f11c44b0484",
+        "checkedService": "true",
+        "makeAndModel": "jeep wrangler",
+        "color": "red",
+        "licensePlate": "LVMH",
+        "carMessage": "hello moto",
+        "objectType": "car",
+        "imagePath": "uploads/9605a3ae32172336945992bc20c04df4"
+      },
+      {
+        "id": "2b1c72c1-6731-4ee9-94b0-14bb1563b630",
+        "selectedSize": "size4",
+        "drivewayMessage": "hi john",
+        "objectType": "driveway",
+        "imagePath": null
+      }
+    ],
+    "userAddresses": [
+      {
+        "id": "33fe0e1a-6a6b-4f16-88a6-1cc9417346f2",
+        "userName": "Raymond Reddington",
+        "userNumber": "555-555-5555",
+        "userStreet": "123 Elmo Loop Road",
+        "userUnit": "Unit 214",
+        "userCity": "Storrs",
+        "userState": "Connecticut",
+        "userZip": "06269"
+      }
+    ],
+    "userRequests": [],
     "refreshToken": null
   }
 ]

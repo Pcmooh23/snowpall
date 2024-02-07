@@ -6,7 +6,7 @@ import { useApi } from '../useApi';
 
 const MainHeader = () => {
 
-    const { setUserId } = useContext(SnowPallContext);
+    const { setUserId, loginName, setLoginName, setAccessToken } = useContext(SnowPallContext);
     const { logout } = useApi(); // Use the logout function from the custom hook
     const navigate = useNavigate();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -17,15 +17,17 @@ const MainHeader = () => {
         try {
             await logout(); // Call the logout function from useApi
             console.log('User logged out successfully');
-            setUserId(''); // Clear user-specific state if any
-            localStorage.setItem('currentUserId', ''); 
-            navigate('/'); // Redirect to home or login page
+            setUserId(null); // Clear user-specific state
+            setAccessToken(null); // Also clear access token from context
+            localStorage.removeItem('combinedToken'); // Remove the token from local storage if you're using it
+            navigate('/'); // Redirect to login page
         } catch (error) {
             console.error('Logout error:', error);
         }
-    };  
+    };
 
     useEffect(() => {
+        // Set up click outside listener
         function handleClickOutside(event) {
           if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
             setIsDropdownOpen(false);
@@ -33,9 +35,17 @@ const MainHeader = () => {
           }
         }
         document.addEventListener("mousedown", handleClickOutside);
+      
+        // Retrieve and set the user's name from localStorage
+        const storedUserName = localStorage.getItem('currentUserName');
+        if (storedUserName) {
+          setLoginName(storedUserName);
+        }
+      
+        // Cleanup function for removing the click outside listener
         return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [dropdownRef]);
-
+      }, [dropdownRef]); // This effect depends on dropdownRef
+      
     const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
   return (
@@ -57,7 +67,7 @@ const MainHeader = () => {
                     {isDropdownOpen && (
                         <div className='dropdown-menu'>
                             <div className='dropdown-menu-top'>
-                                <p className='username'>John Doe</p>
+                                <p className='username'>{loginName}</p>
                                 <div className='dropdown-bar'></div>
                             </div>
                             <ul className='dropdown-links'>

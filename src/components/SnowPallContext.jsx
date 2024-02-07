@@ -25,6 +25,7 @@ export const SnowPallProvider = ({ children }) => {
   const loginFormRef = useRef(null);
   const registerFormRef = useRef(null);
 
+  const [loginName, setLoginName] = useState('');
   // Props for HomePage services.
   const [active, setActive] = useState('');
   const [cart, setCart] = useState([]);
@@ -122,7 +123,7 @@ export const SnowPallProvider = ({ children }) => {
       pageFormRef, loginRef,
       iconCloseRef, signUpRef,
       loginFormRef, registerFormRef,
-
+      loginName, setLoginName,
       // Services and checkout form props.
       active, setActive,
       toggleActive, cart, setCart,
