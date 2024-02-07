@@ -71,7 +71,10 @@ export const SnowPallProvider = ({ children }) => {
     setActive(active === id ? "" : id);
   };
 
-  // Props for the contents of the SubmitRequest component.
+  // Props for the contents of the SubmitRequest components.
+  const [addressLog, setAddressLog] = useState([]);
+  const [selectedAddressForUse, setSelectedAddressForUse] = useState(null);
+  const [selectedAddressIndex, setSelectedAddressIndex] = useState(null);
   // Use useRef to make a reference to the PaymentArea component itself.
   const paymentRef = useRef();
   // Calculate the total based on cart items
@@ -137,6 +140,9 @@ export const SnowPallProvider = ({ children }) => {
       otherFormData, setOtherFormData,
       
       // SubmitRequest area props.
+      addressLog, setAddressLog,
+      selectedAddressForUse, setSelectedAddressForUse,
+      selectedAddressIndex, setSelectedAddressIndex,
       paymentRef, total, estimatedTax, grandTotal
       }}>
       {children}

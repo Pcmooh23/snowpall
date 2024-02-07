@@ -4,7 +4,7 @@ import { useApi } from '../useApi';
 
 const ReviewRequest = () => {
 
-    const { cart, setCart, total, estimatedTax, grandTotal, paymentRef, userId } = useContext(SnowPallContext);
+    const { cart, setCart, baseUrl, total, estimatedTax, grandTotal, paymentRef, userId } = useContext(SnowPallContext);
     const numberOfItems = cart.length;
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');

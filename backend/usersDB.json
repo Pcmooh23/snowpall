@@ -24,5 +24,19 @@
     "userState": "Connecticut",
     "userZip": "06269",
     "userPasswordHash": "$2b$10$sr7Bkq0U2GrbGQo38SzByuEdlpb2EUjjAw4yyhvBE/9M33BPblhRK"
+  },
+  {
+    "id": "40e36958-b8c3-4024-97c7-b25b9b2feab8",
+    "userName": "Raymond Reddington",
+    "userEmail": "Reddington0207@gmail.com",
+    "accountType": "customer",
+    "userNumber": "555-555-5555",
+    "userStreet": "3384 Towers Loop Road",
+    "userUnit": "Unit 01",
+    "userCity": "Storrs",
+    "userState": "Connecticut",
+    "userZip": "06269",
+    "userPasswordHash": "$2b$10$fPHwdb4/vCBonAPATDa5deeK4EQSmcS4MLJWiFUbJpALAewfRgqYa",
+    "refreshToken": null
   }
 ]

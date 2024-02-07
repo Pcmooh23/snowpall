@@ -48,5 +48,41 @@
       "description": "Charge for order",
       "created": "2024-02-03T13:08:18.000Z"
     }
+  },
+  {
+    "id": "83f86de0-40df-4a31-afef-39c81a9bf6ff",
+    "userId": "40e36958-b8c3-4024-97c7-b25b9b2feab8",
+    "orderDate": "2024-02-07T00:49:14.764Z",
+    "cart": [
+      {
+        "id": "7aea5df4-2748-4a1b-b02d-33557a0f3ba8",
+        "userId": "40e36958-b8c3-4024-97c7-b25b9b2feab8",
+        "checkedService": true,
+        "makeAndModel": "jeep wrangler",
+        "color": "white",
+        "licensePlate": "",
+        "carMessage": "I never wanted Tom to marry you liz. ",
+        "objectType": "car",
+        "imagePath": "uploads/277ab74efd9739855b8a4cdf9b15e240"
+      }
+    ],
+    "selectedAddress": {
+      "id": "77d89c38-ab31-4371-bb3a-06cbd99b9b7b",
+      "userId": "40e36958-b8c3-4024-97c7-b25b9b2feab8",
+      "userName": "Kim Possible",
+      "userNumber": "8455052893",
+      "userStreet": "3384 Towers Loop Road",
+      "userUnit": "Unit 214",
+      "userCity": "Storrs",
+      "userState": "Connecticut",
+      "userZip": "06269"
+    },
+    "charge": {
+      "id": "ch_3OgzKABWC1e9EDXY1YYyBnxW",
+      "amount": 2200,
+      "currency": "usd",
+      "description": "Charge for order",
+      "created": "2024-02-07T00:49:14.000Z"
+    }
   }
 ]

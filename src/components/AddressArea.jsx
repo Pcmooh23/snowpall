@@ -7,9 +7,6 @@ const AddressArea = () => {
     const [isOverlayActive, setIsOverlayActive] = useState(false);
     const [showNewAddressForm, setShowNewAddressForm] = useState(false);
     const [indexToEdit, setIndexToEdit] = useState(null);
-    const [selectedAddressIndex, setSelectedAddressIndex] = useState(null);
-    const [selectedAddressForUse, setSelectedAddressForUse] = useState(null);
-    const [addressLog, setAddressLog] = useState([]);
     const [addressInfo, setAddressInfo] = useState({
         userName: '',
         userNumber: '',
@@ -20,7 +17,11 @@ const AddressArea = () => {
         userZip: ''
     });
 
-    const {userId} = useContext(SnowPallContext);
+    const {
+        userId, addressLog, setAddressLog, 
+        selectedAddressForUse, setSelectedAddressForUse,
+        selectedAddressIndex, setSelectedAddressIndex
+    } = useContext(SnowPallContext);
     const { customFetch } = useApi();
     
     const toggleOverlay = () => {

@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { Mail, LockKeyhole, X, CircleUserRound } from 'lucide-react';
 import { SnowPallContext } from './SnowPallContext';
 import { useNavigate } from 'react-router-dom';
+import { useApi } from '../useApi';
 
 const UserForms = () => {
 
@@ -9,8 +10,11 @@ const UserForms = () => {
         pageFormRef, iconCloseRef, baseUrl,
         loginFormRef, registerLinkRef, 
         registerFormRef, loginLinkRef,
-        setAccessToken, setUserId
+        setAccessToken, userId, setUserId,
+        setAddressLog, setSelectedAddressForUse,
+        setSelectedAddressIndex
     } = useContext(SnowPallContext);
+    const { customFetch } = useApi();
 
     const navigate = useNavigate();
     const [loginError, setLoginError] = useState('');
@@ -100,51 +104,100 @@ const UserForms = () => {
 
     const registerUser = async (event) => {
         event.preventDefault();
-    
+      
         if (registerForm.userPassword !== registerForm.confirmPassword) {
             setRegisterError('Passwords do not match.');
             return;
         }
-    
+      
+        // Data for user registration
         const registerData = {
-            userName: registerForm.userName,
-            userEmail: registerForm.userEmail,
-            accountType: registerForm.accountType,
-            userNumber: registerForm.userNumber,
-            userStreet: registerForm.userStreet,
-            userUnit: registerForm.userUnit,
-            userCity: registerForm.userCity,
-            userState: registerForm.userState,
-            userZip: registerForm.userZip,
-            userPassword: registerForm.userPassword,
+          userName: registerForm.userName,
+          userEmail: registerForm.userEmail,
+          accountType: registerForm.accountType,
+          userNumber: registerForm.userNumber,
+          userStreet: registerForm.userStreet,
+          userUnit: registerForm.userUnit,
+          userCity: registerForm.userCity,
+          userState: registerForm.userState,
+          userZip: registerForm.userZip,
+          userPassword: registerForm.userPassword,
         }
-    
+      
+        // First fetch: User Registration
         try {
-            const response = await fetch(`${baseUrl}/users`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(registerData),
-                credentials: 'include', 
-            });
-    
-            const data = await response.json();
-            if (response.ok) {
-                setAccessToken(data.accessToken);
-                setUserId(data.userId)
-                localStorage.setItem('currentUserId', data.userId); 
-                resetRegisterForm();
-                navigate('/home');
-                setRegisterError('');
-            } else {
-                setRegisterError(data.message || 'Registration failed');
+          const registrationResponse = await fetch(`${baseUrl}/users`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(registerData),
+            credentials: 'include', 
+           });
+      
+            if (!registrationResponse.ok) {
+                throw new Error('Registration failed');
             }
+      
+            const registrationData = await registrationResponse.json();
+            // After successful registration, set access token and user ID as needed
+            setAccessToken(registrationData.accessToken);
+            setUserId(registrationData.userId);
+            localStorage.setItem('currentUserId', registrationData.userId);
+      
+            // Second fetch: Create address for the user using customFetch
+            await createAddressForUser();
+      
+            // Reset form, navigate or update UI as needed
+            resetRegisterForm();
+            navigate('/home');
+            setRegisterError('');
+      
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Registration error:', error);
             setRegisterError(error.message || 'An unexpected error occurred during registration.');
         }
+    };
+      
+    const createAddressForUser = async () => {
+    // Prepare address data from the registration form
+    const addressData = {
+        userName: registerForm.userName,
+        userNumber: registerForm.userNumber,
+        userStreet: registerForm.userStreet,
+        userUnit: registerForm.userUnit ? registerForm.userUnit : '',
+        userCity: registerForm.userCity,
+        userState: registerForm.userState,
+        userZip: registerForm.userZip,
+    };
+    
+    // Endpoint for address creation
+    const url = `/address`;
+    const options = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(addressData),
+    };
+    
+    try {
+        const response = await customFetch(url, options);
+        if (!response.ok) {
+            throw new Error('Address creation failed');
+        }
+    
+        // Expecting the backend to return the created address
+        const { newEntry } = await response.json();
+        
+        // Update the context and localStorage with the new address
+        setAddressLog([newEntry]);
+        setSelectedAddressForUse(newEntry);
+        setSelectedAddressIndex(0);
+        localStorage.setItem(`${userId}_selectedAddressIndex`, '0');
+        localStorage.setItem(`${userId}_selectedAddressForUse`, JSON.stringify(newEntry));
+    } catch (error) {
+        console.error('Address creation error:', error);
     }
+    };
     
   return (
     <>
