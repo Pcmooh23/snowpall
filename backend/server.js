@@ -287,11 +287,8 @@ app.post('/refresh-token', async (req, res) => {
         }
 
         jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
-            if (err) {
+            if (err || user.id !== decoded.id) {
                 return res.status(403).json({ error: 'Token verification failed', details: err.message });
-            }
-            if (user.id !== decoded.id) {
-                return res.status(403).json({ error: 'Token user ID mismatch' });
             }
 
             // Generate a new access token
@@ -301,13 +298,9 @@ app.post('/refresh-token', async (req, res) => {
                 { expiresIn: '15m' }
             );
 
-            res.cookie('accessToken', accessToken, {
-                httpOnly: true,
-                secure: true, // set to false if not using https
-                sameSite: 'None', // Use 'Strict' or 'Lax' if not cross-site
-                maxAge: 15 * 60 * 1000 // 15 minutes
-            }).json({
-                message: 'Access token refreshed successfully'
+            res.json({
+                message: 'Access token refreshed successfully',
+                newAccessToken: accessToken
             });
         });
     } catch (error) {

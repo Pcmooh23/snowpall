@@ -7,10 +7,10 @@ import { useApi } from '../useApi';
 const UserForms = () => {
 
     const {
-        pageFormRef, iconCloseRef, baseUrl, accessToken,
+        pageFormRef, iconCloseRef, baseUrl,
         loginFormRef, registerLinkRef, 
         registerFormRef, loginLinkRef,
-        setAccessToken, userId, setUserId, setLoginName
+        setAccessToken, setUserId, setLoginName
     } = useContext(SnowPallContext);
 
     const navigate = useNavigate();
@@ -85,16 +85,23 @@ const UserForms = () => {
     
             const data = await response.json();
             if (response.ok) {
-                const combinedToken = `${data.userId}:${data.accessToken}`; // Combine userId and accessToken
-                localStorage.setItem('combinedToken', combinedToken); // Store combinedToken in local storage for session persistence
-                setAccessToken(data.accessToken); // Update access token in state/context
-                setUserId(data.userId); // Update user ID in state/context
+                const { userId, accessToken, username } = data;
+            
+                localStorage.setItem('currentUserId', userId);
+                setUserId(userId);
+            
+                localStorage.setItem(`${userId}_accessToken`, accessToken);
+                setAccessToken(accessToken);
+            
+                localStorage.setItem('currentUserName', username);
+                setLoginName(username);
+            
                 resetLoginForm();
                 navigate('/home');
-                setLoginName(data.username); // Assuming you handle the user's display name in state/context
             } else {
-                setLoginError(data.message); // Handle login errors, e.g., wrong credentials
+                setLoginError(data.message);
             }
+            
         } catch (error) {
             console.error('Error:', error);
             setLoginError('An unexpected error occurred.');
@@ -139,21 +146,23 @@ const UserForms = () => {
      
             const registrationData = await registrationResponse.json();
     
-            if (registrationData.valid && registrationData.accessToken) {
-                // Prefix user's ID with the accessToken
-                const combinedToken = `${registrationData.user.id}:${registrationData.accessToken}`;
-    
-                // Store the combined string in local storage
-                localStorage.setItem('combinedToken', combinedToken);
-                console.log('User Object:', registrationData.user); // Log the full user object
-    
-                setAccessToken(registrationData.accessToken);
-                setUserId(registrationData.user.id);
-                localStorage.setItem('currentUserId', registrationData.user.id);
-                localStorage.setItem('currentUserName', registrationData.user.userName);
+            if (registrationData) {
+                console.log('User Object:', registrationData.user);
+
+                const { id, userName } = registrationData.user;
+                const { accessToken } = registrationData;
+
+                localStorage.setItem('currentUserId', id);
+                setUserId(id);
+            
+                localStorage.setItem(`${id}_accessToken`, accessToken);
+                setAccessToken(accessToken);
+            
+                localStorage.setItem('currentUserName', userName);
+                setLoginName(userName);
+
                 resetRegisterForm();
                 navigate('/home');
-               
                 setRegisterError('');
             } else {
                 throw new Error(registrationData.message || 'Registration succeeded but no access token provided.');

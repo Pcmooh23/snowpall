@@ -13,23 +13,6 @@
     "userPasswordHash": "$2b$10$/gc/JkQzJMlbbFJPlcLn3uGQ/clDdXOZ1PqHAjxcyZ9KJzxl6sj4q",
     "userCart": [
       {
-        "id": "41e5b9cd-1df9-4df1-9807-ad6e428f18b0",
-        "checkedService": true,
-        "makeAndModel": "jeep wrangler",
-        "color": "dsds",
-        "licensePlate": "dsds",
-        "carMessage": "ijjijijiji",
-        "objectType": "car",
-        "imagePath": "uploads/078807d3373aa44b8661847487254463"
-      },
-      {
-        "id": "36249905-34e4-4f5f-9b42-42b8dc3b6ab6",
-        "selectedSize": "size2",
-        "drivewayMessage": "djijsdisjdisd",
-        "objectType": "driveway",
-        "imagePath": "uploads/cc17d2ee8c2fcb3a9cb1e1b860cebdb7"
-      },
-      {
         "id": "a8d1bd7d-c74b-492f-bb91-900e5cb60409",
         "walkway": false,
         "frontYard": true,
@@ -39,21 +22,32 @@
         "imagePath": "uploads/64c806b57db5cee13192d711d684971b"
       },
       {
-        "id": "77fd970b-5b36-4106-948c-426fff3f39d7",
-        "userId": "253a2c9c-1ea2-44b1-86fa-3e127ff2e5a0",
-        "from": "123 main ",
-        "to": "124 main",
-        "streetMessage": "your mom",
-        "objectType": "street",
-        "imagePath": "uploads/a995c5e50cc9895fed06a1b2efed7abd"
-      },
-      {
         "id": "cc7a1dd6-9870-4456-b1dc-e9fac8d9c9c5",
         "userId": "253a2c9c-1ea2-44b1-86fa-3e127ff2e5a0",
         "selectedSize": "job4",
         "otherMessage": "hola",
         "objectType": "other",
         "imagePath": "uploads/1007b8ed7158068b686490a1b6f495de"
+      },
+      {
+        "id": "337e5522-daf4-45dd-8757-3ab6e1528cbe",
+        "checkedService": "true",
+        "makeAndModel": "honda civic",
+        "color": "dsds",
+        "licensePlate": "",
+        "carMessage": "",
+        "objectType": "car",
+        "imagePath": "uploads/72efd39605c56aa1f5804fa60c2c2e60"
+      },
+      {
+        "id": "34d60560-52da-4f15-b917-33dce18e3e14",
+        "checkedService": true,
+        "makeAndModel": "jeep wrangler",
+        "color": "white",
+        "licensePlate": "nknknkn",
+        "carMessage": "",
+        "objectType": "car",
+        "imagePath": null
       }
     ],
     "userAddresses": [
@@ -146,7 +140,7 @@
         }
       }
     ],
-    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjI1M2EyYzljLTFlYTItNDRiMS04NmZhLTNlMTI3ZmYyZTVhMCIsInVzZXJFbWFpbCI6ImtpbS5wb3NzaWJsZUBnbWFpbC5jb20iLCJpYXQiOjE3MDczMzk5MjksImV4cCI6MTcwNzk0NDcyOX0.CIch6UsRxj-SSwshMLLVY0qQvA1EQ_yAX-rDFevj5Zk"
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjI1M2EyYzljLTFlYTItNDRiMS04NmZhLTNlMTI3ZmYyZTVhMCIsInVzZXJFbWFpbCI6ImtpbS5wb3NzaWJsZUBnbWFpbC5jb20iLCJpYXQiOjE3MDczNTU0NzYsImV4cCI6MTcwNzk2MDI3Nn0.NhihKHk8STKpo7tSCEvFipoHITZZSo3F4isXcOGlCck"
   },
   {
     "id": "342e2433-4b86-4537-b7ee-067479c49fdf",
