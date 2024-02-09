@@ -1,3 +1,111 @@
 [
-
+  {
+    "id": "ec1a1f97-8329-4574-a4d2-f1be53054c43",
+    "userName": "Kim Possible",
+    "userEmail": "kim.possible@gmail.com",
+    "accountType": "customer",
+    "userNumber": "555-555-5555",
+    "userStreet": "123 Elmo Loop Road",
+    "userUnit": "Unit 100",
+    "userCity": "Chicago",
+    "userState": "IL",
+    "userZip": "60007",
+    "userPasswordHash": "$2b$10$NoSjhBVimWxuPyg82Nxcz.cosT8IaoXJ7GGZwJ9K3u69AaHhel4Bq",
+    "userCart": [
+      {
+        "id": "28e5a66b-6448-4d27-9048-321141dd5d58",
+        "checkedService": "true",
+        "makeAndModel": "jeep wrangler",
+        "color": "red",
+        "licensePlate": "LVMH",
+        "carMessage": "jijijijijijiiijip unoij",
+        "objectType": "car",
+        "imagePath": "uploads/b44f92c9058e4d6747e141467519fb01"
+      },
+      {
+        "id": "44586422-060e-4a81-ae17-ebc03cca7cc0",
+        "walkway": false,
+        "frontYard": true,
+        "backyard": true,
+        "lawnMessage": "ijipooubunoij",
+        "objectType": "lawn",
+        "imagePath": "uploads/a6799d68ec7b4aaf81bcea08cb4f00af"
+      },
+      {
+        "id": "8f8739ca-5f3a-434b-91d3-629f738ff01a",
+        "userId": "ec1a1f97-8329-4574-a4d2-f1be53054c43",
+        "from": "123 main ",
+        "to": "124 main",
+        "streetMessage": "",
+        "objectType": "street",
+        "imagePath": "uploads/ce2a9e4409c9227f75e07ae0e85027c0"
+      }
+    ],
+    "userAddresses": [
+      {
+        "id": "f78b7937-ee7e-4c76-b2d4-ddedbabf0c79",
+        "userName": "Kim Possible",
+        "userNumber": "555-555-5555",
+        "userStreet": "123 Elmo Loop Road",
+        "userUnit": "Unit 100",
+        "userCity": "Chicago",
+        "userState": "IL",
+        "userZip": "60007"
+      }
+    ],
+    "userRequests": [
+      {
+        "id": "38cdd24a-84e0-4f94-ad3c-ed5882c1d914",
+        "orderDate": "2024-02-09T02:28:12.389Z",
+        "cart": [
+          {
+            "id": "28e5a66b-6448-4d27-9048-321141dd5d58",
+            "checkedService": "true",
+            "makeAndModel": "jeep wrangler",
+            "color": "red",
+            "licensePlate": "LVMH",
+            "carMessage": "jijijijijijiiijip unoij",
+            "objectType": "car",
+            "imagePath": "uploads/b44f92c9058e4d6747e141467519fb01"
+          },
+          {
+            "id": "44586422-060e-4a81-ae17-ebc03cca7cc0",
+            "walkway": false,
+            "frontYard": true,
+            "backyard": true,
+            "lawnMessage": "ijipooubunoij",
+            "objectType": "lawn",
+            "imagePath": "uploads/a6799d68ec7b4aaf81bcea08cb4f00af"
+          },
+          {
+            "id": "8f8739ca-5f3a-434b-91d3-629f738ff01a",
+            "userId": "ec1a1f97-8329-4574-a4d2-f1be53054c43",
+            "from": "123 main ",
+            "to": "124 main",
+            "streetMessage": "",
+            "objectType": "street",
+            "imagePath": "uploads/ce2a9e4409c9227f75e07ae0e85027c0"
+          }
+        ],
+        "selectedAddress": {
+          "id": "f78b7937-ee7e-4c76-b2d4-ddedbabf0c79",
+          "userName": "Kim Possible",
+          "userNumber": "555-555-5555",
+          "userStreet": "123 Elmo Loop Road",
+          "userUnit": "Unit 100",
+          "userCity": "Chicago",
+          "userState": "IL",
+          "userZip": "60007"
+        },
+        "charge": {
+          "id": "ch_3Ohjp1BWC1e9EDXY00tX7NWj",
+          "amount": 10450,
+          "currency": "usd",
+          "description": "Charge for order",
+          "created": "2024-02-09T02:28:11.000Z"
+        }
+      }
+    ],
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImVjMWExZjk3LTgzMjktNDU3NC1hNGQyLWYxYmU1MzA1NGM0MyIsInVzZXJFbWFpbCI6ImtpbS5wb3NzaWJsZUBnbWFpbC5jb20iLCJpYXQiOjE3MDc0NDUzOTYsImV4cCI6MTcwODA1MDE5Nn0.XjvwIF35grkRRSATNYt5teuIYwKn7eErr-pDu5CjHdo"
+  }
 ]

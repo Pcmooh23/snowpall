@@ -394,7 +394,7 @@ const UserForms = () => {
                             {registerError}
                         </div>
                         <div className='terms-conditions'>
-                            <input type='checkbox'/>
+                            <input type='checkbox' required/>
                             <a href='#'>
                             I agree to terms & conditions
                             </a>
