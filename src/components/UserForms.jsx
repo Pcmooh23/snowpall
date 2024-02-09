@@ -2,13 +2,12 @@ import React, { useState, useContext } from 'react';
 import { Mail, LockKeyhole, X, CircleUserRound } from 'lucide-react';
 import { SnowPallContext } from './SnowPallContext';
 import { useNavigate } from 'react-router-dom';
-import { useApi } from '../useApi';
 
 const UserForms = () => {
 
     const {
         pageFormRef, iconCloseRef, baseUrl,
-        loginFormRef, registerLinkRef, 
+        loginFormRef, registerLinkRef, fetchAddresses, 
         registerFormRef, loginLinkRef,
         setAccessToken, setUserId, setLoginName
     } = useContext(SnowPallContext);
@@ -149,21 +148,43 @@ const UserForms = () => {
             if (registrationData) {
                 console.log('User Object:', registrationData.user);
 
-                const { id, userName } = registrationData.user;
+                const { id, userName, userNumber, userStreet, userUnit, userCity, userState, userZip } = registrationData.user;                
                 const { accessToken } = registrationData;
 
                 localStorage.setItem('currentUserId', id);
-                setUserId(id);
-            
                 localStorage.setItem(`${id}_accessToken`, accessToken);
-                setAccessToken(accessToken);
-            
                 localStorage.setItem('currentUserName', userName);
+                
+                setUserId(id);
+                setAccessToken(accessToken);
                 setLoginName(userName);
 
                 resetRegisterForm();
                 navigate('/home');
                 setRegisterError('');
+
+                const addressData = { userName, userNumber, userStreet, userUnit, userCity, userState, userZip }
+
+                try {
+                    const response = await fetch(`${baseUrl}/address`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${accessToken}` 
+                        },
+                        body: JSON.stringify(addressData),
+                        credentials: 'include' 
+                    });
+            
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    console.log('New address added:', data.newAddress);
+                    await fetchAddresses();
+                } catch (error) {
+                    console.error('Error adding new address:', error);
+                }
             } else {
                 throw new Error(registrationData.message || 'Registration succeeded but no access token provided.');
             }

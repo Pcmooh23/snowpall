@@ -7,19 +7,10 @@ const AddressArea = () => {
     const [isOverlayActive, setIsOverlayActive] = useState(false);
     const [showNewAddressForm, setShowNewAddressForm] = useState(false);
     const [indexToEdit, setIndexToEdit] = useState(null);
-    const [addressInfo, setAddressInfo] = useState({
-        userName: '',
-        userNumber: '',
-        userStreet: '',
-        userUnit: '',
-        userCity: '',
-        userState: '',
-        userZip: ''
-    });
 
     const {
-        userId, addressLog, setAddressLog, 
-        selectedAddressForUse, setSelectedAddressForUse,
+        userId, addressLog, setAddressLog, addressInfo, setAddressInfo,
+        selectedAddressForUse, setSelectedAddressForUse, fetchAddresses,
         selectedAddressIndex, setSelectedAddressIndex
     } = useContext(SnowPallContext);
     const { customFetch } = useApi();
@@ -28,6 +19,10 @@ const AddressArea = () => {
         setIsOverlayActive(!isOverlayActive);
     };
 
+    const clearPresentAddress = () => {
+        setSelectedAddressForUse(null);
+        localStorage.setItem(`${userId}_selectedAddressForUse`, null);
+    }
     const handleNewAddressClick = () => {
         setShowNewAddressForm(!showNewAddressForm);
 
@@ -136,19 +131,6 @@ const AddressArea = () => {
         const selectedAddress = addressLog[index];
         setSelectedAddressForUse(selectedAddress);
         localStorage.setItem(`${userId}_selectedAddressForUse`, JSON.stringify(selectedAddress));
-    }; 
-
-    const fetchAddresses = async () => {
-        try {
-            const response = await customFetch('/addresses');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            setAddressLog(data);
-        } catch (error) {
-            console.error('Error fetching addresses:', error);
-        }
     };    
 
     useEffect(() => {
@@ -173,7 +155,10 @@ const AddressArea = () => {
         <div className='address-area'>
             <div className='order-top'>
                 <h1>1. Address</h1>
-                <p className='change-address' onClick={toggleOverlay}> Change</p>
+                <div className='address-mods'>
+                    <p className='change-address' onClick={toggleOverlay}> Change</p>
+                    <p className='clear-address' onClick={clearPresentAddress}>Clear Address</p>
+                </div>
             </div>
             <div className='user-location'>
                 {selectedAddressForUse ? (

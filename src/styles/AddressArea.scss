@@ -13,12 +13,14 @@
             margin: 0px 0px;
             font-size: 25px;
         }
-        .change-address {
-            color: rgb(0, 85, 255);
-            cursor: pointer;
-            &:hover {
-                color: orangered;
-                text-decoration: underline;
+        .address-mods {
+            .change-address, .clear-address {
+                color: rgb(0, 85, 255);
+                cursor: pointer;
+                &:hover {
+                    color: orangered;
+                    text-decoration: underline;
+                }
             }
         }
     }

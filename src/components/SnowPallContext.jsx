@@ -6,11 +6,11 @@ export const SnowPallContext = createContext();
 // Provider component.
 export const SnowPallProvider = ({ children }) => {
 
+   // The main url endpoint for my backend server.
+  const baseUrl = process.env.REACT_APP_SERVER_URL;
+
   // Set userID upon login.
   const [userId, setUserId] = useState(null);
-
-  // The main url endpoint for my backend server.
-  const baseUrl = process.env.REACT_APP_SERVER_URL;
 
   // Authentication state management.
   const [accessToken, setAccessToken] = useState(null);
@@ -76,6 +76,41 @@ export const SnowPallProvider = ({ children }) => {
   const [addressLog, setAddressLog] = useState([]);
   const [selectedAddressForUse, setSelectedAddressForUse] = useState(null);
   const [selectedAddressIndex, setSelectedAddressIndex] = useState(null);
+  const [addressInfo, setAddressInfo] = useState({
+    userName: '',
+    userNumber: '',
+    userStreet: '',
+    userUnit: '',
+    userCity: '',
+    userState: '',
+    userZip: ''
+  });
+
+  const fetchAddresses = async () => {
+    try {
+      const accessToken = localStorage.getItem('currentUserId') ? localStorage.getItem(`${localStorage.getItem('currentUserId')}_accessToken`) : null;
+      if (!accessToken) {
+        console.error('No access token available.');
+        return;
+      }
+      const response = await fetch(`${baseUrl}/addresses`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        credentials: 'include' 
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setAddressLog(data);
+    } catch (error) {
+      console.error('Error fetching addresses:', error);
+    }
+  };
+  
   // Use useRef to make a reference to the PaymentArea component itself.
   const paymentRef = useRef();
   // Calculate the total based on cart items
@@ -110,10 +145,7 @@ export const SnowPallProvider = ({ children }) => {
   return (
     <SnowPallContext.Provider value={{
       // UserId management.
-      userId, setUserId,
-
-      // Prop any component that needs to talk with the backend.
-      baseUrl, 
+      userId, setUserId, baseUrl,
 
       // Authentication state management.
       accessToken, setAccessToken,
@@ -142,6 +174,7 @@ export const SnowPallProvider = ({ children }) => {
       
       // SubmitRequest area props.
       addressLog, setAddressLog,
+      addressInfo, setAddressInfo, fetchAddresses,
       selectedAddressForUse, setSelectedAddressForUse,
       selectedAddressIndex, setSelectedAddressIndex,
       paymentRef, total, estimatedTax, grandTotal
