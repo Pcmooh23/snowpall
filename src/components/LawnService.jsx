@@ -21,7 +21,7 @@ const LawnService = () => {
     const { name, value, type, checked } = event.target;
     setLawnFormData({ ...lawnFormData, [name]: type === 'checkbox' ? checked : value });
   };
-
+  
   const resetLawnForm = () => {
     setLawnFormData({
       walkway: false,

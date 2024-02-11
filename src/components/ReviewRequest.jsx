@@ -4,7 +4,7 @@ import { useApi } from '../useApi';
 
 const ReviewRequest = () => {
 
-    const { cart, setCart, baseUrl, total, estimatedTax, grandTotal, paymentRef, userId } = useContext(SnowPallContext);
+    const { cart, setCart, baseUrl, total, estimatedTax, grandTotal, paymentRef, userId, requestsLog, setRequestsLog } = useContext(SnowPallContext);
     const numberOfItems = cart.length;
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
@@ -64,7 +64,10 @@ const ReviewRequest = () => {
         
             if (response.ok) {
                 setMessage('Submission successful, request is now live.');
+                setRequestsLog(prevLogs => [...prevLogs, data.request])
+                console.log(data.request)
                 setCart([]); // Clear the cart on successful submission
+               
             } else {
                 // Use the server-provided error message if available, otherwise a generic error message
                 const errorMessage = data.message || 'An error occurred while submitting the order.';

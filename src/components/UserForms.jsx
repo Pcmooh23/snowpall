@@ -84,7 +84,7 @@ const UserForms = () => {
     
             const data = await response.json();
             if (response.ok) {
-                const { userId, accessToken, username } = data;
+                const { userId, accessToken, username, accountType } = data;
             
                 localStorage.setItem('currentUserId', userId);
                 setUserId(userId);
@@ -96,7 +96,13 @@ const UserForms = () => {
                 setLoginName(username);
             
                 resetLoginForm();
-                navigate('/home');
+
+                if (accountType === 'customer') {
+                    navigate('/home');
+                } else if (accountType === 'snowtech') {
+                    navigate('/snowtech');
+                }
+
             } else {
                 setLoginError(data.message);
             }
@@ -130,7 +136,7 @@ const UserForms = () => {
         }
      
         try {
-          const registrationResponse = await fetch(`${baseUrl}/users`, {
+          const registrationResponse = await fetch(`${baseUrl}/registerUser`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -148,7 +154,7 @@ const UserForms = () => {
             if (registrationData) {
                 console.log('User Object:', registrationData.user);
 
-                const { id, userName, userNumber, userStreet, userUnit, userCity, userState, userZip } = registrationData.user;                
+                const { id, userName, userNumber, userStreet, userUnit, userCity, userState, userZip, accountType } = registrationData.user;                
                 const { accessToken } = registrationData;
 
                 localStorage.setItem('currentUserId', id);
@@ -160,7 +166,19 @@ const UserForms = () => {
                 setLoginName(userName);
 
                 resetRegisterForm();
-                navigate('/home');
+
+                if (accountType === 'customer') {
+                    navigate('/home');
+                } else if (accountType === 'snowtech') {
+                    navigate('/snowtech');
+                    localStorage.setItem('snowtechLocation', JSON.stringify({
+                        street: userStreet,
+                        city: userCity,
+                        state: userState,
+                        zip_code: userZip
+                    }));
+                }
+            
                 setRegisterError('');
 
                 const addressData = { userName, userNumber, userStreet, userUnit, userCity, userState, userZip }
@@ -276,15 +294,15 @@ const UserForms = () => {
                         <div className='register-mid-p1'>
                             <input 
                             type='radio'
-                            value='snowTech'
+                            value='snowtech'
                             name='accountType'
                             className='accountRadio'
-                            id='snowTech'
-                            checked={registerForm.accountType === 'snowTech'}
+                            id='snowtech'
+                            checked={registerForm.accountType === 'snowtech'}
                             onChange={inputRegisterChange}
                             style={{display: 'none'}}
                             required/>
-                            <label htmlFor='snowTech' className='snowTech accountType-label'>
+                            <label htmlFor='snowtech' className='snowTech accountType-label'>
                                 <div className='accountType-button'>
                                 <span className='circle'></span>
                                 <span className='subject'>SnowTech</span>

@@ -1,0 +1,79 @@
+.snowtech-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-top: 40px;
+    .left-side-form {
+        width: 500px;
+        margin-right: 25px;
+        border-radius: 10px;
+        box-shadow: 0 10px 15px 0 rgba(0, 0, 0, 0.2);
+        h1 {
+            font-size: 25px;
+        }
+        .travel {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            h1{
+                margin-right: 10px;
+            }
+            .methods-of-transport {
+                display: flex;
+                flex-direction: row;
+                .icon-container {
+                    padding: 12px 12px;
+                    border-radius: 50%;
+                    display: flex;
+                    margin-right: 10px;
+                    cursor: pointer;
+                    &:hover {
+                        background-color: rgb(240, 245, 255);
+                    }
+                    .transpo-icon {
+                        font-size: 20px;
+                    }
+                }
+            }
+        }
+        .request-container {
+            padding: 5px 10px;
+            .request-top {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+            }
+            .request-bottom {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                .request-bottom-left {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    .accept-request {
+                        width: 100px;
+                        height: 40px;
+                        border-radius: 5px;
+                        border: none;
+                        cursor: pointer;
+                        margin-right: 5px;
+                        &:hover {
+                            background-color: #ccc;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    .mapbox {
+        border-radius: 10px;
+        overflow: hidden;
+        .route {
+            border-radius: 10px;
+            padding: 5px 5px;
+        }
+    }
+}

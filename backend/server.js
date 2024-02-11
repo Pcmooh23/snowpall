@@ -79,9 +79,9 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // The file that stores user info.
-const USERS_FILE = path.join(__dirname, './usersDB.json');
+const USERS_FILE = path.join(__dirname, './DB.json');
 
-// verify token middleware
+// Verify token middleware.
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers.authorization;
     
@@ -101,16 +101,35 @@ const verifyToken = (req, res, next) => {
     }
 }
 
-// POST route for new users
-app.post('/users', async (req, res) => {
+// Middleware function that loads and parses user data from JSON file, 
+// and then attaches it to the request object ('req') so that subsequent route handlers 
+// can access it directly, thus eliminating need to repeat the file reading and parsing logic in each route.
+const loadData = async (req, res, next) => {
     try {
         const data = await fsPromises.readFile(USERS_FILE, 'utf8');
-        let users = JSON.parse(data);
+        const db = JSON.parse(data);
+        req.db = db; // Attach the database object to the request object
+        req.combinedUsers = [...db.customers, ...db.snowtechs];
+        req.customerUsers = [...db.customers];
+        req.snowtechUsers = [...db.snowtechs];
+        next(); // Proceed to the next middleware/route handler
+    } catch (err) {
+        console.error("Error loading user data:", err);
+        res.status(500).send('An error occurred while loading user data.');
+    }
+};
+// Then use it before routes.
+app.use(loadData);
 
-        if (users.some(user => user.userEmail === req.body.userEmail)) {
+// POST route for new users
+app.post('/registerUser', async (req, res) => {
+    try {
+        const usersList = req.body.accountType === 'customer' ? req.db.customers : req.db.snowtechs;
+
+        if (usersList.some(user => user.userEmail === req.body.userEmail)) {
             return res.status(400).send('User already exists.');
         }
-
+        
         const hashedPassword = await bcrypt.hash(req.body.userPassword, 10);
 
         const newUser = {
@@ -125,20 +144,25 @@ app.post('/users', async (req, res) => {
             userState: req.body.userState,
             userZip: req.body.userZip,
             userPasswordHash: hashedPassword,
-            userCart: [],
-            userAddresses: [],
-            userRequests: []
+            userAddresses: []
         };
 
+        if (newUser.accountType === 'customer') {
+            newUser.userCart = [];
+            newUser.userRequests = [];
+        } else if (newUser.accountType === 'snowtech') {
+            newUser.CompletedRequests = [];
+        }
+        
         const tokenPayload = { id: newUser.id, userEmail: newUser.userEmail };
         const accessToken = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '15m' });
         const refreshToken = jwt.sign(tokenPayload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
         newUser.refreshToken = refreshToken;
 
-        users.push(newUser);
+        usersList.push(newUser);
 
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
 
         res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 7 * 24 * 60 * 60 * 1000 });
 
@@ -153,10 +177,7 @@ app.post('/users', async (req, res) => {
                 userUnit: newUser.userUnit,
                 userCity: newUser.userCity,
                 userState: newUser.userState,
-                userZip: newUser.userZip,
-                userCart: newUser.userCart,
-                userAddresses: newUser.userAddresses,
-                userRequests: newUser.userRequests
+                userZip: newUser.userZip
             }
         });
     } catch (err) {
@@ -169,8 +190,7 @@ app.post('/users', async (req, res) => {
 app.post('/validateLogin', async (req, res) => {
     const { userEmail, userPassword } = req.body;
     try {
-        const users = JSON.parse(await fsPromises.readFile(USERS_FILE, 'utf8'));
-        const user = users.find(u => u.userEmail === userEmail);
+        const user = req.combinedUsers.find(u => u.userEmail === userEmail);
         
         if (!user) {
             return res.status(404).send('Account not found.');
@@ -187,13 +207,20 @@ app.post('/validateLogin', async (req, res) => {
         const refreshToken = jwt.sign(tokenPayload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
         user.refreshToken = refreshToken;
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
 
         // Send refresh token as secure HttpOnly cookie
         res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 7 * 24 * 60 * 60 * 1000 });
 
         // The JSON response body sent back to the client, including the accessToken
-        res.status(200).json({ valid: true, message: 'Login successful.', userId: user.id, username: user.userName, accessToken: accessToken });
+        res.status(200).json({ 
+            valid: true, 
+            message: 'Login successful.', 
+            userId: user.id, 
+            username: user.userName, 
+            accountType: user.accountType, 
+            accessToken: accessToken 
+        });
 
     } catch (err) {
         console.error("Error handling login:", err);
@@ -201,22 +228,45 @@ app.post('/validateLogin', async (req, res) => {
     }
 });
 
+// Refresh token endpoint
+app.post('/refresh-token', async (req, res) => {
+    const refreshToken = req.cookies.refreshToken; // Access the refresh token from cookies
+    if (!refreshToken) return res.status(401).json({ error: 'No refresh token provided' });
+
+    try {
+        const user = req.combinedUsers.find(user => user.refreshToken === refreshToken);
+
+        if (!user) {
+            return res.status(403).json({ error: 'No matching user for provided refresh token' });
+        }
+
+        jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
+            if (err || user.id !== decoded.id) {
+                return res.status(403).json({ error: 'Token verification failed', details: err.message });
+            }
+
+            // Generate a new access token
+            const accessToken = jwt.sign({ id: user.id, userEmail: user.userEmail }, process.env.JWT_SECRET, { expiresIn: '15m' });
+
+            res.json({ message: 'Access token refreshed successfully', newAccessToken: accessToken });
+        });
+    } catch (error) {
+        console.error("Error during token refresh:", error);
+        res.status(500).json({ error: 'Failed to process token refresh', details: error.message });
+    }
+});
+
 // POST route to logout current user
 app.post('/logout', verifyToken, async (req, res) => {
     try {
-        const userId = req.user.id; // Use userId to identify the user more reliably
+        const userId = req.user.id; 
+        const user = req.combinedUsers.find(user => user.id === userId);
 
-        // Read the current users data
-        const data = await fsPromises.readFile(USERS_FILE, 'utf8');
-        let users = JSON.parse(data);
-
-        // Find the user by ID instead of userEmail for consistency
-        const user = users.find(user => user.id === userId);
         if (user) {
             user.refreshToken = null; // Invalidate the refresh token
 
             res.clearCookie('refreshToken'); // Clear the refreshToken cookie
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(204).send(); // Successfully processed the request but no content to return
         } else {
             res.status(404).send('User not found.'); // User not found
@@ -230,11 +280,9 @@ app.post('/logout', verifyToken, async (req, res) => {
 // GET route for all services
 app.get('/services', verifyToken, async (req, res) => {
     try {
-        const userId = req.user.id; // Extract userId from authData set by verifyToken
-        const data = await fsPromises.readFile(USERS_FILE, 'utf8');
-        const users = JSON.parse(data);
+        const userId = req.user.id; // Extract userId from user set by verifyToken
+        const user = req.customerUsers.find(user => user.id === userId);
 
-        const user = users.find(user => user.id === userId);
         if (!user) {
             return res.status(404).send('User not found.');
         }
@@ -252,11 +300,8 @@ app.get('/services', verifyToken, async (req, res) => {
 app.get('/addresses', verifyToken, async (req, res) => {
     try {
         const userId = req.user.id; // Extract userId from the verified token
-        const data = await fsPromises.readFile(USERS_FILE, 'utf8');
-        const users = JSON.parse(data);
+        const user = req.combinedUsers.find(user => user.id === userId);
 
-        // Find the user by their ID
-        const user = users.find(user => user.id === userId);
         if (!user) {
             return res.status(404).send('User not found.');
         }
@@ -268,44 +313,6 @@ app.get('/addresses', verifyToken, async (req, res) => {
     } catch (err) {
         console.error("Error reading users file:", err);
         res.status(500).send('An error occurred while fetching addresses.');
-    }
-});
-
-// Refresh token endpoint
-app.post('/refresh-token', async (req, res) => {
-    const refreshToken = req.cookies.refreshToken; // Access the refresh token from cookies
-    if (!refreshToken) return res.status(401).json({ error: 'No refresh token provided' });
-
-    try {
-        const data = await fsPromises.readFile(USERS_FILE, 'utf8');
-        const users = JSON.parse(data);
-
-        // Find the user with the matching refresh token
-        const user = users.find(user => user.refreshToken === refreshToken);
-        if (!user) {
-            return res.status(403).json({ error: 'No matching user for provided refresh token' });
-        }
-
-        jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
-            if (err || user.id !== decoded.id) {
-                return res.status(403).json({ error: 'Token verification failed', details: err.message });
-            }
-
-            // Generate a new access token
-            const accessToken = jwt.sign(
-                { id: user.id, userEmail: user.userEmail },
-                process.env.JWT_SECRET,
-                { expiresIn: '15m' }
-            );
-
-            res.json({
-                message: 'Access token refreshed successfully',
-                newAccessToken: accessToken
-            });
-        });
-    } catch (error) {
-        console.error("Error during token refresh:", error);
-        res.status(500).json({ error: 'Failed to process token refresh', details: error.message });
     }
 });
 
@@ -332,13 +339,9 @@ app.post('/submit-request', verifyToken, async (req, res) => {
             created: new Date(charge.created * 1000), // Convert to milliseconds
         };
 
-        // Read user data from USERS_FILE
-        const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
-        let users = JSON.parse(usersData);
-
         // Find the user by their ID
-        const userIndex = users.findIndex(user => user.id === userId);
-        if (userIndex === -1) {
+        const user = req.customerUsers.find(user => user.id === userId);
+        if (!user) {
             return res.status(404).json({ message: 'User not found.' });
         }
 
@@ -351,18 +354,19 @@ app.post('/submit-request', verifyToken, async (req, res) => {
             charge: chargeInfo, // Include the charge details in the request
         };
 
-        // Add the new request to the user's userRequests array
-        users[userIndex].userRequests.push(newRequest);
+        // Add the new request to the user's userRequests array and the active requests array.
+        user.userRequests.push(newRequest);
+        req.db.requests.active.push(newRequest);
 
         // Write the updated users data back to the USERS_FILE
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
+        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2));
 
         // Respond to the client that the charge was processed and the request was saved successfully
         res.status(200).json({
             success: true,
             message: "Charge processed and request saved successfully!",
-            requestId: newRequest.id, // Return the request ID to the client
-        });
+            requestId: newRequest.id // Return the request ID to the client.
+        });        
     } catch (error) {
         console.error("Charge failed or saving failed:", error);
         res.status(500).json({ success: false, message: "Charge failed or saving failed", error: error.message });
@@ -373,9 +377,9 @@ app.post('/submit-request', verifyToken, async (req, res) => {
 app.post('/address', verifyToken,
     [
         body('userName').trim().notEmpty().withMessage('User name is required'),
-        body('userNumber').trim().optional().notEmpty().withMessage('Number can be empty but should be valid if provided'),
+        body('userNumber').trim().optional({ checkFalsy: true }),
         body('userStreet').trim().notEmpty().withMessage('Street is required'),
-        body('userUnit').trim().optional().notEmpty().withMessage('Unit can be empty but should be valid if provided'),
+        body('userUnit').trim().optional({ checkFalsy: true }),
         body('userCity').trim().notEmpty().withMessage('City is required'),
         body('userState').trim().notEmpty().withMessage('State is required'),
         body('userZip').trim().notEmpty().isPostalCode('any').withMessage('Valid ZIP/Postal code is required'),
@@ -389,12 +393,9 @@ app.post('/address', verifyToken,
 
         try {
             const userId = req.user.id; // Extract userId from the verified token
-            const data = await fsPromises.readFile(USERS_FILE, 'utf8');
-            let users = JSON.parse(data);
+            const user = req.combinedUsers.find(user => user.id === userId);  // Find the user by their ID
 
-            // Find the user by their ID
-            const userIndex = users.findIndex(user => user.id === userId);
-            if (userIndex === -1) {
+            if (!user) {
                 return res.status(404).send({ message: 'User not found.' });
             }
 
@@ -411,9 +412,9 @@ app.post('/address', verifyToken,
             };
 
             // Add the new address to the user's addresses array
-            users[userIndex].userAddresses.push(newAddress);
+            user.userAddresses.push(newAddress);
             // Save the updated users back to the file
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             // Respond with the newly created address entry
             res.status(201).json({ message: 'New address added to user profile', newAddress });
         
@@ -430,9 +431,9 @@ app.post('/car', verifyToken, upload.single('image'),
         body('checkedService').isBoolean().withMessage('Checked service must be a boolean value.'),
         body('makeAndModel').trim().isLength({ min: 1 }).withMessage('Make and model are required.'),
         body('color').trim().isLength({ min: 1 }).withMessage('Color is required.'),
-        body('licensePlate').optional().trim(), // Optional field
-        body('carMessage').optional().isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
-        body('objectType').equals('car').withMessage('ObjectType must be car.'),
+        body('licensePlate').optional({ checkFalsy: true }).trim(), // Optional field
+        body('carMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
+        body('objectType').equals('car').withMessage('ObjectType is car.'),
     ], 
     async (req, res) => {
         const errors = validationResult(req);
@@ -442,11 +443,8 @@ app.post('/car', verifyToken, upload.single('image'),
 
         try {
             const userId = req.user.id; // Extract userId from the verified token
-            const data = await fsPromises.readFile(USERS_FILE, 'utf8');
-            let users = JSON.parse(data);
-            
-            const userIndex = users.findIndex(user => user.id === userId);
-            if (userIndex === -1) {
+            const user = req.customerUsers.find(user => user.id === userId);
+            if (!user) {
                 return res.status(404).json({ message: 'User not found.' });
             }
             
@@ -462,8 +460,8 @@ app.post('/car', verifyToken, upload.single('image'),
                 imagePath: req.file ? req.file.path : null, // Include image path if file uploaded
             };
             
-            users[userIndex].userCart.push(newCarService);
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            user.userCart.push(newCarService);
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(201).json({ message: 'New car service object added to the user cart.', newCarService });
        
         } catch (err) {
@@ -478,7 +476,7 @@ app.post('/driveway', verifyToken, upload.single('image'),
     [
         body('selectedSize').not().isEmpty().withMessage('Selected size is required'),
         body('objectType').equals('driveway').withMessage('ObjectType is driveway'),
-        body('drivewayMessage').optional().isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
+        body('drivewayMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
     ], 
     async (req, res) => {
         const errors = validationResult(req);
@@ -488,11 +486,8 @@ app.post('/driveway', verifyToken, upload.single('image'),
 
         try {
             const userId = req.user.id; 
-            const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
-            let users = JSON.parse(usersData);
-
-            const userIndex = users.findIndex(user => user.id === userId);
-            if (userIndex === -1) {
+            const user = req.customerUsers.find(user => user.id === userId);
+            if (!user) {
                 return res.status(404).json({ message: 'User not found.' });
             }
 
@@ -504,8 +499,8 @@ app.post('/driveway', verifyToken, upload.single('image'),
                 imagePath: req.file ? req.file.path : null,
             };
 
-            users[userIndex].userCart.push(newDrivewayService);
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            user.userCart.push(newDrivewayService);
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(201).json({ message: 'New driveway service object added to the user cart.', newDrivewayService });
       
         } catch (error) {
@@ -518,11 +513,11 @@ app.post('/driveway', verifyToken, upload.single('image'),
 // POST route for lawn service
 app.post('/lawn', verifyToken, upload.single('image'), 
     [
-        body('walkway').optional().isBoolean().withMessage('Walkway must be a boolean'),
-        body('frontYard').optional().isBoolean().withMessage('Front yard must be a boolean'),
-        body('backyard').optional().isBoolean().withMessage('Backyard must be a boolean'),
-        body('lawnMessage').optional().isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
-        body('objectType').optional().equals('lawn').withMessage('ObjectType is lawn'),
+        body('walkway').optional({ checkFalsy: true }).isBoolean().withMessage('Walkway must be a boolean'),
+        body('frontYard').optional({ checkFalsy: true }).isBoolean().withMessage('Front yard must be a boolean'),
+        body('backyard').optional({ checkFalsy: true }).isBoolean().withMessage('Backyard must be a boolean'),
+        body('lawnMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
+        body('objectType').equals('lawn').withMessage('ObjectType is lawn'),
     ],
     async (req, res) => {
         const errors = validationResult(req);
@@ -532,11 +527,8 @@ app.post('/lawn', verifyToken, upload.single('image'),
 
         try {
             const userId = req.user.id;
-            const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
-            let users = JSON.parse(usersData);
-
-            const userIndex = users.findIndex(user => user.id === userId);
-            if (userIndex === -1) {
+            const user = req.customerUsers.find(user => user.id === userId);
+            if (!user) {
                 return res.status(404).json({ message: 'User not found.' });
             }
 
@@ -550,8 +542,8 @@ app.post('/lawn', verifyToken, upload.single('image'),
                 imagePath: req.file ? req.file.path : null, 
             };
 
-            users[userIndex].userCart.push(newLawnService);
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            user.userCart.push(newLawnService);
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(201).json({ message: 'New lawn service object added to the user cart.', newLawnService });
 
         } catch (error) {
@@ -565,8 +557,8 @@ app.post('/lawn', verifyToken, upload.single('image'),
 app.post('/street', verifyToken, upload.single('image'), 
     [
         body('from').notEmpty().withMessage('From address is required'),
-        body('to').optional().notEmpty().withMessage('Please include a to address'), // Make "to" optional but validate if provided
-        body('streetMessage').optional().isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
+        body('to').optional({ checkFalsy: true }).notEmpty().withMessage('Please include a to address'), // Make "to" optional but validate if provided
+        body('streetMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
         body('objectType').equals('street').withMessage('ObjectType is street'),
     ], 
     async (req, res) => {
@@ -577,11 +569,8 @@ app.post('/street', verifyToken, upload.single('image'),
 
         try {
             const userId = req.user.id;
-            const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
-            let users = JSON.parse(usersData);
-
-            const userIndex = users.findIndex(user => user.id === userId);
-            if (userIndex === -1) {
+            const user = req.customerUsers.find(user => user.id === userId);
+            if (!user) {
                 return res.status(404).json({ message: 'User not found.' });
             }
 
@@ -595,8 +584,8 @@ app.post('/street', verifyToken, upload.single('image'),
                 imagePath: req.file ? req.file.path : null,
             };
 
-            users[userIndex].userCart.push(newStreetService);
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            user.userCart.push(newStreetService);
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(201).json({ message: 'New street service object added to the DB: ', newStreetService });
 
         } catch (error) {
@@ -610,7 +599,7 @@ app.post('/street', verifyToken, upload.single('image'),
 app.post('/other', verifyToken, upload.single('image'), 
     [
         body('selectedSize').notEmpty().withMessage('Selected size is required'),
-        body('otherMessage').optional().isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
+        body('otherMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
         body('objectType').equals('other').withMessage('ObjectType is other'),
     ], 
     async (req, res) => {
@@ -621,11 +610,8 @@ app.post('/other', verifyToken, upload.single('image'),
 
         try {
             const userId = req.user.id;
-            const data = await fsPromises.readFile(USERS_FILE, 'utf8');
-            let users = JSON.parse(data);
-
-            const userIndex = users.findIndex(user => user.id === userId);
-            if (userIndex === -1) {
+            const user = req.customerUsers.find(user => user.id === userId);
+            if (!user) {
                 return res.status(404).send('User not found.');
             }
 
@@ -638,8 +624,8 @@ app.post('/other', verifyToken, upload.single('image'),
                 imagePath: req.file ? req.file.path : null,
             };
 
-            users[userIndex].userCart.push(newOtherService);
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            user.userCart.push(newOtherService);
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(201).json({ message: 'New other service object added to the DB: ', newOtherService });
 
         } catch (error) {
@@ -653,9 +639,9 @@ app.post('/other', verifyToken, upload.single('image'),
 app.put('/address/:id', verifyToken, 
     [
     body('userName').trim().notEmpty().withMessage('User name is required'),
-    body('userNumber').trim().notEmpty().withMessage('User number is required'),
+    body('userNumber').trim().optional({ checkFalsy: true }),
     body('userStreet').trim().notEmpty().withMessage('Street is required'),
-    body('userUnit').trim().optional().notEmpty().withMessage('Unit can be empty but should be valid if provided'),
+    body('userUnit').trim().optional({ checkFalsy: true }).notEmpty().withMessage('Unit can be empty but should be valid if provided'),
     body('userCity').trim().notEmpty().withMessage('City is required'),
     body('userState').trim().notEmpty().withMessage('State is required'),
     body('userZip').trim().notEmpty().isPostalCode('any').withMessage('Valid ZIP/Postal code is required'),
@@ -669,11 +655,9 @@ app.put('/address/:id', verifyToken,
         try {
             const userId = req.user.id; // Make sure verifyToken sets req.user
             const addressId = req.params.id;
-            const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
-            let users = JSON.parse(usersData);
 
             // Find the user by their ID
-            const user = users.find(u => u.id === userId);
+            const user = req.combinedUsers.find(u => u.id === userId);
             if (!user) {
                 return res.status(404).json({ message: 'User not found.' });
             }
@@ -698,7 +682,7 @@ app.put('/address/:id', verifyToken,
             user.userAddresses[addressIndex] = updatedAddress;
 
             // Write the updated users data back to the USERS_FILE
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             
             res.status(200).json({ message: 'Address updated successfully.', updatedAddress });
         } catch (err) {
@@ -714,9 +698,9 @@ app.put('/car/:id', verifyToken, upload.single('image'),
         body('checkedService').isBoolean().withMessage('Checked Service must be a boolean value.'),
         body('makeAndModel').not().isEmpty().trim().escape().withMessage('Make and Model is required.'),
         body('color').not().isEmpty().trim().escape().withMessage('Color is required.'),
-        body('licensePlate').optional().trim().escape(), // Optional
-        body('carMessage').optional().isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
-        body('objectType').not().isEmpty().trim().escape().withMessage('ObjectType is car.'),
+        body('licensePlate').optional({ checkFalsy: true }).trim().escape(), // Optional
+        body('carMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
+        body('objectType').equals('car').withMessage('ObjectType is car.'),
     ], 
     async (req, res) => {
         const errors = validationResult(req);
@@ -727,11 +711,7 @@ app.put('/car/:id', verifyToken, upload.single('image'),
         try {
             const userId = req.user.id; // Assuming your verifyToken middleware sets req.user
             const carId = req.params.id; // The ID of the car service object to update
-            const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
-            let users = JSON.parse(usersData);
-
-            // Find the user by their ID
-            const user = users.find(u => u.id === userId);
+            const user = req.customerUsers.find(u => u.id === userId); // Find the user by their ID
             if (!user) {
                 return res.status(404).json({ message: 'User not found.' });
             }
@@ -755,7 +735,7 @@ app.put('/car/:id', verifyToken, upload.single('image'),
             };
 
             // Write the updated users data back to the USERS_FILE
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(200).json({ message: 'Car service object updated.', car: user.userCart[carIndex] });
 
         } catch (err) {
@@ -770,7 +750,7 @@ app.put('/driveway/:id', verifyToken, upload.single('image'),
     [ 
         body('selectedSize').not().isEmpty().withMessage('Selected size is required'),
         body('objectType').equals('driveway').withMessage('ObjectType is driveway'),
-        body('drivewayMessage').optional().isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
+        body('drivewayMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
     ],
     async (req, res) => {
         const errors = validationResult(req);
@@ -781,15 +761,12 @@ app.put('/driveway/:id', verifyToken, upload.single('image'),
         try {
             const userId = req.user.id;
             const drivewayId = req.params.id;
-            const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
-            let users = JSON.parse(usersData);
-
-            const user = users.find(u => u.id === userId);
+            const user = req.customerUsers.find(u => u.id === userId);
             if (!user) {
                 return res.status(404).json({ message: 'User not found.' });
             }
 
-            const drivewayIndex = user.userCart.findIndex(car => driveway.id === drivewayId);
+            const drivewayIndex = user.userCart.findIndex(driveway => driveway.id === drivewayId);
             if (drivewayIndex === -1) {
                 return res.status(404).json({ message: 'Driveway service object not found.' });
             }
@@ -802,7 +779,7 @@ app.put('/driveway/:id', verifyToken, upload.single('image'),
                 imagePath: req.file ? req.file.path : user.userCart[drivewayIndex].imagePath, 
             }
 
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(200).json({ message: 'Driveway service object updated in the DB: ', driveway: user.userCart[drivewayIndex]});
         
         } catch (error) {
@@ -815,11 +792,11 @@ app.put('/driveway/:id', verifyToken, upload.single('image'),
 // PUT route to update an existing lawn service entry
 app.put('/lawn/:id', verifyToken, upload.single('image'), 
     [
-        body('walkway').optional().isBoolean().withMessage('Walkway must be a boolean'),
-        body('frontYard').optional().isBoolean().withMessage('Front yard must be a boolean'),
-        body('backyard').optional().isBoolean().withMessage('Backyard must be a boolean'),
-        body('lawnMessage').optional().isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
-        body('objectType').optional().equals('lawn').withMessage('ObjectType is lawn'),
+        body('walkway').optional({ checkFalsy: true }).isBoolean().withMessage('Walkway must be a boolean'),
+        body('frontYard').optional({ checkFalsy: true }).isBoolean().withMessage('Front yard must be a boolean'),
+        body('backyard').optional({ checkFalsy: true }).isBoolean().withMessage('Backyard must be a boolean'),
+        body('lawnMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
+        body('objectType').equals('lawn').withMessage('ObjectType is lawn'),
     ],
     async (req, res) => {
         const errors = validationResult(req);
@@ -830,10 +807,7 @@ app.put('/lawn/:id', verifyToken, upload.single('image'),
         try {
             const userId = req.user.id;
             const lawnId = req.params.id;
-            const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
-            let users = JSON.parse(usersData);
-
-            const user = users.find(u => u.id === userId);
+            const user = req.customerUsers.find(u => u.id === userId);
             if (!user) {
                 return res.status(404).json({ message: 'User not found.' });
             }
@@ -845,15 +819,15 @@ app.put('/lawn/:id', verifyToken, upload.single('image'),
 
             user.userCart[lawnIndex] = {
                 ...user.userCart[lawnIndex],
-                walkway: req.body.walkway !== undefined ? req.body.walkway : lawnService.walkway,
-                frontYard: req.body.frontYard !== undefined ? req.body.frontYard : lawnService.frontYard,
-                backyard: req.body.backyard !== undefined ? req.body.backyard : lawnService.backyard,
-                lawnMessage: req.body.lawnMessage !== undefined ? req.body.lawnMessage : lawnService.lawnMessage,
+                walkway: req.body.walkway !== undefined ? req.body.walkway === 'true' : user.userCart[lawnIndex].walkway === 'true',
+                frontYard: req.body.frontYard !== undefined ? req.body.frontYard === 'true' : user.userCart[lawnIndex].frontYard === 'true',
+                backyard: req.body.backyard !== undefined ? req.body.backyard === 'true' : user.userCart[lawnIndex].backyard === 'true',
+                lawnMessage: req.body.lawnMessage !== undefined ? req.body.lawnMessage : user.userCart[lawnIndex].lawnMessage,
                 objectType: req.body.objectType,
                 imagePath: req.file ? req.file.path : user.userCart[lawnIndex].imagePath,
-            };
+            };            
 
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(200).json({ message: 'Lawn service object updated.', lawn: user.userCart[lawnIndex] });
 
         } catch (error) {
@@ -867,8 +841,8 @@ app.put('/lawn/:id', verifyToken, upload.single('image'),
 app.put('/street/:id', verifyToken, upload.single('image'), 
     [
         body('from').notEmpty().withMessage('From address is required'),
-        body('to').optional().notEmpty().withMessage('Please include a to address'),
-        body('streetMessage').optional().isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
+        body('to').optional({ checkFalsy: true }).notEmpty().withMessage('Please include a to address'),
+        body('streetMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
         body('objectType').equals('street').withMessage('ObjectType is street'),
     ],
     async (req, res) => {
@@ -880,10 +854,7 @@ app.put('/street/:id', verifyToken, upload.single('image'),
         try {
             const userId = req.user.id;
             const streetId = req.params.id;
-            const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
-            let users = JSON.parse(usersData);
-
-            const user = users.find(u => u.id === userId);
+            const user = req.customerUsers.find(u => u.id === userId);
             if (!user) {
                 return res.status(404).json({ message: 'User not found.' });
             }
@@ -903,7 +874,7 @@ app.put('/street/:id', verifyToken, upload.single('image'),
             }
 
 
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(200).json({ message: 'Street service object updated in the DB: ', street: user.userCart[streetIndex] });
 
         } catch (error) {
@@ -917,7 +888,7 @@ app.put('/street/:id', verifyToken, upload.single('image'),
 app.put('/other/:id', verifyToken, upload.single('image'), 
     [
         body('selectedSize').notEmpty().withMessage('Selected size is required'),
-        body('otherMessage').optional().isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
+        body('otherMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
         body('objectType').equals('other').withMessage('ObjectType is other'),
     ], 
     async (req, res) => {
@@ -929,10 +900,7 @@ app.put('/other/:id', verifyToken, upload.single('image'),
         try {
             const userId = req.user.id;
             const otherId = req.params.id;
-            const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
-            let users = JSON.parse(usersData);
-
-            const user = users.find(u => u.id === userId);
+            const user = req.customerUsers.find(u => u.id === userId);
             if (!user) {
                 return res.status(404).json({ message: 'User not found.' });
             }
@@ -950,7 +918,7 @@ app.put('/other/:id', verifyToken, upload.single('image'),
                 imagePath: req.file ? req.file.path : user.userCart[otherIndex].imagePath,
             }
 
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(200).json({ message: 'Other service object updated in the DB: ', other: user.userCart[otherIndex] });
 
         } catch (error) {
@@ -965,26 +933,22 @@ app.delete('/address/:id', verifyToken, async (req, res) => {
     try {
         const userId = req.user.id; 
         const addressId = req.params.id;
-        const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
-        let users = JSON.parse(usersData);
-
-        // Find the user by their ID
-        const userIndex = users.findIndex(u => u.id === userId);
-        if (userIndex === -1) {
+        const user = req.combinedUsers.find(u => u.id === userId); // Find the user by their ID
+        if (!user) {
             return res.status(404).json({ message: 'User not found.' });
         }
 
         // Find the index of the address in the user's address array
-        const addressIndex = users[userIndex].userAddresses.findIndex(addr => addr.id === addressId);
-        if (addressIndex === -1) {
+        const addressIndex = user.userAddresses.findIndex(addr => addr.id === addressId);
+        if ( addressIndex === -1) {
             return res.status(404).json({ message: 'Address not found.' });
         }
 
         // Remove the address from the user's address array
-        users[userIndex].userAddresses.splice(addressIndex, 1);
+        user.userAddresses.splice(addressIndex, 1);
 
         // Write the updated users data back to the USERS_FILE
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
         
         res.status(200).json({ message: 'Address deleted successfully.' });
     } catch (error) {
@@ -998,21 +962,18 @@ app.delete('/car/:id', verifyToken, async (req, res) => {
     try {
         const userId = req.user.id; 
         const carId = req.params.id; 
-        const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
-        let users = JSON.parse(usersData);
-
-        const userIndex = users.findIndex(user => user.id === userId);
-        if (userIndex === -1) {
+        const user = req.customerUsers.find(user => user.id === userId);
+        if (!user) {
             return res.status(404).json({ message: 'User not found.' });
         }
 
-        const carIndex = users[userIndex].userCart.findIndex(car => car.id === carId);
+        const carIndex = user.userCart.findIndex(car => car.id === carId);
         if (carIndex === -1) {
             return res.status(404).json({ message: 'Car service object not found.' });
         }
 
-        users[userIndex].userCart.splice(carIndex, 1);
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+        user.userCart.splice(carIndex, 1);
+        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
         res.status(200).json({ message: 'Car service object deleted successfully.' });
 
     } catch (error) {
@@ -1026,21 +987,18 @@ app.delete('/driveway/:id', verifyToken, async (req, res) => {
     try {
         const userId = req.user.id; 
         const drivewayId = req.params.id;
-        const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
-        let users = JSON.parse(usersData);
-        
-        const userIndex = users.findIndex(user => user.id === userId);
-        if (userIndex === -1) {
+        const user = req.customerUsers.find(user => user.id === userId);
+        if (!user) {
             return res.status(404).json({ message: 'User not found.' });
         }
 
-        const drivewayIndex = users[userIndex].userCart.findIndex(driveway => driveway.id === drivewayId);
+        const drivewayIndex = user.userCart.findIndex(driveway => driveway.id === drivewayId);
         if (drivewayIndex === -1) {
             return res.status(404).json({ message: 'Driveway service object not found.' });
         }
 
-        users[userIndex].userCart.splice(drivewayIndex, 1);
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+        user.userCart.splice(drivewayIndex, 1);
+        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
         res.status(200).json({ message: 'Driveway service object deleted from the DB.' });
 
     } catch (error) {
@@ -1053,22 +1011,19 @@ app.delete('/driveway/:id', verifyToken, async (req, res) => {
 app.delete('/lawn/:id', verifyToken, async (req, res) => {
     try {
         const userId = req.user.id; 
-        const lawnId = req.params.id;
-        const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
-        let users = JSON.parse(usersData);
-        
-        const userIndex = users.findIndex(user => user.id === userId);
-        if (userIndex === -1) {
+        const lawnId = req.params.id;        
+        const user = req.customerUsers.find(user => user.id === userId);
+        if (!user) {
             return res.status(404).json({ message: 'User not found.' });
         }
 
-        const lawnIndex = users[userIndex].userCart.findIndex(lawn => lawn.id === lawnId);
+        const lawnIndex = user.userCart.findIndex(lawn => lawn.id === lawnId);
         if (lawnIndex  === -1) {
             return res.status(404).json({ message: 'Lawn service object not found.' });
         }
 
-        users[userIndex].userCart.splice(lawnIndex, 1);
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+        user.userCart.splice(lawnIndex, 1);
+        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
         res.status(200).json({ message: 'Lawn service object deleted from the DB.' });
 
     } catch (error) {
@@ -1082,21 +1037,18 @@ app.delete('/street/:id', verifyToken, async (req, res) => {
     try {
         const userId = req.user.id; 
         const streetId = req.params.id;
-        const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
-        let users = JSON.parse(usersData);
-        
-        const userIndex = users.findIndex(user => user.id === userId);
-        if (userIndex === -1) {
+        const user = req.customerUsers.find(user => user.id === userId);
+        if (!user) {
             return res.status(404).json({ message: 'User not found.' });
         }
   
-        const streetIndex = users[userIndex].userCart.findIndex(street => street.id === streetId);
+        const streetIndex = user.userCart.findIndex(street => street.id === streetId);
         if (streetIndex === -1) {
             return res.status(404).json({ message: 'Street service object not found.' });
         }
 
-        users[userIndex].userCart.splice(streetIndex, 1);
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');        
+        user.userCart.splice(streetIndex, 1);
+        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');        
         res.status(200).json({ message: 'Street service object deleted from the DB.' });
 
     } catch (error) {
@@ -1110,21 +1062,18 @@ app.delete('/other/:id', verifyToken, async (req, res) => {
     try {
         const userId = req.user.id; 
         const otherId = req.params.id;
-        const usersData = await fsPromises.readFile(USERS_FILE, 'utf8');
-        let users = JSON.parse(usersData);
-        
-        const userIndex = users.findIndex(user => user.id === userId);
-        if (userIndex === -1) {
+        const user = req.customerUsers.find(user => user.id === userId);
+        if (!user) {
             return res.status(404).json({ message: 'User not found.' });
         }
   
-        const otherIndex = users[userIndex].userCart.findIndex(other => other.id === otherId);
+        const otherIndex = user.userCart.findIndex(other => other.id === otherId);
         if (otherIndex === -1) {
             return res.status(404).json({ message: 'Other service object not found.' });
         }
 
-        users[userIndex].userCart.splice(otherIndex, 1);
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+        user.userCart.splice(otherIndex, 1);
+        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
         res.status(200).json({ message: 'Other service object deleted from the DB.' });
 
     } catch (error) {

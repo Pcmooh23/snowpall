@@ -142,6 +142,9 @@ export const SnowPallProvider = ({ children }) => {
   const estimatedTax = total * 0.1; // Assuming tax rate is 10%
   const grandTotal = total + estimatedTax;
 
+  // Log to keep track of all live user requests.
+  const [requestsLog, setRequestsLog] = useState([]);
+
   return (
     <SnowPallContext.Provider value={{
       // UserId management.
@@ -177,7 +180,10 @@ export const SnowPallProvider = ({ children }) => {
       addressInfo, setAddressInfo, fetchAddresses,
       selectedAddressForUse, setSelectedAddressForUse,
       selectedAddressIndex, setSelectedAddressIndex,
-      paymentRef, total, estimatedTax, grandTotal
+      paymentRef, total, estimatedTax, grandTotal,
+
+      // Log all user active requests.
+      requestsLog, setRequestsLog
       }}>
       {children}
     </SnowPallContext.Provider>

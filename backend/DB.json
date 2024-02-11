@@ -1,0 +1,206 @@
+{
+  "customers": [
+    {
+      "id": "c5283c80-2b67-4e4e-85f4-cb44fefb13e2",
+      "userName": "Raymond Reddington",
+      "userEmail": "Reddington0207@gmail.com",
+      "accountType": "customer",
+      "userNumber": "8455052893",
+      "userStreet": "3384 Towers Loop Road",
+      "userUnit": "",
+      "userCity": "Storrs",
+      "userState": "Connecticut",
+      "userZip": "06269",
+      "userPasswordHash": "$2b$10$UY66ig0RoqXzzXx5kjkpS.cR.76DUiETl0NpNE7fNB5nfkcTKhdGi",
+      "userAddresses": [
+        {
+          "id": "74b5e994-4ac3-4f37-8b92-668c9428ccac",
+          "userName": "Raymond Reddington",
+          "userNumber": "8455052893",
+          "userStreet": "3384 Towers Loop Road",
+          "userUnit": "",
+          "userCity": "Storrs",
+          "userState": "Connecticut",
+          "userZip": "06269"
+        }
+      ],
+      "userCart": [
+        {
+          "id": "c768c106-dabb-40bc-8428-dbcaa54d5294",
+          "userId": "c5283c80-2b67-4e4e-85f4-cb44fefb13e2",
+          "selectedSize": "job1",
+          "otherMessage": "lniojonubknjnu",
+          "objectType": "other",
+          "imagePath": "uploads/f802a8e2025a7f84f9193aa3e099c371"
+        }
+      ],
+      "userRequests": [
+        {
+          "id": "05ced031-9215-45ed-a950-d3ca25df08ae",
+          "orderDate": "2024-02-11T13:13:00.172Z",
+          "cart": [
+            {
+              "id": "666f3bd2-0ba4-412c-92e9-d20a7ff2ce63",
+              "checkedService": "true",
+              "makeAndModel": "jeep wrangler",
+              "color": "dsds",
+              "licensePlate": "LVMH",
+              "carMessage": "your mom",
+              "objectType": "car",
+              "imagePath": "uploads/ef3dc290113c08c17917466d4b00ac6d"
+            },
+            {
+              "id": "53bebe50-fbe8-4ef8-80a1-8e883e576082",
+              "selectedSize": "size4",
+              "drivewayMessage": "fuck you boots",
+              "objectType": "driveway",
+              "imagePath": "uploads/6ca31a3f8c2f8725b2b8e694d287e00e"
+            },
+            {
+              "id": "c768c106-dabb-40bc-8428-dbcaa54d5294",
+              "userId": "c5283c80-2b67-4e4e-85f4-cb44fefb13e2",
+              "selectedSize": "job1",
+              "otherMessage": "lniojonubknjnu",
+              "objectType": "other",
+              "imagePath": "uploads/f802a8e2025a7f84f9193aa3e099c371"
+            }
+          ],
+          "selectedAddress": {
+            "id": "74b5e994-4ac3-4f37-8b92-668c9428ccac",
+            "userName": "Raymond Reddington",
+            "userNumber": "8455052893",
+            "userStreet": "3384 Towers Loop Road",
+            "userUnit": "",
+            "userCity": "Storrs",
+            "userState": "Connecticut",
+            "userZip": "06269"
+          },
+          "charge": {
+            "id": "ch_3Oicq7BWC1e9EDXY0HVfuZpi",
+            "amount": 17050,
+            "currency": "usd",
+            "description": "Charge for order",
+            "created": "2024-02-11T13:12:59.000Z"
+          }
+        },
+        {
+          "id": "04885288-91cb-4252-9ddf-a9020beb35a3",
+          "orderDate": "2024-02-11T13:15:10.037Z",
+          "cart": [
+            {
+              "id": "c768c106-dabb-40bc-8428-dbcaa54d5294",
+              "userId": "c5283c80-2b67-4e4e-85f4-cb44fefb13e2",
+              "selectedSize": "job1",
+              "otherMessage": "lniojonubknjnu",
+              "objectType": "other",
+              "imagePath": "uploads/f802a8e2025a7f84f9193aa3e099c371"
+            }
+          ],
+          "selectedAddress": {
+            "id": "74b5e994-4ac3-4f37-8b92-668c9428ccac",
+            "userName": "Raymond Reddington",
+            "userNumber": "8455052893",
+            "userStreet": "3384 Towers Loop Road",
+            "userUnit": "",
+            "userCity": "Storrs",
+            "userState": "Connecticut",
+            "userZip": "06269"
+          },
+          "charge": {
+            "id": "ch_3OicsDBWC1e9EDXY0uIZ1vrE",
+            "amount": 2750,
+            "currency": "usd",
+            "description": "Charge for order",
+            "created": "2024-02-11T13:15:09.000Z"
+          }
+        }
+      ],
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM1MjgzYzgwLTJiNjctNGU0ZS04NWY0LWNiNDRmZWZiMTNlMiIsInVzZXJFbWFpbCI6IlJlZGRpbmd0b24wMjA3QGdtYWlsLmNvbSIsImlhdCI6MTcwNzY1NzAwNiwiZXhwIjoxNzA4MjYxODA2fQ.YELpJY-OXi3tOUd-XVHeNtb6j7ttDSmbbzuIRCuTSxk"
+    }
+  ],
+  "snowtechs": [],
+  "requests": {
+    "active": [
+      {
+        "id": "05ced031-9215-45ed-a950-d3ca25df08ae",
+        "orderDate": "2024-02-11T13:13:00.172Z",
+        "cart": [
+          {
+            "id": "666f3bd2-0ba4-412c-92e9-d20a7ff2ce63",
+            "checkedService": "true",
+            "makeAndModel": "jeep wrangler",
+            "color": "dsds",
+            "licensePlate": "LVMH",
+            "carMessage": "your mom",
+            "objectType": "car",
+            "imagePath": "uploads/ef3dc290113c08c17917466d4b00ac6d"
+          },
+          {
+            "id": "53bebe50-fbe8-4ef8-80a1-8e883e576082",
+            "selectedSize": "size4",
+            "drivewayMessage": "fuck you boots",
+            "objectType": "driveway",
+            "imagePath": "uploads/6ca31a3f8c2f8725b2b8e694d287e00e"
+          },
+          {
+            "id": "c768c106-dabb-40bc-8428-dbcaa54d5294",
+            "userId": "c5283c80-2b67-4e4e-85f4-cb44fefb13e2",
+            "selectedSize": "job1",
+            "otherMessage": "lniojonubknjnu",
+            "objectType": "other",
+            "imagePath": "uploads/f802a8e2025a7f84f9193aa3e099c371"
+          }
+        ],
+        "selectedAddress": {
+          "id": "74b5e994-4ac3-4f37-8b92-668c9428ccac",
+          "userName": "Raymond Reddington",
+          "userNumber": "8455052893",
+          "userStreet": "3384 Towers Loop Road",
+          "userUnit": "",
+          "userCity": "Storrs",
+          "userState": "Connecticut",
+          "userZip": "06269"
+        },
+        "charge": {
+          "id": "ch_3Oicq7BWC1e9EDXY0HVfuZpi",
+          "amount": 17050,
+          "currency": "usd",
+          "description": "Charge for order",
+          "created": "2024-02-11T13:12:59.000Z"
+        }
+      },
+      {
+        "id": "04885288-91cb-4252-9ddf-a9020beb35a3",
+        "orderDate": "2024-02-11T13:15:10.037Z",
+        "cart": [
+          {
+            "id": "c768c106-dabb-40bc-8428-dbcaa54d5294",
+            "userId": "c5283c80-2b67-4e4e-85f4-cb44fefb13e2",
+            "selectedSize": "job1",
+            "otherMessage": "lniojonubknjnu",
+            "objectType": "other",
+            "imagePath": "uploads/f802a8e2025a7f84f9193aa3e099c371"
+          }
+        ],
+        "selectedAddress": {
+          "id": "74b5e994-4ac3-4f37-8b92-668c9428ccac",
+          "userName": "Raymond Reddington",
+          "userNumber": "8455052893",
+          "userStreet": "3384 Towers Loop Road",
+          "userUnit": "",
+          "userCity": "Storrs",
+          "userState": "Connecticut",
+          "userZip": "06269"
+        },
+        "charge": {
+          "id": "ch_3OicsDBWC1e9EDXY0uIZ1vrE",
+          "amount": 2750,
+          "currency": "usd",
+          "description": "Charge for order",
+          "created": "2024-02-11T13:15:09.000Z"
+        }
+      }
+    ],
+    "completed": []
+  }
+}

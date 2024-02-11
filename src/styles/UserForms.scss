@@ -82,11 +82,11 @@
                 align-items: center;
                 justify-content: space-around;
 
-                #snowTech:checked + .accountType-label, 
+                #snowtech:checked + .accountType-label, 
                 #customer:checked + .accountType-label {
                     border-color: black;
                 }
-                #snowTech:checked + .accountType-label .circle,
+                #snowtech:checked + .accountType-label .circle,
                 #customer:checked + .accountType-label .circle {
                     border-color: black;
                 }
