@@ -9,7 +9,7 @@ const UserForms = () => {
         pageFormRef, iconCloseRef, baseUrl,
         loginFormRef, registerLinkRef, fetchAddresses, 
         registerFormRef, loginLinkRef,
-        setAccessToken, setUserId, setLoginName
+        setAccessToken, userId, setUserId, setLoginName
     } = useContext(SnowPallContext);
 
     const navigate = useNavigate();
@@ -157,7 +157,7 @@ const UserForms = () => {
                 const { id, userName, userNumber, userStreet, userUnit, userCity, userState, userZip, accountType } = registrationData.user;                
                 const { accessToken } = registrationData;
 
-                localStorage.setItem('currentUserId', id);
+                localStorage.setItem('currentUserId', id); // this might not work for production as every account has the same localstorage name for currentID
                 localStorage.setItem(`${id}_accessToken`, accessToken);
                 localStorage.setItem('currentUserName', userName);
                 
@@ -171,11 +171,11 @@ const UserForms = () => {
                     navigate('/home');
                 } else if (accountType === 'snowtech') {
                     navigate('/snowtech');
-                    localStorage.setItem('snowtechLocation', JSON.stringify({
-                        street: userStreet,
-                        city: userCity,
-                        state: userState,
-                        zip_code: userZip
+                    localStorage.setItem(`${id}_snowtechLocation`, JSON.stringify({
+                        userStreet: userStreet,
+                        userCity: userCity,
+                        userState: userState,
+                        userZip: userZip
                     }));
                 }
             

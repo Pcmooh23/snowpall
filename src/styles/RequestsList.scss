@@ -1,0 +1,81 @@
+.requestsList {
+    height: 400px;
+    overflow-y: scroll;
+    .request-container {
+        padding: 5px 10px;
+        .request-top {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            .more-details {
+                color: rgb(0, 85, 255);
+                cursor: pointer;
+                &:hover {
+                    color: orangered;
+                    text-decoration: underline;
+                }
+            }
+        }
+        .request-bottom {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            .request-bottom-left {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                .accept-request {
+                    width: 100px;
+                    height: 40px;
+                    border-radius: 5px;
+                    border: none;
+                    cursor: pointer;
+                    margin-right: 5px;
+                    &:hover {
+                        background-color: #ccc;
+                    }
+                }
+            }
+        }
+    }
+}
+.overlay {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99;
+    .request-object-details {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 700px;
+        max-height: 600px;
+        overflow: hidden;
+        position: relative;
+        .top-area {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .address-details {}
+        .cart-details {
+            max-height: 400px;
+            overflow-y: scroll;
+            .service {
+                .image-cover {
+                    width: 100px;
+                    height: 100px;
+                }
+            }
+        }
+        .charge-details {}
+    }
+}

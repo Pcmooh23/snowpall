@@ -1,22 +1,129 @@
 {
   "customers": [
     {
-      "id": "c5283c80-2b67-4e4e-85f4-cb44fefb13e2",
+      "id": "f0347893-1d94-43f9-bf96-6192faf5dff4",
       "userName": "Raymond Reddington",
       "userEmail": "Reddington0207@gmail.com",
       "accountType": "customer",
-      "userNumber": "8455052893",
+      "userNumber": "",
+      "userStreet": "55 Gilbert Rd",
+      "userUnit": "",
+      "userCity": "Storrs",
+      "userState": "Connecticut",
+      "userZip": "06269",
+      "userPasswordHash": "$2b$10$jfBWumBozf7CIrQqwxW6ZOOB6RlY1P40t6HXGP2DP8XvX0aenDdw6",
+      "userAddresses": [
+        {
+          "id": "438ebfec-986e-4dfc-9261-1e67895709e0",
+          "userName": "Raymond Reddington",
+          "userNumber": "",
+          "userStreet": "55 Gilbert Rd",
+          "userUnit": "",
+          "userCity": "Storrs",
+          "userState": "Connecticut",
+          "userZip": "06269"
+        }
+      ],
+      "userNotifications": [
+        {
+          "id": "5730de00-3b3c-409e-954c-078c1ad71f6c",
+          "message": "Your request with ID 895eec37-7029-4689-b871-165025334327 has been accepted.",
+          "date": "2024-02-13T01:59:34.462Z",
+          "read": false
+        }
+      ],
+      "userCart": [
+        {
+          "id": "7b4bf091-f1f1-4cbb-ab19-2f81155b3de9",
+          "userId": "f0347893-1d94-43f9-bf96-6192faf5dff4",
+          "checkedService": true,
+          "makeAndModel": "honda civic",
+          "color": "white",
+          "licensePlate": "LVMH",
+          "carMessage": "I never wanted Tom to marry you Lizzie.",
+          "objectType": "car",
+          "imagePath": "uploads/fa9bdf8eeb4665fe05812c2c9b998faf"
+        },
+        {
+          "id": "2db58bfa-b37c-4a81-aa7a-1841fe4c8c48",
+          "userId": "f0347893-1d94-43f9-bf96-6192faf5dff4",
+          "selectedSize": "size4",
+          "drivewayMessage": "He was only ever meant to be a friend of a friend.",
+          "objectType": "driveway",
+          "imagePath": "uploads/fea41d1a8443e84720149ff39eb112e4"
+        }
+      ],
+      "userRequests": [
+        {
+          "id": "895eec37-7029-4689-b871-165025334327",
+          "orderDate": "2024-02-13T01:33:00.647Z",
+          "cart": [
+            {
+              "id": "7b4bf091-f1f1-4cbb-ab19-2f81155b3de9",
+              "userId": "f0347893-1d94-43f9-bf96-6192faf5dff4",
+              "checkedService": true,
+              "makeAndModel": "honda civic",
+              "color": "white",
+              "licensePlate": "LVMH",
+              "carMessage": "I never wanted Tom to marry you Lizzie.",
+              "objectType": "car",
+              "imagePath": "uploads/fa9bdf8eeb4665fe05812c2c9b998faf"
+            },
+            {
+              "id": "2db58bfa-b37c-4a81-aa7a-1841fe4c8c48",
+              "userId": "f0347893-1d94-43f9-bf96-6192faf5dff4",
+              "selectedSize": "size4",
+              "drivewayMessage": "He was only ever meant to be a friend of a friend.",
+              "objectType": "driveway",
+              "imagePath": "uploads/fea41d1a8443e84720149ff39eb112e4"
+            }
+          ],
+          "selectedAddress": {
+            "id": "438ebfec-986e-4dfc-9261-1e67895709e0",
+            "userName": "Raymond Reddington",
+            "userNumber": "",
+            "userStreet": "55 Gilbert Rd",
+            "userUnit": "",
+            "userCity": "Storrs",
+            "userState": "Connecticut",
+            "userZip": "06269"
+          },
+          "charge": {
+            "id": "ch_3OjArnBWC1e9EDXY1J16NTxE",
+            "amount": 14300,
+            "currency": "usd",
+            "description": "Charge for order",
+            "created": "2024-02-13T01:32:59.000Z"
+          },
+          "stages": {
+            "live": true,
+            "accepted": true,
+            "started": false,
+            "complete": false
+          }
+        }
+      ],
+      "refreshToken": null
+    }
+  ],
+  "snowtechs": [
+    {
+      "id": "9ffce47c-35d2-47b5-8b40-c56d8d161bfd",
+      "userName": "Kim Possible",
+      "userEmail": "kim.possible@gmail.com",
+      "accountType": "snowtech",
+      "userNumber": "",
       "userStreet": "3384 Towers Loop Road",
       "userUnit": "",
       "userCity": "Storrs",
       "userState": "Connecticut",
       "userZip": "06269",
-      "userPasswordHash": "$2b$10$UY66ig0RoqXzzXx5kjkpS.cR.76DUiETl0NpNE7fNB5nfkcTKhdGi",
+      "userPasswordHash": "$2b$10$AC2oRYPIUdv5hb4bg4i1v.e.rheG1wxaH0BEVhyj.uxA4eE5ayHAm",
       "userAddresses": [
         {
-          "id": "74b5e994-4ac3-4f37-8b92-668c9428ccac",
-          "userName": "Raymond Reddington",
-          "userNumber": "8455052893",
+          "id": "519d0c3b-ceb0-4442-81d5-f6b686138045",
+          "userName": "Kim Possible",
+          "userNumber": "",
           "userStreet": "3384 Towers Loop Road",
           "userUnit": "",
           "userCity": "Storrs",
@@ -24,180 +131,59 @@
           "userZip": "06269"
         }
       ],
-      "userCart": [
-        {
-          "id": "c768c106-dabb-40bc-8428-dbcaa54d5294",
-          "userId": "c5283c80-2b67-4e4e-85f4-cb44fefb13e2",
-          "selectedSize": "job1",
-          "otherMessage": "lniojonubknjnu",
-          "objectType": "other",
-          "imagePath": "uploads/f802a8e2025a7f84f9193aa3e099c371"
-        }
-      ],
-      "userRequests": [
-        {
-          "id": "05ced031-9215-45ed-a950-d3ca25df08ae",
-          "orderDate": "2024-02-11T13:13:00.172Z",
-          "cart": [
-            {
-              "id": "666f3bd2-0ba4-412c-92e9-d20a7ff2ce63",
-              "checkedService": "true",
-              "makeAndModel": "jeep wrangler",
-              "color": "dsds",
-              "licensePlate": "LVMH",
-              "carMessage": "your mom",
-              "objectType": "car",
-              "imagePath": "uploads/ef3dc290113c08c17917466d4b00ac6d"
-            },
-            {
-              "id": "53bebe50-fbe8-4ef8-80a1-8e883e576082",
-              "selectedSize": "size4",
-              "drivewayMessage": "fuck you boots",
-              "objectType": "driveway",
-              "imagePath": "uploads/6ca31a3f8c2f8725b2b8e694d287e00e"
-            },
-            {
-              "id": "c768c106-dabb-40bc-8428-dbcaa54d5294",
-              "userId": "c5283c80-2b67-4e4e-85f4-cb44fefb13e2",
-              "selectedSize": "job1",
-              "otherMessage": "lniojonubknjnu",
-              "objectType": "other",
-              "imagePath": "uploads/f802a8e2025a7f84f9193aa3e099c371"
-            }
-          ],
-          "selectedAddress": {
-            "id": "74b5e994-4ac3-4f37-8b92-668c9428ccac",
-            "userName": "Raymond Reddington",
-            "userNumber": "8455052893",
-            "userStreet": "3384 Towers Loop Road",
-            "userUnit": "",
-            "userCity": "Storrs",
-            "userState": "Connecticut",
-            "userZip": "06269"
-          },
-          "charge": {
-            "id": "ch_3Oicq7BWC1e9EDXY0HVfuZpi",
-            "amount": 17050,
-            "currency": "usd",
-            "description": "Charge for order",
-            "created": "2024-02-11T13:12:59.000Z"
-          }
-        },
-        {
-          "id": "04885288-91cb-4252-9ddf-a9020beb35a3",
-          "orderDate": "2024-02-11T13:15:10.037Z",
-          "cart": [
-            {
-              "id": "c768c106-dabb-40bc-8428-dbcaa54d5294",
-              "userId": "c5283c80-2b67-4e4e-85f4-cb44fefb13e2",
-              "selectedSize": "job1",
-              "otherMessage": "lniojonubknjnu",
-              "objectType": "other",
-              "imagePath": "uploads/f802a8e2025a7f84f9193aa3e099c371"
-            }
-          ],
-          "selectedAddress": {
-            "id": "74b5e994-4ac3-4f37-8b92-668c9428ccac",
-            "userName": "Raymond Reddington",
-            "userNumber": "8455052893",
-            "userStreet": "3384 Towers Loop Road",
-            "userUnit": "",
-            "userCity": "Storrs",
-            "userState": "Connecticut",
-            "userZip": "06269"
-          },
-          "charge": {
-            "id": "ch_3OicsDBWC1e9EDXY0uIZ1vrE",
-            "amount": 2750,
-            "currency": "usd",
-            "description": "Charge for order",
-            "created": "2024-02-11T13:15:09.000Z"
-          }
-        }
-      ],
-      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM1MjgzYzgwLTJiNjctNGU0ZS04NWY0LWNiNDRmZWZiMTNlMiIsInVzZXJFbWFpbCI6IlJlZGRpbmd0b24wMjA3QGdtYWlsLmNvbSIsImlhdCI6MTcwNzY1NzAwNiwiZXhwIjoxNzA4MjYxODA2fQ.YELpJY-OXi3tOUd-XVHeNtb6j7ttDSmbbzuIRCuTSxk"
+      "userNotifications": [],
+      "CompletedRequests": [],
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjlmZmNlNDdjLTM1ZDItNDdiNS04YjQwLWM1NmQ4ZDE2MWJmZCIsInVzZXJFbWFpbCI6ImtpbS5wb3NzaWJsZUBnbWFpbC5jb20iLCJpYXQiOjE3MDc3ODg5NDcsImV4cCI6MTcwODM5Mzc0N30.pS6qGezJYcXeW1jgLvdqN0HUpTOfiDImWeHjNUl9A3g"
     }
   ],
-  "snowtechs": [],
   "requests": {
     "active": [
       {
-        "id": "05ced031-9215-45ed-a950-d3ca25df08ae",
-        "orderDate": "2024-02-11T13:13:00.172Z",
+        "id": "895eec37-7029-4689-b871-165025334327",
+        "orderDate": "2024-02-13T01:33:00.647Z",
         "cart": [
           {
-            "id": "666f3bd2-0ba4-412c-92e9-d20a7ff2ce63",
-            "checkedService": "true",
-            "makeAndModel": "jeep wrangler",
-            "color": "dsds",
+            "id": "7b4bf091-f1f1-4cbb-ab19-2f81155b3de9",
+            "userId": "f0347893-1d94-43f9-bf96-6192faf5dff4",
+            "checkedService": true,
+            "makeAndModel": "honda civic",
+            "color": "white",
             "licensePlate": "LVMH",
-            "carMessage": "your mom",
+            "carMessage": "I never wanted Tom to marry you Lizzie.",
             "objectType": "car",
-            "imagePath": "uploads/ef3dc290113c08c17917466d4b00ac6d"
+            "imagePath": "uploads/fa9bdf8eeb4665fe05812c2c9b998faf"
           },
           {
-            "id": "53bebe50-fbe8-4ef8-80a1-8e883e576082",
+            "id": "2db58bfa-b37c-4a81-aa7a-1841fe4c8c48",
+            "userId": "f0347893-1d94-43f9-bf96-6192faf5dff4",
             "selectedSize": "size4",
-            "drivewayMessage": "fuck you boots",
+            "drivewayMessage": "He was only ever meant to be a friend of a friend.",
             "objectType": "driveway",
-            "imagePath": "uploads/6ca31a3f8c2f8725b2b8e694d287e00e"
-          },
-          {
-            "id": "c768c106-dabb-40bc-8428-dbcaa54d5294",
-            "userId": "c5283c80-2b67-4e4e-85f4-cb44fefb13e2",
-            "selectedSize": "job1",
-            "otherMessage": "lniojonubknjnu",
-            "objectType": "other",
-            "imagePath": "uploads/f802a8e2025a7f84f9193aa3e099c371"
+            "imagePath": "uploads/fea41d1a8443e84720149ff39eb112e4"
           }
         ],
         "selectedAddress": {
-          "id": "74b5e994-4ac3-4f37-8b92-668c9428ccac",
+          "id": "438ebfec-986e-4dfc-9261-1e67895709e0",
           "userName": "Raymond Reddington",
-          "userNumber": "8455052893",
-          "userStreet": "3384 Towers Loop Road",
+          "userNumber": "",
+          "userStreet": "55 Gilbert Rd",
           "userUnit": "",
           "userCity": "Storrs",
           "userState": "Connecticut",
           "userZip": "06269"
         },
         "charge": {
-          "id": "ch_3Oicq7BWC1e9EDXY0HVfuZpi",
-          "amount": 17050,
+          "id": "ch_3OjArnBWC1e9EDXY1J16NTxE",
+          "amount": 14300,
           "currency": "usd",
           "description": "Charge for order",
-          "created": "2024-02-11T13:12:59.000Z"
-        }
-      },
-      {
-        "id": "04885288-91cb-4252-9ddf-a9020beb35a3",
-        "orderDate": "2024-02-11T13:15:10.037Z",
-        "cart": [
-          {
-            "id": "c768c106-dabb-40bc-8428-dbcaa54d5294",
-            "userId": "c5283c80-2b67-4e4e-85f4-cb44fefb13e2",
-            "selectedSize": "job1",
-            "otherMessage": "lniojonubknjnu",
-            "objectType": "other",
-            "imagePath": "uploads/f802a8e2025a7f84f9193aa3e099c371"
-          }
-        ],
-        "selectedAddress": {
-          "id": "74b5e994-4ac3-4f37-8b92-668c9428ccac",
-          "userName": "Raymond Reddington",
-          "userNumber": "8455052893",
-          "userStreet": "3384 Towers Loop Road",
-          "userUnit": "",
-          "userCity": "Storrs",
-          "userState": "Connecticut",
-          "userZip": "06269"
+          "created": "2024-02-13T01:32:59.000Z"
         },
-        "charge": {
-          "id": "ch_3OicsDBWC1e9EDXY0uIZ1vrE",
-          "amount": 2750,
-          "currency": "usd",
-          "description": "Charge for order",
-          "created": "2024-02-11T13:15:09.000Z"
+        "stages": {
+          "live": true,
+          "accepted": true,
+          "started": false,
+          "complete": false
         }
       }
     ],

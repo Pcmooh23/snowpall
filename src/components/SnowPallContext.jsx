@@ -1,5 +1,7 @@
-import React, { createContext, useState, useRef } from 'react';
-
+import React, { createContext, useState, useRef, useEffect } from 'react';
+import { useJsApiLoader } from '@react-google-maps/api';
+/* global google */ //This is needed to use the google object 
+const libraries = ['places']; 
 // Created context.
 export const SnowPallContext = createContext();
 
@@ -144,7 +146,62 @@ export const SnowPallProvider = ({ children }) => {
 
   // Log to keep track of all live user requests.
   const [requestsLog, setRequestsLog] = useState([]);
+  const [refetchRequests, setRefetchRequests] = useState(true)
+  const [directionResponse, setDirectionResponse] = useState(null);
+  const [distance, setDistance] = useState('');
+  const [duration, setDuration] = useState('');
+  const [selectedDestination, setSelectedDestination] = useState(null);
+  const selectedTravelMode = localStorage.getItem('selectedTravelMode');
+  const [directionsService, setDirectionsService] = useState(null);
+  const {isLoaded} = useJsApiLoader({
+    googleMapsApiKey: process.env.REACT_APP_SNOWPALL_GOOGLE_MAPS_API_KEY,
+    libraries
+  })
 
+  useEffect(() => {
+    const initDirectionsService = () => {
+      if (window.google) {
+        setDirectionsService(new google.maps.DirectionsService());
+      }
+    };
+  
+    if (isLoaded) {
+      initDirectionsService();
+    }
+  }, [isLoaded]);
+
+
+  const calculateRoute = async (origin, destination, travelMode) => {
+    if (!directionsService) return null;
+
+    try {
+      const results = await directionsService.route({
+        origin: formatAddress(origin),
+        destination: formatAddress(destination),
+        travelMode: google.maps.TravelMode[travelMode],
+      });
+      return {
+        distance: results.routes[0].legs[0].distance.text,
+        duration: results.routes[0].legs[0].duration.text,
+        directions: results,
+      };
+    } catch (error) {
+      console.error('Error calculating route:', error);
+      return null;
+    }
+  };
+
+
+  // Snowtech tools.
+  const userID = localStorage.getItem('currentUserId');
+  const snowtechLocation = JSON.parse(localStorage.getItem(`${userID}_snowtechLocation`));
+  const formatAddress = (address) => {
+    return `${address.userStreet}, ${address.userCity}, ${address.userState} ${address.userZip}`;
+  };
+  const [currentJob, setCurrentJob] = useState({
+    requestId: null,
+    userId: null
+  });
   return (
     <SnowPallContext.Provider value={{
       // UserId management.
@@ -183,7 +240,15 @@ export const SnowPallProvider = ({ children }) => {
       paymentRef, total, estimatedTax, grandTotal,
 
       // Log all user active requests.
-      requestsLog, setRequestsLog
+      requestsLog, setRequestsLog,
+      refetchRequests, setRefetchRequests,
+      snowtechLocation, formatAddress,
+      distance, setDistance,
+      duration, setDuration,
+      selectedTravelMode,
+      directionResponse, setDirectionResponse,
+      selectedDestination, setSelectedDestination, calculateRoute,
+      currentJob, setCurrentJob
       }}>
       {children}
     </SnowPallContext.Provider>

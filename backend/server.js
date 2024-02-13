@@ -112,6 +112,7 @@ const loadData = async (req, res, next) => {
         req.combinedUsers = [...db.customers, ...db.snowtechs];
         req.customerUsers = [...db.customers];
         req.snowtechUsers = [...db.snowtechs];
+        req.activeRequests = [...db.requests.active]
         next(); // Proceed to the next middleware/route handler
     } catch (err) {
         console.error("Error loading user data:", err);
@@ -144,7 +145,8 @@ app.post('/registerUser', async (req, res) => {
             userState: req.body.userState,
             userZip: req.body.userZip,
             userPasswordHash: hashedPassword,
-            userAddresses: []
+            userAddresses: [],
+            userNotifications: []
         };
 
         if (newUser.accountType === 'customer') {
@@ -290,11 +292,47 @@ app.get('/services', verifyToken, async (req, res) => {
         const userServices = user.userCart;
 
         res.json(userServices); // Send filtered services as JSON
-    } catch (err) {
-        console.error("Error reading services file:", err);
+    } catch (error) {
+        console.error("Error reading services data:", error);
         res.status(500).send('An error occurred while fetching services.');
     }
 });
+
+// Get route for all active requests
+app.get('/requestsLog', verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        // Assuming snowtechUsers is an array of user objects
+        const user = req.snowtechUsers.find(user => user.id === userId);
+ 
+        if (!user) {
+            return res.status(404).send('User not found.');
+        }
+ 
+        // Since req.db.requests.active is an array, we need to map over it
+        const activeRequests = req.db.requests.active.map(request => ({
+            id: request.id,
+            orderDate: request.orderDate,
+            cart: request.cart,
+            address: {
+                userName: request.selectedAddress.userName,
+                userStreet: request.selectedAddress.userStreet,
+                userCity: request.selectedAddress.userCity,
+                userState: request.selectedAddress.userState,
+                userZip: request.selectedAddress.userZip,
+            },
+            charge: {
+                id: request.charge.id,
+                amount: request.charge.amount,
+            }
+        }));
+        // Sending the array of transformed active requests back to the client
+        res.json({ activeRequests });
+    } catch (error) {
+        console.error("Error reading active requests data:", error);
+        res.status(500).send('An error occurred while fetching active requests.');
+    }
+ });
 
 // GET route for saved addresses
 app.get('/addresses', verifyToken, async (req, res) => {
@@ -352,6 +390,12 @@ app.post('/submit-request', verifyToken, async (req, res) => {
             cart: cart,
             selectedAddress: selectedAddress,
             charge: chargeInfo, // Include the charge details in the request
+            stages: {
+                live: true,
+                accepted: false,
+                started: false,
+                complete: false,
+            }
         };
 
         // Add the new request to the user's userRequests array and the active requests array.
@@ -451,6 +495,7 @@ app.post('/car', verifyToken, upload.single('image'),
             // Create the new car service object
             const newCarService = {
                 id: uuidv4(),
+                userId: userId,
                 checkedService: req.body.checkedService === 'true', // Convert string to boolean
                 makeAndModel: req.body.makeAndModel,
                 color: req.body.color,
@@ -493,6 +538,7 @@ app.post('/driveway', verifyToken, upload.single('image'),
 
             const newDrivewayService = {
                 id: uuidv4(),
+                userId: userId,
                 selectedSize: req.body.selectedSize,
                 drivewayMessage: req.body.drivewayMessage || '',
                 objectType: req.body.objectType,
@@ -534,6 +580,7 @@ app.post('/lawn', verifyToken, upload.single('image'),
 
             const newLawnService = {
                 id: uuidv4(),
+                userId: userId,
                 walkway: req.body.walkway === 'true',
                 frontYard: req.body.frontYard === 'true',
                 backyard: req.body.backyard === 'true', 
@@ -635,6 +682,40 @@ app.post('/other', verifyToken, upload.single('image'),
     }
 );
 
+app.put('/requests/:id/accept', verifyToken, async (req, res) => {
+        try {
+            const requestId = req.params.id; // Capture the request ID from the URL
+            const { customerId } = req.body; // Extract customerId from the request body
+            const customer = req.customerUsers.find(user => user.id === customerId);
+            const customerRequest = customer.userRequests.find(request => request.id === requestId)
+            if (!customer) {
+                return res.status(404).send('Customer not found.');
+            }
+
+            const request = req.activeRequests.find(request => request.id === requestId);
+            if (!request) {
+            return res.status(404).send('Request not found.');
+            }
+
+            const notificationMessage = `Your request with ID ${requestId} has been accepted.`;
+            request.stages.accepted = true;
+            customerRequest.stages.accepted = true;
+            customer.userNotifications.push({
+                id: uuidv4(),
+                message: notificationMessage,
+                date: new Date(),
+                read: false
+            });
+            
+        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+        res.status(200).json({ message: 'Request accepted and customer notified.', request: customerRequest });
+        } catch (error) {
+            console.error("Error updating request object:", error);
+            res.status(500).send('An error occurred while updating a request object.');
+        }
+    }
+)
+
 // PUT route to update an existing address
 app.put('/address/:id', verifyToken, 
     [
@@ -671,6 +752,7 @@ app.put('/address/:id', verifyToken,
             // Update the address
             const updatedAddress = {
                 ...user.userAddresses[addressIndex],
+                userId: userId,
                 userName: req.body.userName,
                 userNumber: req.body.userNumber,
                 userStreet: req.body.userStreet,
@@ -738,7 +820,7 @@ app.put('/car/:id', verifyToken, upload.single('image'),
             await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(200).json({ message: 'Car service object updated.', car: user.userCart[carIndex] });
 
-        } catch (err) {
+        } catch (error) {
             console.error("Error updating car service object:", err);
             res.status(500).send('An error occurred while updating the car service object.');
         }
