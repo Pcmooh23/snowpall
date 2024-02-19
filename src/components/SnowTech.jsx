@@ -1,5 +1,5 @@
-import React, { useState, useContext, useEffect} from 'react';
-import { Box, Button, ButtonGroup, Flex, HStack, IconButton, Input, Text } from '@chakra-ui/react'
+import React, { useState, useContext, useEffect, useRef} from 'react';
+import { Box, Button, ButtonGroup, Flex, HStack, IconButton, Text } from '@chakra-ui/react'
 import { FaBus, FaCar, FaLocationArrow, FaWalking,  } from 'react-icons/fa'
 import { MdDirectionsBike } from "react-icons/md";
 import MainHeader from "./MainHeader";
@@ -15,32 +15,39 @@ const SnowTech = () => {
   const [map, setMap] = useState(/** @type google.maps.Map */ (null)); // Re-centering the map 
   
   const [localCenter, setLocalCenter] = useState(null);
-  const [isProximityClose, setIsProximityClose] = useState(false);
+  const proximityCloseRef = useRef(null);
 
   const { 
-    snowtechLocation, formatAddress, 
-    directionResponse, setDirectionResponse, selectedTravelMode, calculateRoute,
-    distance, setDistance, duration, setDuration, selectedDestination, setSelectedDestination
+    snowtechLocation, formatAddress, directionResponse, acceptedRequest,
+    setDirectionResponse, selectedTravelMode, calculateRoute,
+    distance, setDistance, duration, setDuration, setRequestsLog,
+    selectedDestination, setSelectedDestination, cancelRequestGlobal, setAcceptedRequestId, acceptedRequestId
   } = useContext(SnowPallContext);
   const { customFetch } = useApi();
-  
+
   const {isLoaded} = useJsApiLoader({
     googleMapsApiKey: process.env.REACT_APP_SNOWPALL_GOOGLE_MAPS_API_KEY,
     libraries
   })
 
   const geocodeAddress = async (address) => {
-    if (!isLoaded) return; // Ensure Google Maps API is loaded
+    if (!isLoaded) return;
+  
     const geocoder = new google.maps.Geocoder();
     try {
-      const response = await geocoder.geocode({ address: formatAddress(address) });
-      return response.results[0].geometry.location;
+      const response = await geocoder.geocode({address: formatAddress(address)});
+      if (response.results && response.results.length > 0) {
+        return response.results[0].geometry.location;
+      } else {
+        console.error(`Geocoding found no results for the address: ${address}`);
+        return null;
+      }
     } catch (error) {
       console.error('Geocoding error:', error);
       return null;
     }
   };
-
+  
   useEffect(() => {
     const getInitialCenter = async () => {
       if ( isLoaded) {
@@ -53,6 +60,7 @@ const SnowTech = () => {
     };
   
     getInitialCenter();
+
   }, [isLoaded]);
 
   if (!isLoaded) {
@@ -86,7 +94,7 @@ const SnowTech = () => {
       const distance = R * c; // in metres
       return distance;
     };
-  
+    
     // Start tracking
     const watchId = navigator.geolocation.watchPosition(
       async (position) => {
@@ -100,23 +108,46 @@ const SnowTech = () => {
           prevMap.panTo(currentLocation);
           return prevMap;
         });
-  
+        const destination = {
+          userStreet: acceptedRequest.address.userStreet,
+          userCity: acceptedRequest.address.userCity,
+          userState: acceptedRequest.address.userState,
+          userZip: acceptedRequest.address.userZip
+        }
+        const geocodedDestination = await geocodeAddress(destination);
+        console.log('Geocoded destination:', geocodedDestination); 
+
+        if (!geocodedDestination || typeof geocodedDestination.lat !== 'function' || typeof geocodedDestination.lng !== 'function') {
+          console.error('Invalid geocoded destination:', geocodedDestination);
+          return; // Exit the function if geocoding fails
+        }
+
+        const destinationLat = geocodedDestination.lat();
+        const destinationLng = geocodedDestination.lng();
         // Check if the snowtech is within one foot of the destination
-        const destinationCoords = new google.maps.LatLng(selectedDestination); // Assume selectedDestination is an object with lat and lng
+
+        console.log('This is the destination Coords:', destinationLat, destinationLng);
+
         const distance = calculateDistance(
           currentLocation.lat, currentLocation.lng, 
-          destinationCoords.lat(), destinationCoords.lng()
+          destinationLat, destinationLng
         );
+
+        console.log('This is the distance: ', distance);
+        const distanceInFeet = distance * 3.28084;
+        console.log('This is the distance in feet: ', distanceInFeet);
   
-        // Check if the distance is less than or equal to one foot (approximately 0.3 meters)
-        if (distance <= 3.048) {
-          setIsProximityClose(true);
-        } else {
-          setIsProximityClose(false);
+        // Check if the distance is less than or equal to approximately 200 feet or 61 meters.
+        if (distanceInFeet <= 500) {
+          proximityCloseRef.current = true;
+          console.log('Proximity close:', proximityCloseRef.current);
+        
+        } else if (distanceInFeet > 500) {
+          proximityCloseRef.current = false;
+          console.log('Proximity not close:', proximityCloseRef.current);
         }
-  
         // Recalculate the route from the current location to the destination
-        const routeInfo = await calculateRoute(currentLocation, selectedDestination, selectedTravelMode);
+        const routeInfo = await calculateRoute(currentLocation, destination, selectedTravelMode);
         if (routeInfo) {
           setDirectionResponse(routeInfo.directions); // set in context state
         }
@@ -134,7 +165,7 @@ const SnowTech = () => {
   };  
 
   // Function to cancel the request and stop tracking
-  const cancelRequest = () => {
+  const cancelRequest = async () => {
     // Clear the watchPosition using the stored watchId
     const watchId = localStorage.getItem('watchId');
     if (watchId) {
@@ -147,44 +178,114 @@ const SnowTech = () => {
     setDistance('');
     setDuration('');
     setSelectedDestination(null); // Clear the selected destination
+    setAcceptedRequestId(null);
     
     // Reset the map to the initial center
     setMap((prevMap) => {
       prevMap.panTo(localCenter);
       return prevMap;
-    });
+    });    
+    const url = `/requests/${acceptedRequestId}/cancel`;
+    const options = {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        customerId: acceptedRequest.cart[0].userId,
+        stages: {
+            accepted: false
+        }
+      })
+    };
+
+    try {
+      const response = await customFetch(url, options);
+
+      if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      cancelRequestGlobal();
+
+      setRequestsLog(currentRequests =>
+          currentRequests.map(req =>
+              req.id === acceptedRequest ? { ...req, stages: { ...req.stages, accepted: false } } : req
+          )
+      );
+    } catch (error) {
+      console.error('Error cancelling the request:', error);
+    }
   };
 
-  /*
-  const startJob = async () => {
-    if (!isProximityClose) {
-      alert('You need to be at the location to start the job.');
+  const startRequest = async () => {
+    if (!proximityCloseRef.current) {
+      alert('You need to be at the location to start the request.');
       return;
     }
-    const url =  '/start-job';
+    const url =  `/requests/${acceptedRequestId}/start`;
     const options = {
-        method:'POST' ,
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId: currentUserId, requestId: currentRequestId }),
+      method:'PUT' ,
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+        requestId: acceptedRequest.id, 
+        customerId: acceptedRequest.cart[0].userId,
+        stages: {
+          started: true
+        }
+      }),
     };
 
     try {
       const response = await customFetch(url, options)
 
       if (!response.ok) {
-        throw new Error('Problem starting the job');
+        throw new Error('Problem starting the request');
       }
   
       const responseData = await response.json();
       console.log('Job started:', responseData);
   
     } catch (error) {
-      console.error('Error starting the job:', error);
+      console.error('Error starting the request:', error);
     }
   };
-  */
+
+  const completeRequest = async () => {
+ 
+    const url =  `/requests/${acceptedRequestId}/complete`;
+    const options = {
+      method:'PUT' ,
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+        requestId: acceptedRequest.id, 
+        customerId: acceptedRequest.cart[0].userId,
+        snowtechId: localStorage.getItem('currentUserId'),
+        stages: {
+          live: false,
+          complete: true
+        }
+      }),
+    };
+
+    try {
+      const response = await customFetch(url, options)
+
+      if (!response.ok) {
+        throw new Error('Problem completing the request');
+      }
+  
+      const responseData = await response.json();
+      console.log('Job complete:', responseData);
+  
+    } catch (error) {
+      console.error('Error completing the request:', error);
+    }
+  };
   
   return (
     <>
@@ -245,10 +346,10 @@ const SnowTech = () => {
                 <Button className='request-button' onClick={cancelRequest}>
                 Cancel Request
                 </Button>
-                <Button className='request-button'>
+                <Button className='request-button' onClick={startRequest}>
                   Start Request
                 </Button>
-                <Button className='request-button'>
+                <Button className='request-button' onClick={completeRequest}>
                   Complete Request
                 </Button>
               </div>

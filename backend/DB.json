@@ -1,7 +1,7 @@
 {
   "customers": [
     {
-      "id": "f0347893-1d94-43f9-bf96-6192faf5dff4",
+      "id": "ec61cce1-3360-4e01-9a65-ac6c5f125adb",
       "userName": "Raymond Reddington",
       "userEmail": "Reddington0207@gmail.com",
       "accountType": "customer",
@@ -11,10 +11,10 @@
       "userCity": "Storrs",
       "userState": "Connecticut",
       "userZip": "06269",
-      "userPasswordHash": "$2b$10$jfBWumBozf7CIrQqwxW6ZOOB6RlY1P40t6HXGP2DP8XvX0aenDdw6",
+      "userPasswordHash": "$2b$10$LJj.ImxRnifUwMv55Ogofu23y1QgquWY2hlHkHAP4tvbze380P0nK",
       "userAddresses": [
         {
-          "id": "438ebfec-986e-4dfc-9261-1e67895709e0",
+          "id": "8e6b1987-904a-4af6-b36e-7e8690e4b953",
           "userName": "Raymond Reddington",
           "userNumber": "",
           "userStreet": "55 Gilbert Rd",
@@ -24,62 +24,55 @@
           "userZip": "06269"
         }
       ],
-      "userNotifications": [
-        {
-          "id": "5730de00-3b3c-409e-954c-078c1ad71f6c",
-          "message": "Your request with ID 895eec37-7029-4689-b871-165025334327 has been accepted.",
-          "date": "2024-02-13T01:59:34.462Z",
-          "read": false
-        }
-      ],
+      "userNotifications": [],
       "userCart": [
         {
-          "id": "7b4bf091-f1f1-4cbb-ab19-2f81155b3de9",
-          "userId": "f0347893-1d94-43f9-bf96-6192faf5dff4",
+          "id": "b656c530-a2b8-4b2e-ad6d-5fb310e92296",
+          "userId": "ec61cce1-3360-4e01-9a65-ac6c5f125adb",
           "checkedService": true,
-          "makeAndModel": "honda civic",
-          "color": "white",
+          "makeAndModel": "jeep wrangler",
+          "color": "dsds",
           "licensePlate": "LVMH",
-          "carMessage": "I never wanted Tom to marry you Lizzie.",
+          "carMessage": "hello Lizzie.",
           "objectType": "car",
-          "imagePath": "uploads/fa9bdf8eeb4665fe05812c2c9b998faf"
+          "imagePath": "uploads/e12b9957d4fa6491961abb7ef33130eb"
         },
         {
-          "id": "2db58bfa-b37c-4a81-aa7a-1841fe4c8c48",
-          "userId": "f0347893-1d94-43f9-bf96-6192faf5dff4",
-          "selectedSize": "size4",
-          "drivewayMessage": "He was only ever meant to be a friend of a friend.",
+          "id": "2a31dc89-84cc-41b0-8f42-e0eb65ad9b4b",
+          "userId": "ec61cce1-3360-4e01-9a65-ac6c5f125adb",
+          "selectedSize": "size3",
+          "drivewayMessage": "As my daughter I forbid you to marry tom.",
           "objectType": "driveway",
-          "imagePath": "uploads/fea41d1a8443e84720149ff39eb112e4"
+          "imagePath": "uploads/e18303d13adc954d64d5c16b965727f3"
         }
       ],
       "userRequests": [
         {
-          "id": "895eec37-7029-4689-b871-165025334327",
-          "orderDate": "2024-02-13T01:33:00.647Z",
+          "id": "e3d0d674-6a8a-47e2-a9e3-11035a6ff2b4",
+          "orderDate": "2024-02-17T06:28:36.624Z",
           "cart": [
             {
-              "id": "7b4bf091-f1f1-4cbb-ab19-2f81155b3de9",
-              "userId": "f0347893-1d94-43f9-bf96-6192faf5dff4",
+              "id": "b656c530-a2b8-4b2e-ad6d-5fb310e92296",
+              "userId": "ec61cce1-3360-4e01-9a65-ac6c5f125adb",
               "checkedService": true,
-              "makeAndModel": "honda civic",
-              "color": "white",
+              "makeAndModel": "jeep wrangler",
+              "color": "dsds",
               "licensePlate": "LVMH",
-              "carMessage": "I never wanted Tom to marry you Lizzie.",
+              "carMessage": "hello Lizzie.",
               "objectType": "car",
-              "imagePath": "uploads/fa9bdf8eeb4665fe05812c2c9b998faf"
+              "imagePath": "uploads/e12b9957d4fa6491961abb7ef33130eb"
             },
             {
-              "id": "2db58bfa-b37c-4a81-aa7a-1841fe4c8c48",
-              "userId": "f0347893-1d94-43f9-bf96-6192faf5dff4",
-              "selectedSize": "size4",
-              "drivewayMessage": "He was only ever meant to be a friend of a friend.",
+              "id": "2a31dc89-84cc-41b0-8f42-e0eb65ad9b4b",
+              "userId": "ec61cce1-3360-4e01-9a65-ac6c5f125adb",
+              "selectedSize": "size3",
+              "drivewayMessage": "As my daughter I forbid you to marry tom.",
               "objectType": "driveway",
-              "imagePath": "uploads/fea41d1a8443e84720149ff39eb112e4"
+              "imagePath": "uploads/e18303d13adc954d64d5c16b965727f3"
             }
           ],
           "selectedAddress": {
-            "id": "438ebfec-986e-4dfc-9261-1e67895709e0",
+            "id": "8e6b1987-904a-4af6-b36e-7e8690e4b953",
             "userName": "Raymond Reddington",
             "userNumber": "",
             "userStreet": "55 Gilbert Rd",
@@ -89,15 +82,91 @@
             "userZip": "06269"
           },
           "charge": {
-            "id": "ch_3OjArnBWC1e9EDXY1J16NTxE",
-            "amount": 14300,
+            "id": "ch_3OkhO3BWC1e9EDXY0az0caPT",
+            "amount": 11000,
             "currency": "usd",
             "description": "Charge for order",
-            "created": "2024-02-13T01:32:59.000Z"
+            "created": "2024-02-17T06:28:35.000Z"
           },
           "stages": {
             "live": true,
-            "accepted": true,
+            "accepted": false,
+            "started": false,
+            "complete": false
+          }
+        }
+      ],
+      "refreshToken": null
+    },
+    {
+      "id": "f4414a43-926b-4686-b8db-2296c37d1a82",
+      "userName": "Tom Keen",
+      "userEmail": "TomKeen123@gmail.com",
+      "accountType": "customer",
+      "userNumber": "",
+      "userStreet": "3384 Towers Loop Road",
+      "userUnit": "",
+      "userCity": "Storrs",
+      "userState": "Connecticut",
+      "userZip": "06269",
+      "userPasswordHash": "$2b$10$Iv1sKuzIGzmejjOYJcFINeA4NhQzMUBYVKnFyvEVarJEidBX8.mbC",
+      "userAddresses": [
+        {
+          "id": "ad162f58-b9ae-452c-86fc-f6204640715a",
+          "userName": "Tom Keen",
+          "userNumber": "",
+          "userStreet": "3384 Towers Loop Road",
+          "userUnit": "",
+          "userCity": "Storrs",
+          "userState": "Connecticut",
+          "userZip": "06269"
+        }
+      ],
+      "userNotifications": [],
+      "userCart": [
+        {
+          "id": "2bf76ef9-b70d-435d-8886-854c9ab01d66",
+          "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+          "selectedSize": "job4",
+          "otherMessage": "I'm going to marry Elizabeth whether you like it or not, we gave you a grand daughter",
+          "objectType": "other",
+          "imagePath": "uploads/d86e6838595b309f1b0d5a18054a2c9f"
+        }
+      ],
+      "userRequests": [
+        {
+          "id": "bc104110-cf20-4e4e-a3ac-7b66cbac981e",
+          "orderDate": "2024-02-17T06:30:26.706Z",
+          "cart": [
+            {
+              "id": "2bf76ef9-b70d-435d-8886-854c9ab01d66",
+              "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+              "selectedSize": "job4",
+              "otherMessage": "I'm going to marry Elizabeth whether you like it or not, we gave you a grand daughter",
+              "objectType": "other",
+              "imagePath": "uploads/d86e6838595b309f1b0d5a18054a2c9f"
+            }
+          ],
+          "selectedAddress": {
+            "id": "ad162f58-b9ae-452c-86fc-f6204640715a",
+            "userName": "Tom Keen",
+            "userNumber": "",
+            "userStreet": "3384 Towers Loop Road",
+            "userUnit": "",
+            "userCity": "Storrs",
+            "userState": "Connecticut",
+            "userZip": "06269"
+          },
+          "charge": {
+            "id": "ch_3OkhPpBWC1e9EDXY0Ts3CX7p",
+            "amount": 6050,
+            "currency": "usd",
+            "description": "Charge for order",
+            "created": "2024-02-17T06:30:25.000Z"
+          },
+          "stages": {
+            "live": true,
+            "accepted": false,
             "started": false,
             "complete": false
           }
@@ -108,7 +177,7 @@
   ],
   "snowtechs": [
     {
-      "id": "9ffce47c-35d2-47b5-8b40-c56d8d161bfd",
+      "id": "433adac0-90e4-4d97-9c91-bcf9e2e7b791",
       "userName": "Kim Possible",
       "userEmail": "kim.possible@gmail.com",
       "accountType": "snowtech",
@@ -118,10 +187,10 @@
       "userCity": "Storrs",
       "userState": "Connecticut",
       "userZip": "06269",
-      "userPasswordHash": "$2b$10$AC2oRYPIUdv5hb4bg4i1v.e.rheG1wxaH0BEVhyj.uxA4eE5ayHAm",
+      "userPasswordHash": "$2b$10$kSSiZrCstEaNmM67jh3HAuWE7vnrt.301Fdw.x7JFyZfaqQDHGrsS",
       "userAddresses": [
         {
-          "id": "519d0c3b-ceb0-4442-81d5-f6b686138045",
+          "id": "6e6d1ec0-f8a6-452f-9627-1d03572ae523",
           "userName": "Kim Possible",
           "userNumber": "",
           "userStreet": "3384 Towers Loop Road",
@@ -132,38 +201,68 @@
         }
       ],
       "userNotifications": [],
-      "CompletedRequests": [],
-      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjlmZmNlNDdjLTM1ZDItNDdiNS04YjQwLWM1NmQ4ZDE2MWJmZCIsInVzZXJFbWFpbCI6ImtpbS5wb3NzaWJsZUBnbWFpbC5jb20iLCJpYXQiOjE3MDc3ODg5NDcsImV4cCI6MTcwODM5Mzc0N30.pS6qGezJYcXeW1jgLvdqN0HUpTOfiDImWeHjNUl9A3g"
+      "completedRequests": [],
+      "balance": 0,
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQzM2FkYWMwLTkwZTQtNGQ5Ny05YzkxLWJjZjllMmU3Yjc5MSIsInVzZXJFbWFpbCI6ImtpbS5wb3NzaWJsZUBnbWFpbC5jb20iLCJpYXQiOjE3MDgzNjc1NTksImV4cCI6MTcwODk3MjM1OX0.b8Yv1x-WYANj8_EMeqWTSPlV3cNepWFu9y8qF-T6q2U"
+    },
+    {
+      "id": "76c0c3c4-c8ed-4204-a8ba-ff731be5882d",
+      "userName": "Ron Stoppable",
+      "userEmail": "ron.stoppable@gmail.com",
+      "accountType": "snowtech",
+      "userNumber": "",
+      "userStreet": "2374 Alumni Dr",
+      "userUnit": "",
+      "userCity": "Storrs",
+      "userState": "Connecticut",
+      "userZip": "06269",
+      "userPasswordHash": "$2b$10$FvjUasoqKhX3uRTV7uUqhO3nXw4AsmdVDcMp4DUtY1EiwJsBdzUSu",
+      "userAddresses": [
+        {
+          "id": "ce7ef648-2a75-4a79-9fc5-5351f96e1ef5",
+          "userName": "Ron Stoppable",
+          "userNumber": "",
+          "userStreet": "2374 Alumni Dr",
+          "userUnit": "",
+          "userCity": "Storrs",
+          "userState": "Connecticut",
+          "userZip": "06269"
+        }
+      ],
+      "userNotifications": [],
+      "completedRequests": [],
+      "balance": 0,
+      "refreshToken": null
     }
   ],
   "requests": {
     "active": [
       {
-        "id": "895eec37-7029-4689-b871-165025334327",
-        "orderDate": "2024-02-13T01:33:00.647Z",
+        "id": "e3d0d674-6a8a-47e2-a9e3-11035a6ff2b4",
+        "orderDate": "2024-02-17T06:28:36.624Z",
         "cart": [
           {
-            "id": "7b4bf091-f1f1-4cbb-ab19-2f81155b3de9",
-            "userId": "f0347893-1d94-43f9-bf96-6192faf5dff4",
+            "id": "b656c530-a2b8-4b2e-ad6d-5fb310e92296",
+            "userId": "ec61cce1-3360-4e01-9a65-ac6c5f125adb",
             "checkedService": true,
-            "makeAndModel": "honda civic",
-            "color": "white",
+            "makeAndModel": "jeep wrangler",
+            "color": "dsds",
             "licensePlate": "LVMH",
-            "carMessage": "I never wanted Tom to marry you Lizzie.",
+            "carMessage": "hello Lizzie.",
             "objectType": "car",
-            "imagePath": "uploads/fa9bdf8eeb4665fe05812c2c9b998faf"
+            "imagePath": "uploads/e12b9957d4fa6491961abb7ef33130eb"
           },
           {
-            "id": "2db58bfa-b37c-4a81-aa7a-1841fe4c8c48",
-            "userId": "f0347893-1d94-43f9-bf96-6192faf5dff4",
-            "selectedSize": "size4",
-            "drivewayMessage": "He was only ever meant to be a friend of a friend.",
+            "id": "2a31dc89-84cc-41b0-8f42-e0eb65ad9b4b",
+            "userId": "ec61cce1-3360-4e01-9a65-ac6c5f125adb",
+            "selectedSize": "size3",
+            "drivewayMessage": "As my daughter I forbid you to marry tom.",
             "objectType": "driveway",
-            "imagePath": "uploads/fea41d1a8443e84720149ff39eb112e4"
+            "imagePath": "uploads/e18303d13adc954d64d5c16b965727f3"
           }
         ],
         "selectedAddress": {
-          "id": "438ebfec-986e-4dfc-9261-1e67895709e0",
+          "id": "8e6b1987-904a-4af6-b36e-7e8690e4b953",
           "userName": "Raymond Reddington",
           "userNumber": "",
           "userStreet": "55 Gilbert Rd",
@@ -173,15 +272,52 @@
           "userZip": "06269"
         },
         "charge": {
-          "id": "ch_3OjArnBWC1e9EDXY1J16NTxE",
-          "amount": 14300,
+          "id": "ch_3OkhO3BWC1e9EDXY0az0caPT",
+          "amount": 11000,
           "currency": "usd",
           "description": "Charge for order",
-          "created": "2024-02-13T01:32:59.000Z"
+          "created": "2024-02-17T06:28:35.000Z"
         },
         "stages": {
           "live": true,
-          "accepted": true,
+          "accepted": false,
+          "started": false,
+          "complete": false
+        }
+      },
+      {
+        "id": "bc104110-cf20-4e4e-a3ac-7b66cbac981e",
+        "orderDate": "2024-02-17T06:30:26.706Z",
+        "cart": [
+          {
+            "id": "2bf76ef9-b70d-435d-8886-854c9ab01d66",
+            "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+            "selectedSize": "job4",
+            "otherMessage": "I'm going to marry Elizabeth whether you like it or not, we gave you a grand daughter",
+            "objectType": "other",
+            "imagePath": "uploads/d86e6838595b309f1b0d5a18054a2c9f"
+          }
+        ],
+        "selectedAddress": {
+          "id": "ad162f58-b9ae-452c-86fc-f6204640715a",
+          "userName": "Tom Keen",
+          "userNumber": "",
+          "userStreet": "3384 Towers Loop Road",
+          "userUnit": "",
+          "userCity": "Storrs",
+          "userState": "Connecticut",
+          "userZip": "06269"
+        },
+        "charge": {
+          "id": "ch_3OkhPpBWC1e9EDXY0Ts3CX7p",
+          "amount": 6050,
+          "currency": "usd",
+          "description": "Charge for order",
+          "created": "2024-02-17T06:30:25.000Z"
+        },
+        "stages": {
+          "live": true,
+          "accepted": false,
           "started": false,
           "complete": false
         }

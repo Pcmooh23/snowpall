@@ -44,7 +44,7 @@ export function useApi() {
 
        let response = await fetch(`${baseUrl}${url}`, authOptions);
 
-       if (response.status === 401 && !skipRefresh) {
+       if (response.status === 403 && !skipRefresh) {
            const newAccessToken = await refreshToken();
            if (newAccessToken) {
                authOptions.headers['Authorization'] = `Bearer ${newAccessToken}`; 

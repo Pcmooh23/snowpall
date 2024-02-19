@@ -10,10 +10,9 @@ const RequestsList = () => {
         requestsLog, setRequestsLog, baseUrl, snowtechLocation,
         refetchRequests, setRefetchRequests, formatAddress, calculateRoute,
         setDirectionResponse, setDistance, setSelectedDestination,
-        setDuration, selectedTravelMode, currentJob, setCurrentJob
+        setDuration, selectedTravelMode, setAcceptedRequest, setAcceptedRequestId, acceptedRequestId
      } = useContext(SnowPallContext);
     const { customFetch } = useApi();
-
 
     const [moreDetailsOverlay, setMoreDetailsOverlay] = useState(false);
     const [selectedItemDetails, setSelectedItemDetails] = useState(null);
@@ -31,7 +30,6 @@ const RequestsList = () => {
         setMoreDetailsOverlay(true);
     };
     
-
     const hideMoreDetails = () => {
         setMoreDetailsOverlay(false);
         setSelectedItemDetails(null);
@@ -82,6 +80,8 @@ const RequestsList = () => {
     }, [refetchRequests])
       
     const handleAccept = async (request) => {
+        setAcceptedRequest(request)
+        setAcceptedRequestId(request.id)
         const destination = {
             userStreet: request.address.userStreet,
             userCity: request.address.userCity,
@@ -118,6 +118,12 @@ const RequestsList = () => {
             const responseData = await response.json();
             console.log('Job accepted:', responseData);
 
+            setRequestsLog((currentRequests) => currentRequests.map((req) => {
+                if (req.id === request.id) {
+                    return {...req, stages: {...req.stages, accepted:true}};
+                }
+                return req;
+            }))
         } catch (error) {
             console.error('Error accepting the job:', error);
         }
@@ -147,7 +153,9 @@ const RequestsList = () => {
                             </div>
                             <div className='request-bottom'>
                                 <div className='request-bottom-left'>
-                                <button className='accept-request' onClick={() => handleAccept(request)}>Accept</button>
+                                    <button className='accept-request' onClick={() => handleAccept(request)}>
+                                        { acceptedRequestId === request.id ? 'Accepted' : 'Accept'}
+                                    </button>
                                     <p>${amount}</p>
                                 </div>
                                 <div className='distance'>{request.distance || 'Calculating...'}</div>

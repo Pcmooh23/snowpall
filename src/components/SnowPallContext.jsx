@@ -170,26 +170,48 @@ export const SnowPallProvider = ({ children }) => {
     }
   }, [isLoaded]);
 
+ // Adjust the calculateRoute function to handle different types of input
+const calculateRoute = async (origin, destination, travelMode) => {
+  if (!directionsService) return null;
 
-  const calculateRoute = async (origin, destination, travelMode) => {
-    if (!directionsService) return null;
+  let originLocation;
+  let destinationLocation;
 
-    try {
-      const results = await directionsService.route({
-        origin: formatAddress(origin),
-        destination: formatAddress(destination),
-        travelMode: google.maps.TravelMode[travelMode],
-      });
-      return {
-        distance: results.routes[0].legs[0].distance.text,
-        duration: results.routes[0].legs[0].duration.text,
-        directions: results,
-      };
-    } catch (error) {
-      console.error('Error calculating route:', error);
-      return null;
-    }
-  };
+  // Check if the origin and destination are strings or coordinates
+  if (origin && typeof origin === 'object' && 'userStreet' in origin) {
+    originLocation = formatAddress(origin);
+  } else if (origin && origin.lat && origin.lng) {
+    originLocation = new google.maps.LatLng(origin.lat, origin.lng);
+  } else {
+    console.error('Invalid origin:', origin);
+    return null;
+  }
+
+  if (destination && typeof destination === 'object' && 'userStreet' in destination) {
+    destinationLocation = formatAddress(destination);
+  } else if (destinationLocation && destinationLocation.lat && origin.lng) {
+    destinationLocation = new google.maps.LatLng(destinationLocation.lat, destinationLocation.lng);
+  } else {
+    console.error('Invalid destination:', destinationLocation);
+    return null;
+  }
+
+  try {
+    const results = await directionsService.route({
+      origin: originLocation,
+      destination: destinationLocation,
+      travelMode: google.maps.TravelMode[travelMode],
+    });
+    return {
+      distance: results.routes[0].legs[0].distance.text,
+      duration: results.routes[0].legs[0].duration.text,
+      directions: results,
+    };
+  } catch (error) {
+    console.error('Error calculating route:', error);
+    return null;
+  }
+};
 
 
   // Snowtech tools.
@@ -202,6 +224,15 @@ export const SnowPallProvider = ({ children }) => {
     requestId: null,
     userId: null
   });
+
+  const [acceptedRequest, setAcceptedRequest] = useState(null);
+  const [acceptedRequestId, setAcceptedRequestId] = useState(null);
+
+
+  const cancelRequestGlobal = () => {
+      setAcceptedRequest(null); // or whatever logic you need to reset the accepted request
+  };
+
   return (
     <SnowPallContext.Provider value={{
       // UserId management.
@@ -239,6 +270,7 @@ export const SnowPallProvider = ({ children }) => {
       selectedAddressIndex, setSelectedAddressIndex,
       paymentRef, total, estimatedTax, grandTotal,
 
+
       // Log all user active requests.
       requestsLog, setRequestsLog,
       refetchRequests, setRefetchRequests,
@@ -248,7 +280,10 @@ export const SnowPallProvider = ({ children }) => {
       selectedTravelMode,
       directionResponse, setDirectionResponse,
       selectedDestination, setSelectedDestination, calculateRoute,
-      currentJob, setCurrentJob
+      currentJob, setCurrentJob,
+      acceptedRequest, setAcceptedRequest,
+      cancelRequestGlobal,
+      acceptedRequestId, setAcceptedRequestId,
       }}>
       {children}
     </SnowPallContext.Provider>

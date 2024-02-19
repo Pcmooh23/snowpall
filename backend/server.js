@@ -113,6 +113,7 @@ const loadData = async (req, res, next) => {
         req.customerUsers = [...db.customers];
         req.snowtechUsers = [...db.snowtechs];
         req.activeRequests = [...db.requests.active]
+        req.completedRequests = [...db.requests.completed]
         next(); // Proceed to the next middleware/route handler
     } catch (err) {
         console.error("Error loading user data:", err);
@@ -153,7 +154,8 @@ app.post('/registerUser', async (req, res) => {
             newUser.userCart = [];
             newUser.userRequests = [];
         } else if (newUser.accountType === 'snowtech') {
-            newUser.CompletedRequests = [];
+            newUser.completedRequests = [];
+            newUser.balance = 0
         }
         
         const tokenPayload = { id: newUser.id, userEmail: newUser.userEmail };
@@ -324,7 +326,8 @@ app.get('/requestsLog', verifyToken, async (req, res) => {
             charge: {
                 id: request.charge.id,
                 amount: request.charge.amount,
-            }
+            },
+            stages: request.stages
         }));
         // Sending the array of transformed active requests back to the client
         res.json({ activeRequests });
@@ -682,14 +685,149 @@ app.post('/other', verifyToken, upload.single('image'),
     }
 );
 
+app.put('/requests/:id/cancel', verifyToken, async (req, res) => {
+        try {
+            const requestId = req.params.id; 
+            const { customerId } = req.body; 
+           
+            const customer = req.customerUsers.find(user => user.id === customerId); 
+            if (!customer) {
+                return res.status(404).send('Customer not found.');
+            }
+
+            const customerRequest = customer.userRequests.find(request => request.id === requestId)
+            if (!customerRequest) {
+                return res.status(404).send('Request not found.');
+            }
+
+            const request = req.activeRequests.find(request => request.id === requestId);
+            if (!request) {
+            return res.status(404).send('Request not found.');
+            }
+
+            const notificationMessage = `Snowtech cancelled request with ID ${requestId}.`;
+            request.stages.accepted = false;
+            customerRequest.stages.accepted = false;
+            customer.userNotifications.push({
+                id: uuidv4(),
+                message: notificationMessage,
+                date: new Date(),
+                read: false
+            });
+            
+        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+        res.status(200).json({ message: 'Request cancelled and customer notified.', request: customerRequest });
+        } catch (error) {
+            console.error("Error updating request object:", error);
+            res.status(500).send('An error occurred while updating a request object.');
+        }
+    }
+)
+
+app.put('/requests/:id/complete', verifyToken, async (req, res) => {
+        try {
+            const requestId = req.params.id; // Capture the request ID from the URL
+            const { customerId, snowtechId } = req.body; // Extract customerId from the request body
+             
+           
+            const customer = req.customerUsers.find(user => user.id === customerId); 
+            if (!customer) {
+                return res.status(404).send('Customer not found.');
+            }
+
+            const snowtech = req.snowtechUsers.find(tech => tech.id === snowtechId);
+            if (!snowtech) {
+                return res.status(404).send('Snowtech not found.');
+            }
+
+            const customerRequest = customer.userRequests.find(request => request.id === requestId)
+            if (!customerRequest) {
+                return res.status(404).send('Request not found.');
+            }
+
+            const request = req.activeRequests.find(request => request.id === requestId);
+            if (!request) {
+            return res.status(404).send('Request not found.');
+            }
+
+            const notificationMessage = `Your request with ID ${requestId} has been completed.`;
+            request.stages.live = false;
+            request.stages.complete = true;
+            customerRequest.stages.live = false;
+            customerRequest.stages.complete = true;
+            snowtech.completedRequests.push(request);
+            req.db.requests.completed.push(request);
+            req.db.requests.active = req.db.requests.active.filter((removeRequest) => removeRequest.id !== request.id);
+            customer.userNotifications.push({
+                id: uuidv4(),
+                message: notificationMessage,
+                date: new Date(),
+                read: false
+            });
+            
+        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+        res.status(200).json({ message: 'Request complete and customer notified.', request: customerRequest });
+        } catch (error) {
+            console.error("Error updating request object:", error);
+            res.status(500).send('An error occurred while updating a request object.');
+        }
+    }
+)
+app.put('/requests/:id/start', verifyToken, async (req, res) => {
+        try {
+            const requestId = req.params.id; // Capture the request ID from the URL
+            const { customerId } = req.body; // Extract customerId from the request body
+           
+            const customer = req.customerUsers.find(user => user.id === customerId); 
+            if (!customer) {
+                return res.status(404).send('Customer not found.');
+            }
+
+            const customerRequest = customer.userRequests.find(request => request.id === requestId)
+            if (!customerRequest) {
+                return res.status(404).send('Request not found.');
+            }
+
+            const request = req.activeRequests.find(request => request.id === requestId);
+            if (!request) {
+            return res.status(404).send('Request not found.');
+            }
+
+            const notificationMessage = `Your request with ID ${requestId} has been started.`;
+            request.stages.started = true;
+            customerRequest.stages.started = true;
+            customer.userNotifications.push({
+                id: uuidv4(),
+                message: notificationMessage,
+                date: new Date(),
+                read: false
+            });
+            
+        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+        res.status(200).json({ message: 'Request started and customer notified.', request: customerRequest });
+        } catch (error) {
+            console.error("Error updating request object:", error);
+            res.status(500).send('An error occurred while updating a request object.');
+        }
+    }
+)
 app.put('/requests/:id/accept', verifyToken, async (req, res) => {
         try {
             const requestId = req.params.id; // Capture the request ID from the URL
             const { customerId } = req.body; // Extract customerId from the request body
-            const customer = req.customerUsers.find(user => user.id === customerId);
-            const customerRequest = customer.userRequests.find(request => request.id === requestId)
+           
+            const customer = req.customerUsers.find(user => user.id === customerId); 
             if (!customer) {
                 return res.status(404).send('Customer not found.');
+            }
+
+            const customerRequest = customer.userRequests.find(request => request.id === requestId)
+            if (!customerRequest) {
+                return res.status(404).send('Request not found.');
+            }
+
+            if (customerRequest.stages.accepted) {
+            return res.status(409).send('Request has already been accepted.');
             }
 
             const request = req.activeRequests.find(request => request.id === requestId);
