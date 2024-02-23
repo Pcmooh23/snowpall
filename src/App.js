@@ -8,9 +8,6 @@ import LoginPage from './components/LoginPage';
 import SnowTech from './components/SnowTech';
 import SnowtechOnboarding from './components/SnowtechOnboarding';
 
-
-
-
 function App() {
   return (
     <Router>
@@ -22,6 +19,7 @@ function App() {
             <Route exact path='/submit-request' element={<SubmitRequest/>}/>
             <Route exact path='/snowtech' element={<SnowTech/>}/>
             <Route exact path='/onboarding' element={<SnowtechOnboarding/>}/>
+            <Route path='*' element={<Notfound/>}/> {/* The '*' is used as a wildcard incase there's something that doesn't exist */}
           </Routes>
         </div>
       </SnowPallProvider>
