@@ -1,25 +1,70 @@
-import React, {useContext, useRef, useState} from 'react';
+import React, {useContext, useRef, useState, useEffect} from 'react';
 import { ChevronUp, ImageIcon} from 'lucide-react';
 import { SnowPallContext } from './SnowPallContext';
 import { useApi } from '../useApi';
+import { SnowPall_Pricing_Model } from './PricingModel';
+
 
 const OtherService = () => {
 
   const {
     cart, setCart, setShouldRefetch,
-    active, toggleActive, 
+    active, toggleActive, currentWeather, basePrice,
     editingIndex, setEditingIndex, 
     otherFormData, setOtherFormData, 
     otherPreview, setOtherPreview
   } = useContext(SnowPallContext)
+
+  const [dynamicPrices, setDynamicPrices] = useState({
+    size1: 0,
+    size2: 0,
+    size3: 0,
+    size4: 0
+  });
+
+  useEffect(() => {
+    const prices = {
+      size1: SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'small'),
+      size2: SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'medium'),
+      size3: SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'large'),
+      size4: SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'x-large'),
+    };
+    setDynamicPrices(prices);
+  }, [currentWeather, basePrice]);
 
   const fileInputRef = useRef();
   const { customFetch } = useApi();
   const [error, setError] = useState('');
 
   const handleInputChange = (event) => {
-    const { name, value, type } = event.target;
-    setOtherFormData({ ...otherFormData, [name]: type === 'radio' ? value : value });
+    const { name, value } = event.target;
+  
+    // Declare newPrice at the beginning of the function
+    let newPrice = basePrice;
+  
+    if (name === 'selectedSize') {
+      // Assign newPrice based on the case
+      switch (value) {
+        case 'job1':
+          newPrice = SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'small');
+          break;
+        case 'job2':
+          newPrice = SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'medium');
+          break;
+        case 'job3':
+          newPrice = SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'large');
+          break;
+        case 'job4':
+          newPrice = SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'x-large');
+          break;
+        default:
+          newPrice = basePrice;
+          break;
+      }
+    }
+  
+    // Then use newPrice when setting state
+    setOtherFormData(prevFormData => ({ ...prevFormData, [name]: value, price: newPrice }));
   };
 
   const resetOtherForm = () => {
@@ -36,9 +81,13 @@ const OtherService = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+    console.log('handle prices: ', dynamicPrices.size1.toFixed(2).toString(), dynamicPrices.size2.toFixed(2).toString(), dynamicPrices.size3.toFixed(2).toString(), dynamicPrices.size4.toFixed(2).toString())
     const formData = new FormData();
     formData.append('selectedSize', otherFormData.selectedSize);
+    formData.append('job1Price', dynamicPrices.size1.toFixed(2).toString());
+    formData.append('job2Price', dynamicPrices.size2.toFixed(2).toString());
+    formData.append('job3Price', dynamicPrices.size3.toFixed(2).toString());
+    formData.append('job4Price', dynamicPrices.size4.toFixed(2).toString());
     formData.append('otherMessage', otherFormData.otherMessage);
     formData.append('objectType', 'other');
     if (otherFormData.image) {
@@ -120,7 +169,7 @@ const OtherService = () => {
                       <span className='circle'></span>
                       <span className='subject'>(100 sq. ft.)</span>
                     </div>
-                    <span className='price'>$25</span>
+                    <span className='price'>${dynamicPrices.size1.toFixed(2)}</span>
                   </label>  
                   <input 
                   type='radio'
@@ -136,7 +185,7 @@ const OtherService = () => {
                       <span className='circle'></span>
                       <span className='subject'>(200 sq. ft.)</span>
                     </div>
-                    <span className='price'>$35</span>
+                    <span className='price'>${dynamicPrices.size2.toFixed(2)}</span>
                   </label>
                   <input 
                   type='radio'
@@ -152,7 +201,7 @@ const OtherService = () => {
                       <span className='circle'></span>
                       <span className='subject'>(300 sq. ft.)</span>
                     </div>
-                    <span className='price'>$45</span>
+                    <span className='price'>${dynamicPrices.size3.toFixed(2)}</span>
                   </label>
                   <input 
                   type='radio'
@@ -168,7 +217,7 @@ const OtherService = () => {
                       <span className='circle'></span>
                       <span className='subject'>(400 sq. ft.)</span>
                     </div>
-                    <span className='price'>$55</span>
+                    <span className='price'>${dynamicPrices.size4.toFixed(2)}</span>
                   </label>
                 </div>
               </div> 

@@ -1,13 +1,14 @@
-import React, {useContext, useRef, useState} from 'react';
+import React, {useContext, useRef, useState, useEffect} from 'react';
 import { ChevronUp, ImageIcon, Check } from 'lucide-react';
 import { SnowPallContext } from './SnowPallContext';
 import { useApi } from '../useApi';
+import { SnowPall_Pricing_Model } from './PricingModel';
 
 const LawnService = () => {
 
     const {
       cart, setCart, setShouldRefetch,
-      active, toggleActive, 
+      active, toggleActive, currentWeather,
       editingIndex, setEditingIndex,
       lawnFormData, setLawnFormData,
       lawnPreview, setLawnPreview
@@ -17,11 +18,56 @@ const LawnService = () => {
   const { customFetch } = useApi();
   const [error, setError] = useState('');
 
+    // Initialize state for dynamic prices
+    const [dynamicPrices, setDynamicPrices] = useState({
+      walkway: null,
+      frontYard: null,
+      backyard: null
+    });
+
+  // Function to calculate prices
+  const calculatePrices = () => {
+    return {
+      walkway: SnowPall_Pricing_Model(
+        currentWeather.temperature,
+        currentWeather.precipitationType,
+        currentWeather.precipitationIntensity,
+        'small'
+      ),
+      frontYard: SnowPall_Pricing_Model(
+        currentWeather.temperature,
+        currentWeather.precipitationType,
+        currentWeather.precipitationIntensity,
+        'medium'
+      ),
+      backyard: SnowPall_Pricing_Model(
+        currentWeather.temperature,
+        currentWeather.precipitationType,
+        currentWeather.precipitationIntensity,
+        'medium'
+      )
+    };
+  };
+
+  // Calculate and set prices when currentWeather changes
+  useEffect(() => {
+    if (currentWeather) {
+      setDynamicPrices(calculatePrices());
+    }
+  }, [currentWeather]);
+
   const handleInputChange = (event) => {
     const { name, value, type, checked } = event.target;
-    setLawnFormData({ ...lawnFormData, [name]: type === 'checkbox' ? checked : value });
+    if (type === 'checkbox') {
+      // Update the state for checkboxes
+      setLawnFormData({ ...lawnFormData, [name]: checked });
+    } else {
+      // Update the state for other inputs like 'textarea'
+      setLawnFormData({ ...lawnFormData, [name]: value });
+    }
   };
   
+
   const resetLawnForm = () => {
     setLawnFormData({
       walkway: false,
@@ -39,10 +85,15 @@ const LawnService = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    console.log(lawnFormData.lawnMessage)
+
     const formData = new FormData();
     formData.append('walkway', lawnFormData.walkway);
     formData.append('frontYard',lawnFormData.frontYard);
     formData.append('backyard', lawnFormData.backyard);
+    formData.append('walkwayPrice', dynamicPrices.walkway.toString());
+    formData.append('frontYardPrice', dynamicPrices.frontYard.toString());
+    formData.append('backyardPrice', dynamicPrices.backyard.toString());
     formData.append('lawnMessage', lawnFormData.lawnMessage);
     formData.append('objectType', 'lawn');
     if (lawnFormData.image) {
@@ -122,7 +173,7 @@ const LawnService = () => {
                       </span>
                       <p className='lawn-detail'>Clear Snow off walkway</p>
                     </div>
-                    <span className='price'>$15</span>
+                    <span className='price'>${dynamicPrices.walkway?.toFixed(2)}</span>
                   </label>
                   <label className='lawn-label'>
                     <input 
@@ -137,7 +188,7 @@ const LawnService = () => {
                       </span>
                       <p className='lawn-detail'>Clear Snow off front yard</p>
                     </div>
-                    <span className='price'>$25</span>
+                    <span className='price'>${dynamicPrices.frontYard?.toFixed(2)}</span>
                   </label>
                   <label className='lawn-label'>
                     <input 
@@ -152,7 +203,7 @@ const LawnService = () => {
                       </span>
                       <p className='lawn-detail'>Clear Snow off backyard</p>
                     </div>                
-                    <span className='price'>$25</span>
+                    <span className='price'>${dynamicPrices.backyard?.toFixed(2)}</span>
                   </label>
                 </div>
                 <div className='lawn-upload-area'>

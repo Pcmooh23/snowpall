@@ -79,7 +79,7 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // The file that stores user info.
-const USERS_FILE = path.join(__dirname, './DB.json');
+const DB_FILE = path.join(__dirname, './DB.json');
 
 // Verify token middleware.
 const verifyToken = (req, res, next) => {
@@ -106,7 +106,7 @@ const verifyToken = (req, res, next) => {
 // can access it directly, thus eliminating need to repeat the file reading and parsing logic in each route.
 const loadData = async (req, res, next) => {
     try {
-        const data = await fsPromises.readFile(USERS_FILE, 'utf8');
+        const data = await fsPromises.readFile(DB_FILE, 'utf8');
         const db = JSON.parse(data);
         req.db = db; // Attach the database object to the request object
         req.combinedUsers = [...db.customers, ...db.snowtechs];
@@ -155,9 +155,8 @@ app.post('/registerUser', async (req, res) => {
             newUser.userRequests = [];
         } else if (newUser.accountType === 'snowtech') {
             newUser.completedRequests = [];
-            newUser.balance = 0
         }
-        
+
         const tokenPayload = { id: newUser.id, userEmail: newUser.userEmail };
         const accessToken = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '15m' });
         const refreshToken = jwt.sign(tokenPayload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
@@ -166,7 +165,7 @@ app.post('/registerUser', async (req, res) => {
 
         usersList.push(newUser);
 
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+        await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
 
         res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 7 * 24 * 60 * 60 * 1000 });
 
@@ -187,6 +186,51 @@ app.post('/registerUser', async (req, res) => {
     } catch (err) {
         console.error("Error processing request:", err);
         res.status(500).send('An error occurred during account creation.');
+    }
+});
+
+app.put('/update-stripe-link', verifyToken, async (req, res) => {
+    try {
+        const snowtechId = req.user.id; // Access the authenticated user's ID
+        const snowtech = req.db.snowtechs.find(user => user.id === snowtechId);
+
+        if (!snowtech) {
+            return res.status(404).send('Snowtech not found.');
+        }
+
+        let updateNeeded = false;
+
+        if (!snowtech.stripeAccountId) {
+            const connectedAccount = await stripe.accounts.create({
+                type: 'express',
+                country: 'US',
+                email: snowtech.userEmail,
+                capabilities: {
+                    card_payments: { requested: true },
+                    transfers: { requested: true },
+                },
+            });
+            // Update the snowtech with the new Stripe account ID
+            snowtech.stripeAccountId = connectedAccount.id;
+            updateNeeded = true;
+        }
+
+        // If an update to the snowtech profile was made, save the changes to the database file
+        if (updateNeeded) {
+            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2));
+        }
+
+        const accountLink = await stripe.accountLinks.create({
+            account: snowtech.stripeAccountId,
+            refresh_url: 'https://localhost:3000/onboarding',
+            return_url: 'https://localhost:3000/snowtech',
+            type: 'account_onboarding',
+        });
+
+        res.json({ url: accountLink.url });
+    } catch (err) {
+        console.error("Error updating Stripe link:", err);
+        res.status(500).send('An error occurred during Stripe link update.');
     }
 });
 
@@ -211,7 +255,7 @@ app.post('/validateLogin', async (req, res) => {
         const refreshToken = jwt.sign(tokenPayload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
         user.refreshToken = refreshToken;
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+        await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
 
         // Send refresh token as secure HttpOnly cookie
         res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 7 * 24 * 60 * 60 * 1000 });
@@ -223,7 +267,9 @@ app.post('/validateLogin', async (req, res) => {
             userId: user.id, 
             username: user.userName, 
             accountType: user.accountType, 
-            accessToken: accessToken 
+            userZip: user.userZip,
+            accessToken: accessToken
+     
         });
 
     } catch (err) {
@@ -270,7 +316,7 @@ app.post('/logout', verifyToken, async (req, res) => {
             user.refreshToken = null; // Invalidate the refresh token
 
             res.clearCookie('refreshToken'); // Clear the refreshToken cookie
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(204).send(); // Successfully processed the request but no content to return
         } else {
             res.status(404).send('User not found.'); // User not found
@@ -278,6 +324,27 @@ app.post('/logout', verifyToken, async (req, res) => {
     } catch (err) {
         console.error("Error during logout:", err);
         res.status(500).send('An error occurred processing the logout request.');
+    }
+});
+
+app.get('/verify-stripe-onboarding', verifyToken, async (req, res) => {
+    const snowtechId = req.user.id; 
+    const snowtech = req.db.snowtechs.find(user => user.id === snowtechId);
+
+    if (!snowtech || !snowtech.stripeAccountId) {
+        return res.status(404).send('Snowtech or Stripe account not found.');
+    }
+
+    try {
+        const account = await stripe.accounts.retrieve(snowtech.stripeAccountId);
+        // Check for specific conditions that indicate completion
+        const isOnboardingCompleted = account.capabilities.card_payments === 'active' &&
+                                      account.capabilities.transfers === 'active';
+
+        res.json({ isOnboardingCompleted });
+    } catch (err) {
+        console.error("Error retrieving Stripe account:", err);
+        res.status(500).send('Failed to retrieve Stripe account status.');
     }
 });
 
@@ -367,8 +434,9 @@ app.post('/submit-request', verifyToken, async (req, res) => {
         const charge = await stripe.charges.create({
             amount: amount,
             currency: "usd",
-            source: stripeToken, // Use stripeToken here
-            description: `Charge for order`,
+            source: stripeToken, 
+            description: "Charge for service",
+            transfer_data: {},
         });
 
         // Construct charge information to save along with order details
@@ -404,9 +472,10 @@ app.post('/submit-request', verifyToken, async (req, res) => {
         // Add the new request to the user's userRequests array and the active requests array.
         user.userRequests.push(newRequest);
         req.db.requests.active.push(newRequest);
+        user.userCart = [];
 
-        // Write the updated users data back to the USERS_FILE
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2));
+        // Write the updated users data back to the DB_FILE
+        await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2));
 
         // Respond to the client that the charge was processed and the request was saved successfully
         res.status(200).json({
@@ -461,7 +530,7 @@ app.post('/address', verifyToken,
             // Add the new address to the user's addresses array
             user.userAddresses.push(newAddress);
             // Save the updated users back to the file
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             // Respond with the newly created address entry
             res.status(201).json({ message: 'New address added to user profile', newAddress });
         
@@ -480,6 +549,7 @@ app.post('/car', verifyToken, upload.single('image'),
         body('color').trim().isLength({ min: 1 }).withMessage('Color is required.'),
         body('licensePlate').optional({ checkFalsy: true }).trim(), // Optional field
         body('carMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
+        body('price').isFloat({ min: 0 }).withMessage('Price must be a positive number.'),
         body('objectType').equals('car').withMessage('ObjectType is car.'),
     ], 
     async (req, res) => {
@@ -504,12 +574,13 @@ app.post('/car', verifyToken, upload.single('image'),
                 color: req.body.color,
                 licensePlate: req.body.licensePlate || '', // Include license plate if provided
                 carMessage: req.body.carMessage || '', // Include car message if provided
+                price: req.body.price,
                 objectType: req.body.objectType,
                 imagePath: req.file ? req.file.path : null, // Include image path if file uploaded
             };
             
             user.userCart.push(newCarService);
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(201).json({ message: 'New car service object added to the user cart.', newCarService });
        
         } catch (err) {
@@ -523,6 +594,10 @@ app.post('/car', verifyToken, upload.single('image'),
 app.post('/driveway', verifyToken, upload.single('image'),
     [
         body('selectedSize').not().isEmpty().withMessage('Selected size is required'),
+        body('size1Price').isFloat({ min: 0 }).withMessage('Price must be a positive number.'),
+        body('size2Price').isFloat({ min: 0 }).withMessage('Price must be a positive number.'),
+        body('size3Price').isFloat({ min: 0 }).withMessage('Price must be a positive number.'),
+        body('size4Price').isFloat({ min: 0 }).withMessage('Price must be a positive number.'),
         body('objectType').equals('driveway').withMessage('ObjectType is driveway'),
         body('drivewayMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
     ], 
@@ -543,13 +618,17 @@ app.post('/driveway', verifyToken, upload.single('image'),
                 id: uuidv4(),
                 userId: userId,
                 selectedSize: req.body.selectedSize,
+                size1Price: req.body.size1Price,
+                size2Price: req.body.size2Price,
+                size3Price: req.body.size3Price,
+                size4Price: req.body.size4Price,
                 drivewayMessage: req.body.drivewayMessage || '',
                 objectType: req.body.objectType,
                 imagePath: req.file ? req.file.path : null,
             };
 
             user.userCart.push(newDrivewayService);
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(201).json({ message: 'New driveway service object added to the user cart.', newDrivewayService });
       
         } catch (error) {
@@ -565,6 +644,9 @@ app.post('/lawn', verifyToken, upload.single('image'),
         body('walkway').optional({ checkFalsy: true }).isBoolean().withMessage('Walkway must be a boolean'),
         body('frontYard').optional({ checkFalsy: true }).isBoolean().withMessage('Front yard must be a boolean'),
         body('backyard').optional({ checkFalsy: true }).isBoolean().withMessage('Backyard must be a boolean'),
+        body('walkwayPrice').isFloat({ min: 0 }).withMessage('Price must be a positive number.'),
+        body('frontYardPrice').isFloat({ min: 0 }).withMessage('Price must be a positive number.'),
+        body('backyardPrice').isFloat({ min: 0 }).withMessage('Price must be a positive number.'),
         body('lawnMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
         body('objectType').equals('lawn').withMessage('ObjectType is lawn'),
     ],
@@ -587,13 +669,16 @@ app.post('/lawn', verifyToken, upload.single('image'),
                 walkway: req.body.walkway === 'true',
                 frontYard: req.body.frontYard === 'true',
                 backyard: req.body.backyard === 'true', 
-                lawnMessage: req.body.lawnMessage || '',
+                lawnMessage: req.body.lawnMessage,
+                walkwayPrice: req.body.walkwayPrice,
+                frontYardPrice: req.body.frontYardPrice,
+                backyardPrice: req.body.backyardPrice,
                 objectType: req.body.objectType,
                 imagePath: req.file ? req.file.path : null, 
             };
 
             user.userCart.push(newLawnService);
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(201).json({ message: 'New lawn service object added to the user cart.', newLawnService });
 
         } catch (error) {
@@ -608,6 +693,7 @@ app.post('/street', verifyToken, upload.single('image'),
     [
         body('from').notEmpty().withMessage('From address is required'),
         body('to').optional({ checkFalsy: true }).notEmpty().withMessage('Please include a to address'), // Make "to" optional but validate if provided
+        body('price').isFloat({ min: 0 }).withMessage('Price must be a positive number.'),
         body('streetMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
         body('objectType').equals('street').withMessage('ObjectType is street'),
     ], 
@@ -629,13 +715,14 @@ app.post('/street', verifyToken, upload.single('image'),
                 userId: userId,
                 from: req.body.from,
                 to: req.body.to, // "to" field is optional
+                price: req.body.price,
                 streetMessage: req.body.streetMessage,
                 objectType: req.body.objectType,
                 imagePath: req.file ? req.file.path : null,
             };
 
             user.userCart.push(newStreetService);
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(201).json({ message: 'New street service object added to the DB: ', newStreetService });
 
         } catch (error) {
@@ -649,6 +736,10 @@ app.post('/street', verifyToken, upload.single('image'),
 app.post('/other', verifyToken, upload.single('image'), 
     [
         body('selectedSize').notEmpty().withMessage('Selected size is required'),
+        body('job1Price').isFloat({ min: 0 }).withMessage('Price must be a positive number.'),
+        body('job2Price').isFloat({ min: 0 }).withMessage('Price must be a positive number.'),
+        body('job3Price').isFloat({ min: 0 }).withMessage('Price must be a positive number.'),
+        body('job4Price').isFloat({ min: 0 }).withMessage('Price must be a positive number.'),
         body('otherMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
         body('objectType').equals('other').withMessage('ObjectType is other'),
     ], 
@@ -669,13 +760,17 @@ app.post('/other', verifyToken, upload.single('image'),
                 id: uuidv4(),
                 userId: userId,
                 selectedSize: req.body.selectedSize,
+                job1Price: req.body.job1Price,
+                job2Price: req.body.job2Price,
+                job3Price: req.body.job3Price,
+                job4Price: req.body.job4Price,
                 otherMessage: req.body.otherMessage,
                 objectType: req.body.objectType,
                 imagePath: req.file ? req.file.path : null,
             };
 
             user.userCart.push(newOtherService);
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(201).json({ message: 'New other service object added to the DB: ', newOtherService });
 
         } catch (error) {
@@ -715,7 +810,7 @@ app.put('/requests/:id/cancel', verifyToken, async (req, res) => {
                 read: false
             });
             
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+        await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
         res.status(200).json({ message: 'Request cancelled and customer notified.', request: customerRequest });
         } catch (error) {
             console.error("Error updating request object:", error);
@@ -725,54 +820,75 @@ app.put('/requests/:id/cancel', verifyToken, async (req, res) => {
 )
 
 app.put('/requests/:id/complete', verifyToken, async (req, res) => {
-        try {
-            const requestId = req.params.id; // Capture the request ID from the URL
-            const { customerId, snowtechId } = req.body; // Extract customerId from the request body
-             
-           
-            const customer = req.customerUsers.find(user => user.id === customerId); 
-            if (!customer) {
-                return res.status(404).send('Customer not found.');
-            }
+    try {
+        const requestId = req.params.id;
+        const { customerId, snowtechId } = req.body;
 
-            const snowtech = req.snowtechUsers.find(tech => tech.id === snowtechId);
-            if (!snowtech) {
-                return res.status(404).send('Snowtech not found.');
-            }
-
-            const customerRequest = customer.userRequests.find(request => request.id === requestId)
-            if (!customerRequest) {
-                return res.status(404).send('Request not found.');
-            }
-
-            const request = req.activeRequests.find(request => request.id === requestId);
-            if (!request) {
-            return res.status(404).send('Request not found.');
-            }
-
-            const notificationMessage = `Your request with ID ${requestId} has been completed.`;
-            request.stages.live = false;
-            request.stages.complete = true;
-            customerRequest.stages.live = false;
-            customerRequest.stages.complete = true;
-            snowtech.completedRequests.push(request);
-            req.db.requests.completed.push(request);
-            req.db.requests.active = req.db.requests.active.filter((removeRequest) => removeRequest.id !== request.id);
-            customer.userNotifications.push({
-                id: uuidv4(),
-                message: notificationMessage,
-                date: new Date(),
-                read: false
-            });
-            
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
-        res.status(200).json({ message: 'Request complete and customer notified.', request: customerRequest });
-        } catch (error) {
-            console.error("Error updating request object:", error);
-            res.status(500).send('An error occurred while updating a request object.');
+        const customer = req.customerUsers.find(user => user.id === customerId);
+        if (!customer) {
+            return res.status(404).send('Customer not found.');
         }
+
+        const snowtech = req.snowtechUsers.find(tech => tech.id === snowtechId);
+        if (!snowtech) {
+            return res.status(404).send('Snowtech not found.');
+        }
+
+        const customerRequest = customer.userRequests.find(request => request.id === requestId);
+        if (!customerRequest) {
+            return res.status(404).send('Request not found.');
+        }
+
+        const request = req.activeRequests.find(request => request.id === requestId);
+        if (!request) {
+            return res.status(404).send('Request not found.');
+        }
+
+        // Assuming `request.charge.amount` contains the total charge amount in cents
+        const totalAmount = request.charge.amount;
+        const snowtechPayoutAmount = Math.round(totalAmount * 0.8); // 80% to snowtech
+
+        // Create a transfer to the connected snowtech's Stripe account
+        const transfer = await stripe.transfers.create({
+            amount: snowtechPayoutAmount,
+            currency: 'usd',
+            destination: snowtech.stripeAccountId, 
+            transfer_group: requestId,
+        });
+
+        // Update the job status to complete
+        request.stages.live = false;
+        request.stages.complete = true;
+        customerRequest.stages.live = false;
+        customerRequest.stages.complete = true;
+        snowtech.completedRequests.push(request);
+        req.db.requests.completed.push(request);
+        req.db.requests.active = req.db.requests.active.filter(removeRequest => removeRequest.id !== requestId);
+
+        // Notify the customer
+        const notificationMessage = `Your request with ID ${requestId} has been completed.`;
+        customer.userNotifications.push({
+            id: uuidv4(),
+            message: notificationMessage,
+            date: new Date(),
+            read: false
+        });
+
+        // Save changes to the database
+        await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+
+        // Respond to the client
+        res.status(200).json({
+            message: 'Request complete, customer notified, and payout processed.',
+            request: customerRequest,
+            transfer: transfer,
+        });
+    } catch (error) {
+        console.error("Error during job completion and payout:", error);
+        res.status(500).send('An error occurred during job completion and payout.');
     }
-)
+});
+
 app.put('/requests/:id/start', verifyToken, async (req, res) => {
         try {
             const requestId = req.params.id; // Capture the request ID from the URL
@@ -803,7 +919,7 @@ app.put('/requests/:id/start', verifyToken, async (req, res) => {
                 read: false
             });
             
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+        await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
         res.status(200).json({ message: 'Request started and customer notified.', request: customerRequest });
         } catch (error) {
             console.error("Error updating request object:", error);
@@ -811,6 +927,7 @@ app.put('/requests/:id/start', verifyToken, async (req, res) => {
         }
     }
 )
+
 app.put('/requests/:id/accept', verifyToken, async (req, res) => {
         try {
             const requestId = req.params.id; // Capture the request ID from the URL
@@ -845,7 +962,7 @@ app.put('/requests/:id/accept', verifyToken, async (req, res) => {
                 read: false
             });
             
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+        await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
         res.status(200).json({ message: 'Request accepted and customer notified.', request: customerRequest });
         } catch (error) {
             console.error("Error updating request object:", error);
@@ -901,8 +1018,8 @@ app.put('/address/:id', verifyToken,
             };
             user.userAddresses[addressIndex] = updatedAddress;
 
-            // Write the updated users data back to the USERS_FILE
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+            // Write the updated users data back to the DB_FILE
+            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             
             res.status(200).json({ message: 'Address updated successfully.', updatedAddress });
         } catch (err) {
@@ -954,8 +1071,8 @@ app.put('/car/:id', verifyToken, upload.single('image'),
                 imagePath: req.file ? req.file.path : user.userCart[carIndex].imagePath,
             };
 
-            // Write the updated users data back to the USERS_FILE
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+            // Write the updated users data back to the DB_FILE
+            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(200).json({ message: 'Car service object updated.', car: user.userCart[carIndex] });
 
         } catch (error) {
@@ -999,7 +1116,7 @@ app.put('/driveway/:id', verifyToken, upload.single('image'),
                 imagePath: req.file ? req.file.path : user.userCart[drivewayIndex].imagePath, 
             }
 
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(200).json({ message: 'Driveway service object updated in the DB: ', driveway: user.userCart[drivewayIndex]});
         
         } catch (error) {
@@ -1042,12 +1159,12 @@ app.put('/lawn/:id', verifyToken, upload.single('image'),
                 walkway: req.body.walkway !== undefined ? req.body.walkway === 'true' : user.userCart[lawnIndex].walkway === 'true',
                 frontYard: req.body.frontYard !== undefined ? req.body.frontYard === 'true' : user.userCart[lawnIndex].frontYard === 'true',
                 backyard: req.body.backyard !== undefined ? req.body.backyard === 'true' : user.userCart[lawnIndex].backyard === 'true',
-                lawnMessage: req.body.lawnMessage !== undefined ? req.body.lawnMessage : user.userCart[lawnIndex].lawnMessage,
+                lawnMessage: req.body.lawnMessage || user.userCart[lawnIndex].lawnMessage,
                 objectType: req.body.objectType,
                 imagePath: req.file ? req.file.path : user.userCart[lawnIndex].imagePath,
             };            
 
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(200).json({ message: 'Lawn service object updated.', lawn: user.userCart[lawnIndex] });
 
         } catch (error) {
@@ -1094,7 +1211,7 @@ app.put('/street/:id', verifyToken, upload.single('image'),
             }
 
 
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(200).json({ message: 'Street service object updated in the DB: ', street: user.userCart[streetIndex] });
 
         } catch (error) {
@@ -1138,7 +1255,7 @@ app.put('/other/:id', verifyToken, upload.single('image'),
                 imagePath: req.file ? req.file.path : user.userCart[otherIndex].imagePath,
             }
 
-            await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
             res.status(200).json({ message: 'Other service object updated in the DB: ', other: user.userCart[otherIndex] });
 
         } catch (error) {
@@ -1167,8 +1284,8 @@ app.delete('/address/:id', verifyToken, async (req, res) => {
         // Remove the address from the user's address array
         user.userAddresses.splice(addressIndex, 1);
 
-        // Write the updated users data back to the USERS_FILE
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+        // Write the updated users data back to the DB_FILE
+        await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
         
         res.status(200).json({ message: 'Address deleted successfully.' });
     } catch (error) {
@@ -1193,7 +1310,7 @@ app.delete('/car/:id', verifyToken, async (req, res) => {
         }
 
         user.userCart.splice(carIndex, 1);
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+        await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
         res.status(200).json({ message: 'Car service object deleted successfully.' });
 
     } catch (error) {
@@ -1218,7 +1335,7 @@ app.delete('/driveway/:id', verifyToken, async (req, res) => {
         }
 
         user.userCart.splice(drivewayIndex, 1);
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+        await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
         res.status(200).json({ message: 'Driveway service object deleted from the DB.' });
 
     } catch (error) {
@@ -1243,7 +1360,7 @@ app.delete('/lawn/:id', verifyToken, async (req, res) => {
         }
 
         user.userCart.splice(lawnIndex, 1);
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+        await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
         res.status(200).json({ message: 'Lawn service object deleted from the DB.' });
 
     } catch (error) {
@@ -1268,7 +1385,7 @@ app.delete('/street/:id', verifyToken, async (req, res) => {
         }
 
         user.userCart.splice(streetIndex, 1);
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');        
+        await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');        
         res.status(200).json({ message: 'Street service object deleted from the DB.' });
 
     } catch (error) {
@@ -1293,7 +1410,7 @@ app.delete('/other/:id', verifyToken, async (req, res) => {
         }
 
         user.userCart.splice(otherIndex, 1);
-        await fsPromises.writeFile(USERS_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+        await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
         res.status(200).json({ message: 'Other service object deleted from the DB.' });
 
     } catch (error) {

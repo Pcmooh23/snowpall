@@ -1,12 +1,13 @@
-import React, {useContext, useRef, useState} from 'react';
+import React, {useContext, useRef, useState, use} from 'react';
 import { ChevronUp, ImageIcon } from 'lucide-react';
 import { SnowPallContext } from './SnowPallContext';
 import { useApi } from '../useApi';
+import { SnowPall_Pricing_Model } from './PricingModel';
 
 const CarService = () => {
 
     const {
-        cart, setCart,
+        cart, setCart, currentWeather, basePrice,
         active, toggleActive, setShouldRefetch,
         editingIndex, setEditingIndex, 
         carFormData, setCarFormData, 
@@ -16,6 +17,16 @@ const CarService = () => {
     const fileInputRef = useRef();
     const { customFetch } = useApi();
     const [error, setError] = useState('');
+
+
+    const jobSize = 'small';
+
+    const dynamicPrice = currentWeather ? SnowPall_Pricing_Model(
+        currentWeather.temperature,
+        currentWeather.precipitationType,
+        currentWeather.precipitationIntensity,
+        jobSize
+    ) : basePrice;
 
     const handleInputChange = ({ target: { name, value, type, checked } }) =>
     setCarFormData({ ...carFormData, [name]: type === 'checkbox' ? checked : value });  
@@ -45,6 +56,7 @@ const CarService = () => {
         formData.append('color', carFormData.color);
         formData.append('licensePlate', carFormData.licensePlate);
         formData.append('carMessage', carFormData.carMessage);
+        formData.append('price', dynamicPrice);
         formData.append('objectType', 'car');
         if (carFormData.image) {
             formData.append('image', carFormData.image); // This is the File object
@@ -128,7 +140,7 @@ const CarService = () => {
                         <span className='circle'></span>
                         <span className='subject'>Clear snow of vehicle</span>
                     </div>
-                    <span className='price'>$20</span>
+                    <span className='price'>${dynamicPrice}</span>
                 </label>
                 <div className='car-service-top'>
                     <div className='car-specs'>

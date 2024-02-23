@@ -1,11 +1,12 @@
-import React, { useState, useContext, useEffect, useRef} from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import { Box, Button, ButtonGroup, Flex, HStack, IconButton, Text } from '@chakra-ui/react'
-import { FaBus, FaCar, FaLocationArrow, FaWalking,  } from 'react-icons/fa'
+import { FaBus, FaCar, FaLocationArrow, FaWalking } from 'react-icons/fa'
 import { MdDirectionsBike } from "react-icons/md";
 import MainHeader from "./MainHeader";
-import { GoogleMap, useJsApiLoader, Marker, DirectionsRenderer} from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, Marker, DirectionsRenderer } from '@react-google-maps/api';
 import { SnowPallContext } from './SnowPallContext';
 import RequestsList from './RequestsList';
+import { useNavigate } from 'react-router-dom';
 import { useApi } from '../useApi';
 
 /* global google */ //This is needed to use the google object 
@@ -24,6 +25,7 @@ const SnowTech = () => {
     selectedDestination, setSelectedDestination, cancelRequestGlobal, setAcceptedRequestId, acceptedRequestId
   } = useContext(SnowPallContext);
   const { customFetch } = useApi();
+  const navigate = useNavigate();
 
   const {isLoaded} = useJsApiLoader({
     googleMapsApiKey: process.env.REACT_APP_SNOWPALL_GOOGLE_MAPS_API_KEY,
@@ -62,6 +64,32 @@ const SnowTech = () => {
     getInitialCenter();
 
   }, [isLoaded]);
+
+  useEffect(() => {
+    const verifyOnboardingStatus = async () => {
+      // Example endpoint to verify the snowtech's Stripe onboarding status
+      const url = '/verify-stripe-onboarding';
+      const options = {
+        method: 'GET',
+      };
+      const response = await customFetch(url,options);
+  
+      if (response.ok) {
+        const { isOnboardingCompleted } = await response.json();
+        if (!isOnboardingCompleted) {
+          // Redirect to onboarding if not completed
+          navigate('/onboarding');
+        }
+      } else {
+        // Handle error or incomplete status
+        console.error('Failed to verify Stripe onboarding status');
+        navigate('/onboarding');
+      }
+    };
+  
+    verifyOnboardingStatus();
+  }, [customFetch, navigate]);
+  
 
   if (!isLoaded) {
     return <div>Loading...</div>

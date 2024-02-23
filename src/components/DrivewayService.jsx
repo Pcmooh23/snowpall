@@ -1,26 +1,71 @@
-import React, {useContext, useRef, useState} from 'react';
+import React, {useContext, useRef, useState, useEffect} from 'react';
 import { ChevronUp, ImageIcon } from "lucide-react";
 import { SnowPallContext } from "./SnowPallContext";
 import { useApi } from '../useApi';
+import { SnowPall_Pricing_Model } from './PricingModel';
 
 const DrivewayService = () => {
 
   const {
     cart, setCart, setShouldRefetch,
-    active, toggleActive, 
+    active, toggleActive, currentWeather, basePrice,
     editingIndex, setEditingIndex,
     drivewayFormData, setDrivewayFormData, 
     drivewayPreview, setDrivewayPreview
   } = useContext(SnowPallContext);
 
+  const [dynamicPrices, setDynamicPrices] = useState({
+    size1: 0,
+    size2: 0,
+    size3: 0,
+    size4: 0
+  });
+
+  useEffect(() => {
+    const prices = {
+      size1: SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'small'),
+      size2: SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'medium'),
+      size3: SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'large'),
+      size4: SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'x-large'),
+    };
+    setDynamicPrices(prices);
+  }, [currentWeather, basePrice]);
+
   const fileInputRef = useRef();
   const { customFetch } = useApi();
   const [error, setError] = useState('');
-
+  
   const handleInputChange = (event) => {
-    const { name, value, type } = event.target;
-    setDrivewayFormData({ ...drivewayFormData, [name]: type === 'radio' ? value : value });
+    const { name, value } = event.target;
+  
+    // Declare newPrice at the beginning of the function
+    let newPrice = basePrice;
+  
+    if (name === 'selectedSize') {
+      // Assign newPrice based on the case
+      switch (value) {
+        case 'size1':
+          newPrice = SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'small');
+          break;
+        case 'size2':
+          newPrice = SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'medium');
+          break;
+        case 'size3':
+          newPrice = SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'large');
+          break;
+        case 'size4':
+          newPrice = SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'x-large');
+          break;
+        default:
+          newPrice = basePrice;
+          break;
+      }
+    }
+  
+    // Then use newPrice when setting state
+    setDrivewayFormData(prevFormData => ({ ...prevFormData, [name]: value, price: newPrice }));
   };
+  
 
   const resetDrivewayForm = () => {
     setDrivewayFormData({
@@ -36,9 +81,12 @@ const DrivewayService = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-  
     const formData = new FormData();
     formData.append('selectedSize', drivewayFormData.selectedSize);
+    formData.append('size1Price', dynamicPrices.size1.toFixed(2).toString());
+    formData.append('size2Price', dynamicPrices.size2.toFixed(2).toString());
+    formData.append('size3Price', dynamicPrices.size3.toFixed(2).toString());
+    formData.append('size4Price', dynamicPrices.size4.toFixed(2).toString());
     formData.append('drivewayMessage', drivewayFormData.drivewayMessage);
     formData.append('objectType', 'driveway');
     if (drivewayFormData.image) {
@@ -123,7 +171,9 @@ const DrivewayService = () => {
                     <span className='circle'></span>
                     <span className='subject'>10 x 24ft. (240 sq. ft.)</span>
                   </div>
-                  <span className='price'>$40</span>
+                  <span className='price'>
+                  ${dynamicPrices.size1.toFixed(2)}
+                  </span>
                 </label>  
                 <input 
                 type='radio'
@@ -139,7 +189,9 @@ const DrivewayService = () => {
                     <span className='circle'></span>
                     <span className='subject'>20 x 20 ft. (400 sq. ft.)</span>
                   </div>
-                  <span className='price'>$60</span>
+                  <span className='price'>
+                  ${dynamicPrices.size2.toFixed(2)}
+                  </span>
                 </label>
                 <input 
                 type='radio'
@@ -155,7 +207,9 @@ const DrivewayService = () => {
                     <span className='circle'></span>
                     <span className='subject'>24 x 24 ft. (576 sq. ft.)</span>
                   </div>
-                  <span className='price'>$80</span>
+                  <span className='price'>
+                  ${dynamicPrices.size3.toFixed(2)}
+                  </span>
                 </label>
                 <input 
                 type='radio'
@@ -171,7 +225,9 @@ const DrivewayService = () => {
                     <span className='circle'></span>
                     <span className='subject'>24 x 36 ft. (864 sq. ft.)</span>
                   </div>
-                  <span className='price'>$110</span>
+                  <span className='price'>
+                  ${dynamicPrices.size4.toFixed(2)}
+                  </span>
                 </label>
               </div>
             </div> 

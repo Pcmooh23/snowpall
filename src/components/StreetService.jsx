@@ -2,12 +2,13 @@ import React, {useContext, useRef, useState} from 'react';
 import { ChevronUp, ImageIcon } from 'lucide-react';
 import { SnowPallContext } from './SnowPallContext';
 import { useApi } from '../useApi';
+import { SnowPall_Pricing_Model } from './PricingModel';
 
 const StreetService = () => {
 
     const {
         cart, setCart, setShouldRefetch,
-        active, toggleActive, 
+        active, toggleActive, currentWeather, basePrice,
         editingIndex, setEditingIndex, 
         streetFormData, setStreetFormData,
         streetPreview, setStreetPreview
@@ -37,10 +38,18 @@ const StreetService = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+
+        const price = SnowPall_Pricing_Model(
+            currentWeather.temperature,
+            currentWeather.precipitationType,
+            currentWeather.precipitationIntensity,
+            'medium' // The job size is medium for demo purposes
+        );
         
         const formData = new FormData();
         formData.append('from', streetFormData.from);
         formData.append('to', streetFormData.to);
+        formData.append('price', price.toString()); 
         formData.append('streetMessage', streetFormData.streetMessage);
         formData.append('objectType', 'street');
         if (streetFormData.image) {

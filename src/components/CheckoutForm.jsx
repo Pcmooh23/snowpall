@@ -270,7 +270,7 @@ const CheckoutForm = () => {
                     if (item.objectType === 'car') {
                         return (
                             <div key={index} className='checked-service'>
-                                <p>Service: {item.checkedService ? "Clear snow of vehicle": "No service selected"}<span className='price'>$20</span></p>
+                                <p>Service: {item.checkedService ? "Clear snow of vehicle": "No service selected"}<span className='price'>${item.price}</span></p>
                                 <p>Make & Model: {item.makeAndModel}</p>
                                 <p>Color: {item.color}</p>
                                 { item.licensePlate !== '' && <p>License Plate: {item.licensePlate}</p>}
@@ -287,10 +287,10 @@ const CheckoutForm = () => {
                     } else if (item.objectType === 'driveway') {
                         return (
                             <div key={index} className='checked-service'>
-                                {item.selectedSize === 'size1' && <p>10 x 24ft. (240 sq. ft.)<span className='price'>$40</span></p>}
-                                {item.selectedSize === 'size2' && <p>20 x 20 ft. (400 sq. ft.)<span className='price'>$60</span></p>}
-                                {item.selectedSize === 'size3' && <p>24 x 24 ft. (576 sq. ft.)<span className='price'>$80</span></p>}
-                                {item.selectedSize === 'size4' && <p>24 x 36 ft. (864 sq. ft.)<span className='price'>$110</span></p>}
+                                {item.selectedSize === 'size1' && <p>10 x 24 ft. (240 sq. ft.)<span className='price'>${item.size1Price}</span></p>}
+                                {item.selectedSize === 'size2' && <p>20 x 20 ft. (400 sq. ft.)<span className='price'>${item.size2Price}</span></p>}
+                                {item.selectedSize === 'size3' && <p>24 x 24 ft. (576 sq. ft.)<span className='price'>${item.size3Price}</span></p>}
+                                {item.selectedSize === 'size4' && <p>24 x 36 ft. (864 sq. ft.)<span className='price'>${item.size4Price}</span></p>}
                                 {item.imagePath && <img 
                                     className='image-cover' 
                                     src={`${baseUrl}/${item.imagePath}`}
@@ -303,9 +303,9 @@ const CheckoutForm = () => {
                     } else if (item.objectType === 'lawn') {
                         return (
                             <div key={index} className='checked-service'>
-                                {item.walkway && <p>Clear Snow off walkway<span className='price'>$15</span></p>}
-                                {item.frontYard && <p>Clear Snow off front yard<span className='price'>$25</span></p>}
-                                {item.backyard && <p>Clear Snow off backyard<span className='price'>$25</span></p>}
+                                {item.walkway && <p>Clear Snow off walkway<span className='price'>${item.walkwayPrice}</span></p>}
+                                {item.frontYard && <p>Clear Snow off front yard<span className='price'>${item.frontYardPrice}</span></p>}
+                                {item.backyard && <p>Clear Snow off backyard<span className='price'>${item.backyardPrice}</span></p>}
                                 {item.imagePath && <img 
                                     className='image-cover' 
                                     src={`${baseUrl}/${item.imagePath}`}
@@ -320,7 +320,7 @@ const CheckoutForm = () => {
                             <div key={index} className='checked-service'>
                                 {item.from && <p>From: {item.from}</p>}
                                 {item.to && <p>To: {item.to}</p>}
-                                {<span className='price'>$25</span>}
+                                {<span className='price'>${item.price}</span>}
                                 {item.imagePath && <img 
                                     className='image-cover' 
                                     src={`${baseUrl}/${item.imagePath}`}
@@ -333,10 +333,10 @@ const CheckoutForm = () => {
                     } else if (item.objectType === 'other') {
                         return (
                             <div key={index} className='checked-service'>
-                                {item.selectedSize === 'job1' && <p>(100 sq. ft.)<span className='price'>$25</span></p>}
-                                {item.selectedSize === 'job2' && <p>(200 sq. ft.)<span className='price'>$35</span></p>}
-                                {item.selectedSize === 'job3' && <p>(300 sq. ft.)<span className='price'>$45</span></p>}
-                                {item.selectedSize === 'job4' && <p>(400 sq. ft.)<span className='price'>$55</span></p>}
+                                {item.selectedSize === 'job1' && <p>(100 sq. ft.)<span className='price'>${item.job1Price}</span></p>}
+                                {item.selectedSize === 'job2' && <p>(200 sq. ft.)<span className='price'>${item.job2Price}</span></p>}
+                                {item.selectedSize === 'job3' && <p>(300 sq. ft.)<span className='price'>${item.job3Price}</span></p>}
+                                {item.selectedSize === 'job4' && <p>(400 sq. ft.)<span className='price'>${item.job4Price}</span></p>}
                                 {item.imagePath && <img 
                                     className='image-cover' 
                                     src={`${baseUrl}/${item.imagePath}`}

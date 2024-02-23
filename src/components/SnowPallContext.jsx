@@ -11,6 +11,11 @@ export const SnowPallProvider = ({ children }) => {
    // The main url endpoint for my backend server.
   const baseUrl = process.env.REACT_APP_SERVER_URL;
 
+  // So each service component has access to the weather data when the user either logs in or registers.
+  const currentWeather = localStorage.getItem(`${localStorage.getItem('currentUserId')}_currentWeather`);
+  const basePrice = 15;
+
+
   // Set userID upon login.
   const [userId, setUserId] = useState(null);
 
@@ -49,15 +54,16 @@ export const SnowPallProvider = ({ children }) => {
   const [drivewayFormData, setDrivewayFormData] = useState({
     selectedSize: '',
     image: null,
-    drivewayMessage: ''
+    drivewayMessage: '',
+    price: 0,
   });
   const [lawnFormData, setLawnFormData] = useState({
     walkway: false,
     frontYard: false,
     backyard: false,
     image: null,
-    lawnMessage: ''
-  });
+    lawnMessage: '',
+ });
   const [streetFormData, setStreetFormData] = useState({
     from: '',
     to: '',
@@ -121,25 +127,25 @@ export const SnowPallProvider = ({ children }) => {
     if (Array.isArray(cart)) {
       cart.forEach(item => {
         if (item.objectType === 'car' && item.checkedService) {
-          total += 20;
+          total += Number(item.price);
         } else if (item.objectType === 'driveway') {
-          const prices = { size1: 40, size2: 60, size3: 80, size4: 110 };
-          total += prices[item.selectedSize];
+          total += Number(item[`${item.selectedSize}Price`]);
+          console.log('driveway: ',Number(item[`${item.selectedSize}Price`]))
         } else if (item.objectType === 'lawn') {
-          if (item.walkway) total += 15;
-          if (item.frontYard) total += 25;
-          if (item.backyard) total += 25;
+          if (item.walkway) total += Number(item.walkwayPrice);
+          if (item.frontYard) total += Number(item.frontYardPrice);
+          if (item.backyard) total += Number(item.backyardPrice);
         } else if (item.objectType === 'street') {
-          total += 25;
+          console.log('street: ',Number(item.price))
+          total += Number(item.price);
         } else if (item.objectType === 'other') {
-          const prices = { job1: 25, job2: 35, job3: 45, job4: 55 };
-          total += prices[item.selectedSize];
+          console.log('other: ',item[`${item.selectedSize}Price`])
+          total += Number(item[`${item.selectedSize}Price`]);
         }
       });
     }
     return total;
   };
-  
   const total = calculateTotal();
   const estimatedTax = total * 0.1; // Assuming tax rate is 10%
   const grandTotal = total + estimatedTax;
@@ -153,6 +159,7 @@ export const SnowPallProvider = ({ children }) => {
   const [selectedDestination, setSelectedDestination] = useState(null);
   const selectedTravelMode = localStorage.getItem('selectedTravelMode');
   const [directionsService, setDirectionsService] = useState(null);
+  const [weatherData, setWeatherData] = useState(null);
   const {isLoaded} = useJsApiLoader({
     googleMapsApiKey: process.env.REACT_APP_SNOWPALL_GOOGLE_MAPS_API_KEY,
     libraries
@@ -262,6 +269,7 @@ const calculateRoute = async (origin, destination, travelMode) => {
       lawnFormData, setLawnFormData,
       streetFormData, setStreetFormData,
       otherFormData, setOtherFormData,
+      currentWeather, basePrice,
       
       // SubmitRequest area props.
       addressLog, setAddressLog,
@@ -269,6 +277,7 @@ const calculateRoute = async (origin, destination, travelMode) => {
       selectedAddressForUse, setSelectedAddressForUse,
       selectedAddressIndex, setSelectedAddressIndex,
       paymentRef, total, estimatedTax, grandTotal,
+      weatherData, setWeatherData,
 
 
       // Log all user active requests.

@@ -24,26 +24,79 @@
           "userZip": "06269"
         }
       ],
-      "userNotifications": [],
-      "userCart": [
+      "userNotifications": [
         {
-          "id": "b656c530-a2b8-4b2e-ad6d-5fb310e92296",
-          "userId": "ec61cce1-3360-4e01-9a65-ac6c5f125adb",
-          "checkedService": true,
-          "makeAndModel": "jeep wrangler",
-          "color": "dsds",
-          "licensePlate": "LVMH",
-          "carMessage": "hello Lizzie.",
-          "objectType": "car",
-          "imagePath": "uploads/e12b9957d4fa6491961abb7ef33130eb"
+          "id": "80aa0876-bcd3-409d-9a51-b69ddc541e95",
+          "message": "Your request with ID e3d0d674-6a8a-47e2-a9e3-11035a6ff2b4 has been accepted.",
+          "date": "2024-02-20T07:36:04.034Z",
+          "read": false
         },
         {
-          "id": "2a31dc89-84cc-41b0-8f42-e0eb65ad9b4b",
+          "id": "d1d20827-644f-4838-b28b-2aa4c5ba7ac9",
+          "message": "Snowtech cancelled request with ID e3d0d674-6a8a-47e2-a9e3-11035a6ff2b4.",
+          "date": "2024-02-20T07:36:10.284Z",
+          "read": false
+        }
+      ],
+      "userCart": [
+        {
+          "id": "72d7c437-bdc5-49a9-a01e-bd66fe428896",
           "userId": "ec61cce1-3360-4e01-9a65-ac6c5f125adb",
-          "selectedSize": "size3",
-          "drivewayMessage": "As my daughter I forbid you to marry tom.",
+          "checkedService": true,
+          "makeAndModel": "dsds",
+          "color": "white",
+          "licensePlate": "LVMH",
+          "carMessage": "xzczxc",
+          "price": "15",
+          "objectType": "car",
+          "imagePath": "uploads/45eb57de8041c9db36e7188387e4ec48"
+        },
+        {
+          "id": "4dea1a24-ebb3-41b5-b8aa-dd15a56eeb47",
+          "userId": "ec61cce1-3360-4e01-9a65-ac6c5f125adb",
+          "selectedSize": "size2",
+          "size1Price": "15.00",
+          "size2Price": "18.00",
+          "size3Price": "22.50",
+          "size4Price": "30.00",
+          "drivewayMessage": "asdasdasd",
           "objectType": "driveway",
-          "imagePath": "uploads/e18303d13adc954d64d5c16b965727f3"
+          "imagePath": null
+        },
+        {
+          "id": "9d355361-5244-4bca-88c9-ae3be8d259a0",
+          "userId": "ec61cce1-3360-4e01-9a65-ac6c5f125adb",
+          "walkway": true,
+          "frontYard": true,
+          "backyard": true,
+          "lawnMessage": "asdasdaxcasd",
+          "walkwayPrice": "15",
+          "frontYardPrice": "18",
+          "backyardPrice": "18",
+          "objectType": "lawn",
+          "imagePath": null
+        },
+        {
+          "id": "e6dd1b15-121d-47fd-8da8-e1329096d931",
+          "userId": "ec61cce1-3360-4e01-9a65-ac6c5f125adb",
+          "from": "da",
+          "to": "asd",
+          "price": "18",
+          "streetMessage": "asdasdasdasd",
+          "objectType": "street",
+          "imagePath": null
+        },
+        {
+          "id": "cffddb6d-8a0e-44ed-9eb7-894d7c898fd3",
+          "userId": "ec61cce1-3360-4e01-9a65-ac6c5f125adb",
+          "selectedSize": "job1",
+          "job1Price": "15.00",
+          "job2Price": "18.00",
+          "job3Price": "22.50",
+          "job4Price": "30.00",
+          "otherMessage": "",
+          "objectType": "other",
+          "imagePath": null
         }
       ],
       "userRequests": [
@@ -96,7 +149,7 @@
           }
         }
       ],
-      "refreshToken": null
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImVjNjFjY2UxLTMzNjAtNGUwMS05YTY1LWFjNmM1ZjEyNWFkYiIsInVzZXJFbWFpbCI6IlJlZGRpbmd0b24wMjA3QGdtYWlsLmNvbSIsImlhdCI6MTcwODYzMzk3MywiZXhwIjoxNzA5MjM4NzczfQ.y3ELzbvHeIuZBfL1ygx3fumPL1w3n311ZnDIhePh3AE"
     },
     {
       "id": "f4414a43-926b-4686-b8db-2296c37d1a82",
@@ -122,17 +175,81 @@
           "userZip": "06269"
         }
       ],
-      "userNotifications": [],
-      "userCart": [
+      "userNotifications": [
         {
-          "id": "2bf76ef9-b70d-435d-8886-854c9ab01d66",
-          "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
-          "selectedSize": "job4",
-          "otherMessage": "I'm going to marry Elizabeth whether you like it or not, we gave you a grand daughter",
-          "objectType": "other",
-          "imagePath": "uploads/d86e6838595b309f1b0d5a18054a2c9f"
+          "id": "7410b5e5-e0c1-4c1f-9219-425bca6766fc",
+          "message": "Your request with ID bc104110-cf20-4e4e-a3ac-7b66cbac981e has been accepted.",
+          "date": "2024-02-20T05:45:30.057Z",
+          "read": false
+        },
+        {
+          "id": "dfb93948-0571-4c19-b97c-60e2b6acf978",
+          "message": "Your request with ID bc104110-cf20-4e4e-a3ac-7b66cbac981e has been started.",
+          "date": "2024-02-20T05:45:37.994Z",
+          "read": false
+        },
+        {
+          "id": "d1f145dc-06e7-4ce2-af2b-205142d273a7",
+          "message": "Your request with ID bc104110-cf20-4e4e-a3ac-7b66cbac981e has been completed.",
+          "date": "2024-02-20T05:45:41.755Z",
+          "read": false
+        },
+        {
+          "id": "f1402d44-466e-4d25-8197-f41686c376d1",
+          "message": "Your request with ID bf35e9e7-1394-4592-8e9e-56447447d31c has been accepted.",
+          "date": "2024-02-20T07:38:21.083Z",
+          "read": false
+        },
+        {
+          "id": "83823ff6-7252-446d-9669-48ac4033c7ba",
+          "message": "Your request with ID bf35e9e7-1394-4592-8e9e-56447447d31c has been started.",
+          "date": "2024-02-20T07:38:54.865Z",
+          "read": false
+        },
+        {
+          "id": "12f12f0b-5108-4bf8-a425-2c14b1333be4",
+          "message": "Your request with ID bf35e9e7-1394-4592-8e9e-56447447d31c has been completed.",
+          "date": "2024-02-20T07:38:56.894Z",
+          "read": false
+        },
+        {
+          "id": "85fa880e-9df6-4fc6-ac8a-4ce3178eb458",
+          "message": "Your request with ID b6b98bff-c725-4949-935f-73b2c2cbbf02 has been accepted.",
+          "date": "2024-02-20T20:56:06.352Z",
+          "read": false
+        },
+        {
+          "id": "be0bd074-5c9e-4e67-8c35-0b9192712f81",
+          "message": "Your request with ID b6b98bff-c725-4949-935f-73b2c2cbbf02 has been started.",
+          "date": "2024-02-20T20:56:19.608Z",
+          "read": false
+        },
+        {
+          "id": "e6ec6f62-d0b6-4241-9b04-337f9f186cbb",
+          "message": "Your request with ID b6b98bff-c725-4949-935f-73b2c2cbbf02 has been completed.",
+          "date": "2024-02-20T20:56:22.312Z",
+          "read": false
+        },
+        {
+          "id": "f0520706-322a-4ad4-8b0b-de0c2a9ebe8a",
+          "message": "Your request with ID 4446a84a-a3e0-4630-8acb-6ae9de4f329d has been accepted.",
+          "date": "2024-02-20T21:41:34.098Z",
+          "read": false
+        },
+        {
+          "id": "834c41f4-3ead-4a9d-bef2-7e63296032c0",
+          "message": "Your request with ID 4446a84a-a3e0-4630-8acb-6ae9de4f329d has been started.",
+          "date": "2024-02-20T21:41:41.225Z",
+          "read": false
+        },
+        {
+          "id": "52361014-e0d5-4b4f-a8b4-889756835466",
+          "message": "Your request with ID 4446a84a-a3e0-4630-8acb-6ae9de4f329d has been completed.",
+          "date": "2024-02-20T21:41:44.306Z",
+          "read": false
         }
       ],
+      "userCart": [],
       "userRequests": [
         {
           "id": "bc104110-cf20-4e4e-a3ac-7b66cbac981e",
@@ -165,14 +282,211 @@
             "created": "2024-02-17T06:30:25.000Z"
           },
           "stages": {
-            "live": true,
-            "accepted": false,
-            "started": false,
-            "complete": false
+            "live": false,
+            "accepted": true,
+            "started": true,
+            "complete": true
+          }
+        },
+        {
+          "id": "bf35e9e7-1394-4592-8e9e-56447447d31c",
+          "orderDate": "2024-02-20T07:37:51.547Z",
+          "cart": [
+            {
+              "id": "2bf76ef9-b70d-435d-8886-854c9ab01d66",
+              "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+              "selectedSize": "job4",
+              "otherMessage": "I'm going to marry Elizabeth whether you like it or not, we gave you a grand daughter",
+              "objectType": "other",
+              "imagePath": "uploads/d86e6838595b309f1b0d5a18054a2c9f"
+            },
+            {
+              "id": "57338eb4-7e90-41ca-839d-a6802cc1df10",
+              "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+              "checkedService": true,
+              "makeAndModel": "dsds",
+              "color": "white",
+              "licensePlate": "LVMH",
+              "carMessage": "you",
+              "objectType": "car",
+              "imagePath": "uploads/224951a0b8f0c2de56051e3f50c076fe"
+            }
+          ],
+          "selectedAddress": {
+            "id": "ad162f58-b9ae-452c-86fc-f6204640715a",
+            "userName": "Tom Keen",
+            "userNumber": "",
+            "userStreet": "3384 Towers Loop Road",
+            "userUnit": "",
+            "userCity": "Storrs",
+            "userState": "Connecticut",
+            "userZip": "06269"
+          },
+          "charge": {
+            "id": "ch_3OlntiBWC1e9EDXY0xonSuqw",
+            "amount": 8250,
+            "currency": "usd",
+            "description": "Charge for order",
+            "created": "2024-02-20T07:37:50.000Z"
+          },
+          "stages": {
+            "live": false,
+            "accepted": true,
+            "started": true,
+            "complete": true
+          }
+        },
+        {
+          "id": "b6b98bff-c725-4949-935f-73b2c2cbbf02",
+          "orderDate": "2024-02-20T20:53:56.243Z",
+          "cart": [
+            {
+              "id": "57338eb4-7e90-41ca-839d-a6802cc1df10",
+              "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+              "checkedService": true,
+              "makeAndModel": "dsds",
+              "color": "white",
+              "licensePlate": "LVMH",
+              "carMessage": "you",
+              "objectType": "car",
+              "imagePath": "uploads/224951a0b8f0c2de56051e3f50c076fe"
+            }
+          ],
+          "selectedAddress": {
+            "id": "ad162f58-b9ae-452c-86fc-f6204640715a",
+            "userName": "Tom Keen",
+            "userNumber": "",
+            "userStreet": "3384 Towers Loop Road",
+            "userUnit": "",
+            "userCity": "Storrs",
+            "userState": "Connecticut",
+            "userZip": "06269"
+          },
+          "charge": {
+            "id": "ch_3Om0K7BWC1e9EDXY19djKMuN",
+            "amount": 2200,
+            "currency": "usd",
+            "description": "Charge for service",
+            "created": "2024-02-20T20:53:55.000Z"
+          },
+          "stages": {
+            "live": false,
+            "accepted": true,
+            "started": true,
+            "complete": true
+          }
+        },
+        {
+          "id": "4446a84a-a3e0-4630-8acb-6ae9de4f329d",
+          "orderDate": "2024-02-20T21:14:06.603Z",
+          "cart": [
+            {
+              "id": "57338eb4-7e90-41ca-839d-a6802cc1df10",
+              "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+              "checkedService": true,
+              "makeAndModel": "dsds",
+              "color": "white",
+              "licensePlate": "LVMH",
+              "carMessage": "you",
+              "objectType": "car",
+              "imagePath": "uploads/224951a0b8f0c2de56051e3f50c076fe"
+            },
+            {
+              "id": "506343f6-7c2c-43dc-abf9-76a86db61895",
+              "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+              "selectedSize": "size4",
+              "drivewayMessage": "hello Mr. reddington",
+              "objectType": "driveway",
+              "imagePath": "uploads/447451255b415479d31490cd9dc3e4ad"
+            },
+            {
+              "id": "bc390b8d-2d88-4d2d-a986-b1510d2153e3",
+              "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+              "walkway": true,
+              "frontYard": true,
+              "backyard": false,
+              "lawnMessage": "this is your granddaughter ",
+              "objectType": "lawn",
+              "imagePath": "uploads/00850fa2e11113251706384c15aa8798"
+            },
+            {
+              "id": "a5f47ae7-b6bb-4be6-9861-7bdf1b4f4177",
+              "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+              "from": "your mom",
+              "to": "your sister",
+              "streetMessage": "yolo",
+              "objectType": "street",
+              "imagePath": "uploads/14e7cd0b544f86dd232b1ceb1869d278"
+            }
+          ],
+          "selectedAddress": {
+            "id": "ad162f58-b9ae-452c-86fc-f6204640715a",
+            "userName": "Tom Keen",
+            "userNumber": "",
+            "userStreet": "3384 Towers Loop Road",
+            "userUnit": "",
+            "userCity": "Storrs",
+            "userState": "Connecticut",
+            "userZip": "06269"
+          },
+          "charge": {
+            "id": "ch_3Om0ddBWC1e9EDXY0R5h83bE",
+            "amount": 21450,
+            "currency": "usd",
+            "description": "Charge for service",
+            "created": "2024-02-20T21:14:05.000Z"
+          },
+          "stages": {
+            "live": false,
+            "accepted": true,
+            "started": true,
+            "complete": true
           }
         }
       ],
       "refreshToken": null
+    },
+    {
+      "id": "f47d3921-10a1-4f9b-bfbe-fa2ac3e6e007",
+      "userName": "Tim drake",
+      "userEmail": "tim.drake@gmail.com",
+      "accountType": "customer",
+      "userNumber": "",
+      "userStreet": "3384 Towers Loop Road",
+      "userUnit": "",
+      "userCity": "Storrs",
+      "userState": "Connecticut",
+      "userZip": "06269",
+      "userPasswordHash": "$2b$10$JxbJssLLuzW0ArsKfnZSO.bL/t08uYiuuU79pJS7nOvz2i0h3Jf0q",
+      "userAddresses": [
+        {
+          "id": "e9b6912b-8754-4b4e-8476-1bc43114fac5",
+          "userName": "Tim drake",
+          "userNumber": "",
+          "userStreet": "3384 Towers Loop Road",
+          "userUnit": "",
+          "userCity": "Storrs",
+          "userState": "Connecticut",
+          "userZip": "06269"
+        }
+      ],
+      "userNotifications": [],
+      "userCart": [
+        {
+          "id": "d834647d-b1a0-4aae-9830-54d374e1e91c",
+          "userId": "f47d3921-10a1-4f9b-bfbe-fa2ac3e6e007",
+          "checkedService": true,
+          "makeAndModel": "jeep wrangler",
+          "color": "white",
+          "licensePlate": "LVMH",
+          "carMessage": "you",
+          "price": "15",
+          "objectType": "car",
+          "imagePath": "uploads/d35cc1181becadd93289dd6b483ce5b8"
+        }
+      ],
+      "userRequests": [],
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY0N2QzOTIxLTEwYTEtNGY5Yi1iZmJlLWZhMmFjM2U2ZTAwNyIsInVzZXJFbWFpbCI6InRpbS5kcmFrZUBnbWFpbC5jb20iLCJpYXQiOjE3MDg1MDEyNDQsImV4cCI6MTcwOTEwNjA0NH0.RpUfpEzoomhpvuAeg892Szv2OFzAba6tnWUOeJNhOnI"
     }
   ],
   "snowtechs": [
@@ -203,7 +517,8 @@
       "userNotifications": [],
       "completedRequests": [],
       "balance": 0,
-      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQzM2FkYWMwLTkwZTQtNGQ5Ny05YzkxLWJjZjllMmU3Yjc5MSIsInVzZXJFbWFpbCI6ImtpbS5wb3NzaWJsZUBnbWFpbC5jb20iLCJpYXQiOjE3MDgzNjc1NTksImV4cCI6MTcwODk3MjM1OX0.b8Yv1x-WYANj8_EMeqWTSPlV3cNepWFu9y8qF-T6q2U"
+      "refreshToken": null,
+      "stripeAccountId": "acct_1Om474B3V6dWZsKu"
     },
     {
       "id": "76c0c3c4-c8ed-4204-a8ba-ff731be5882d",
@@ -233,6 +548,229 @@
       "completedRequests": [],
       "balance": 0,
       "refreshToken": null
+    },
+    {
+      "id": "0fc44ccc-14f7-4de0-8cd0-e4781f1fcf81",
+      "userName": "John Doe",
+      "userEmail": "johnDoe2121@gmail.com",
+      "accountType": "snowtech",
+      "userNumber": "",
+      "userStreet": "3384 Towers Loop Road",
+      "userUnit": "",
+      "userCity": "Storrs",
+      "userState": "Connecticut",
+      "userZip": "06269",
+      "userPasswordHash": "$2b$10$kSJXsvCj8Gz156/1pn01eeMGyUU8ynGSWNrXSFkszx7tRuKoFriRq",
+      "userAddresses": [
+        {
+          "id": "b35e5cf3-d40b-4698-9c33-0721a1972b1f",
+          "userName": "John Doe",
+          "userNumber": "",
+          "userStreet": "3384 Towers Loop Road",
+          "userUnit": "",
+          "userCity": "Storrs",
+          "userState": "Connecticut",
+          "userZip": "06269"
+        }
+      ],
+      "userNotifications": [],
+      "completedRequests": [
+        {
+          "id": "bc104110-cf20-4e4e-a3ac-7b66cbac981e",
+          "orderDate": "2024-02-17T06:30:26.706Z",
+          "cart": [
+            {
+              "id": "2bf76ef9-b70d-435d-8886-854c9ab01d66",
+              "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+              "selectedSize": "job4",
+              "otherMessage": "I'm going to marry Elizabeth whether you like it or not, we gave you a grand daughter",
+              "objectType": "other",
+              "imagePath": "uploads/d86e6838595b309f1b0d5a18054a2c9f"
+            }
+          ],
+          "selectedAddress": {
+            "id": "ad162f58-b9ae-452c-86fc-f6204640715a",
+            "userName": "Tom Keen",
+            "userNumber": "",
+            "userStreet": "3384 Towers Loop Road",
+            "userUnit": "",
+            "userCity": "Storrs",
+            "userState": "Connecticut",
+            "userZip": "06269"
+          },
+          "charge": {
+            "id": "ch_3OkhPpBWC1e9EDXY0Ts3CX7p",
+            "amount": 6050,
+            "currency": "usd",
+            "description": "Charge for order",
+            "created": "2024-02-17T06:30:25.000Z"
+          },
+          "stages": {
+            "live": false,
+            "accepted": true,
+            "started": true,
+            "complete": true
+          }
+        },
+        {
+          "id": "bf35e9e7-1394-4592-8e9e-56447447d31c",
+          "orderDate": "2024-02-20T07:37:51.547Z",
+          "cart": [
+            {
+              "id": "2bf76ef9-b70d-435d-8886-854c9ab01d66",
+              "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+              "selectedSize": "job4",
+              "otherMessage": "I'm going to marry Elizabeth whether you like it or not, we gave you a grand daughter",
+              "objectType": "other",
+              "imagePath": "uploads/d86e6838595b309f1b0d5a18054a2c9f"
+            },
+            {
+              "id": "57338eb4-7e90-41ca-839d-a6802cc1df10",
+              "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+              "checkedService": true,
+              "makeAndModel": "dsds",
+              "color": "white",
+              "licensePlate": "LVMH",
+              "carMessage": "you",
+              "objectType": "car",
+              "imagePath": "uploads/224951a0b8f0c2de56051e3f50c076fe"
+            }
+          ],
+          "selectedAddress": {
+            "id": "ad162f58-b9ae-452c-86fc-f6204640715a",
+            "userName": "Tom Keen",
+            "userNumber": "",
+            "userStreet": "3384 Towers Loop Road",
+            "userUnit": "",
+            "userCity": "Storrs",
+            "userState": "Connecticut",
+            "userZip": "06269"
+          },
+          "charge": {
+            "id": "ch_3OlntiBWC1e9EDXY0xonSuqw",
+            "amount": 8250,
+            "currency": "usd",
+            "description": "Charge for order",
+            "created": "2024-02-20T07:37:50.000Z"
+          },
+          "stages": {
+            "live": false,
+            "accepted": true,
+            "started": true,
+            "complete": true
+          }
+        },
+        {
+          "id": "b6b98bff-c725-4949-935f-73b2c2cbbf02",
+          "orderDate": "2024-02-20T20:53:56.243Z",
+          "cart": [
+            {
+              "id": "57338eb4-7e90-41ca-839d-a6802cc1df10",
+              "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+              "checkedService": true,
+              "makeAndModel": "dsds",
+              "color": "white",
+              "licensePlate": "LVMH",
+              "carMessage": "you",
+              "objectType": "car",
+              "imagePath": "uploads/224951a0b8f0c2de56051e3f50c076fe"
+            }
+          ],
+          "selectedAddress": {
+            "id": "ad162f58-b9ae-452c-86fc-f6204640715a",
+            "userName": "Tom Keen",
+            "userNumber": "",
+            "userStreet": "3384 Towers Loop Road",
+            "userUnit": "",
+            "userCity": "Storrs",
+            "userState": "Connecticut",
+            "userZip": "06269"
+          },
+          "charge": {
+            "id": "ch_3Om0K7BWC1e9EDXY19djKMuN",
+            "amount": 2200,
+            "currency": "usd",
+            "description": "Charge for service",
+            "created": "2024-02-20T20:53:55.000Z"
+          },
+          "stages": {
+            "live": false,
+            "accepted": true,
+            "started": true,
+            "complete": true
+          }
+        },
+        {
+          "id": "4446a84a-a3e0-4630-8acb-6ae9de4f329d",
+          "orderDate": "2024-02-20T21:14:06.603Z",
+          "cart": [
+            {
+              "id": "57338eb4-7e90-41ca-839d-a6802cc1df10",
+              "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+              "checkedService": true,
+              "makeAndModel": "dsds",
+              "color": "white",
+              "licensePlate": "LVMH",
+              "carMessage": "you",
+              "objectType": "car",
+              "imagePath": "uploads/224951a0b8f0c2de56051e3f50c076fe"
+            },
+            {
+              "id": "506343f6-7c2c-43dc-abf9-76a86db61895",
+              "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+              "selectedSize": "size4",
+              "drivewayMessage": "hello Mr. reddington",
+              "objectType": "driveway",
+              "imagePath": "uploads/447451255b415479d31490cd9dc3e4ad"
+            },
+            {
+              "id": "bc390b8d-2d88-4d2d-a986-b1510d2153e3",
+              "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+              "walkway": true,
+              "frontYard": true,
+              "backyard": false,
+              "lawnMessage": "this is your granddaughter ",
+              "objectType": "lawn",
+              "imagePath": "uploads/00850fa2e11113251706384c15aa8798"
+            },
+            {
+              "id": "a5f47ae7-b6bb-4be6-9861-7bdf1b4f4177",
+              "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+              "from": "your mom",
+              "to": "your sister",
+              "streetMessage": "yolo",
+              "objectType": "street",
+              "imagePath": "uploads/14e7cd0b544f86dd232b1ceb1869d278"
+            }
+          ],
+          "selectedAddress": {
+            "id": "ad162f58-b9ae-452c-86fc-f6204640715a",
+            "userName": "Tom Keen",
+            "userNumber": "",
+            "userStreet": "3384 Towers Loop Road",
+            "userUnit": "",
+            "userCity": "Storrs",
+            "userState": "Connecticut",
+            "userZip": "06269"
+          },
+          "charge": {
+            "id": "ch_3Om0ddBWC1e9EDXY0R5h83bE",
+            "amount": 21450,
+            "currency": "usd",
+            "description": "Charge for service",
+            "created": "2024-02-20T21:14:05.000Z"
+          },
+          "stages": {
+            "live": false,
+            "accepted": true,
+            "started": true,
+            "complete": true
+          }
+        }
+      ],
+      "balance": 0,
+      "refreshToken": null,
+      "stripeAccountId": "acct_1OllWiPcGoPmexm7"
     }
   ],
   "requests": {
@@ -284,7 +822,9 @@
           "started": false,
           "complete": false
         }
-      },
+      }
+    ],
+    "completed": [
       {
         "id": "bc104110-cf20-4e4e-a3ac-7b66cbac981e",
         "orderDate": "2024-02-17T06:30:26.706Z",
@@ -316,13 +856,167 @@
           "created": "2024-02-17T06:30:25.000Z"
         },
         "stages": {
-          "live": true,
-          "accepted": false,
-          "started": false,
-          "complete": false
+          "live": false,
+          "accepted": true,
+          "started": true,
+          "complete": true
+        }
+      },
+      {
+        "id": "bf35e9e7-1394-4592-8e9e-56447447d31c",
+        "orderDate": "2024-02-20T07:37:51.547Z",
+        "cart": [
+          {
+            "id": "2bf76ef9-b70d-435d-8886-854c9ab01d66",
+            "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+            "selectedSize": "job4",
+            "otherMessage": "I'm going to marry Elizabeth whether you like it or not, we gave you a grand daughter",
+            "objectType": "other",
+            "imagePath": "uploads/d86e6838595b309f1b0d5a18054a2c9f"
+          },
+          {
+            "id": "57338eb4-7e90-41ca-839d-a6802cc1df10",
+            "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+            "checkedService": true,
+            "makeAndModel": "dsds",
+            "color": "white",
+            "licensePlate": "LVMH",
+            "carMessage": "you",
+            "objectType": "car",
+            "imagePath": "uploads/224951a0b8f0c2de56051e3f50c076fe"
+          }
+        ],
+        "selectedAddress": {
+          "id": "ad162f58-b9ae-452c-86fc-f6204640715a",
+          "userName": "Tom Keen",
+          "userNumber": "",
+          "userStreet": "3384 Towers Loop Road",
+          "userUnit": "",
+          "userCity": "Storrs",
+          "userState": "Connecticut",
+          "userZip": "06269"
+        },
+        "charge": {
+          "id": "ch_3OlntiBWC1e9EDXY0xonSuqw",
+          "amount": 8250,
+          "currency": "usd",
+          "description": "Charge for order",
+          "created": "2024-02-20T07:37:50.000Z"
+        },
+        "stages": {
+          "live": false,
+          "accepted": true,
+          "started": true,
+          "complete": true
+        }
+      },
+      {
+        "id": "b6b98bff-c725-4949-935f-73b2c2cbbf02",
+        "orderDate": "2024-02-20T20:53:56.243Z",
+        "cart": [
+          {
+            "id": "57338eb4-7e90-41ca-839d-a6802cc1df10",
+            "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+            "checkedService": true,
+            "makeAndModel": "dsds",
+            "color": "white",
+            "licensePlate": "LVMH",
+            "carMessage": "you",
+            "objectType": "car",
+            "imagePath": "uploads/224951a0b8f0c2de56051e3f50c076fe"
+          }
+        ],
+        "selectedAddress": {
+          "id": "ad162f58-b9ae-452c-86fc-f6204640715a",
+          "userName": "Tom Keen",
+          "userNumber": "",
+          "userStreet": "3384 Towers Loop Road",
+          "userUnit": "",
+          "userCity": "Storrs",
+          "userState": "Connecticut",
+          "userZip": "06269"
+        },
+        "charge": {
+          "id": "ch_3Om0K7BWC1e9EDXY19djKMuN",
+          "amount": 2200,
+          "currency": "usd",
+          "description": "Charge for service",
+          "created": "2024-02-20T20:53:55.000Z"
+        },
+        "stages": {
+          "live": false,
+          "accepted": true,
+          "started": true,
+          "complete": true
+        }
+      },
+      {
+        "id": "4446a84a-a3e0-4630-8acb-6ae9de4f329d",
+        "orderDate": "2024-02-20T21:14:06.603Z",
+        "cart": [
+          {
+            "id": "57338eb4-7e90-41ca-839d-a6802cc1df10",
+            "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+            "checkedService": true,
+            "makeAndModel": "dsds",
+            "color": "white",
+            "licensePlate": "LVMH",
+            "carMessage": "you",
+            "objectType": "car",
+            "imagePath": "uploads/224951a0b8f0c2de56051e3f50c076fe"
+          },
+          {
+            "id": "506343f6-7c2c-43dc-abf9-76a86db61895",
+            "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+            "selectedSize": "size4",
+            "drivewayMessage": "hello Mr. reddington",
+            "objectType": "driveway",
+            "imagePath": "uploads/447451255b415479d31490cd9dc3e4ad"
+          },
+          {
+            "id": "bc390b8d-2d88-4d2d-a986-b1510d2153e3",
+            "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+            "walkway": true,
+            "frontYard": true,
+            "backyard": false,
+            "lawnMessage": "this is your granddaughter ",
+            "objectType": "lawn",
+            "imagePath": "uploads/00850fa2e11113251706384c15aa8798"
+          },
+          {
+            "id": "a5f47ae7-b6bb-4be6-9861-7bdf1b4f4177",
+            "userId": "f4414a43-926b-4686-b8db-2296c37d1a82",
+            "from": "your mom",
+            "to": "your sister",
+            "streetMessage": "yolo",
+            "objectType": "street",
+            "imagePath": "uploads/14e7cd0b544f86dd232b1ceb1869d278"
+          }
+        ],
+        "selectedAddress": {
+          "id": "ad162f58-b9ae-452c-86fc-f6204640715a",
+          "userName": "Tom Keen",
+          "userNumber": "",
+          "userStreet": "3384 Towers Loop Road",
+          "userUnit": "",
+          "userCity": "Storrs",
+          "userState": "Connecticut",
+          "userZip": "06269"
+        },
+        "charge": {
+          "id": "ch_3Om0ddBWC1e9EDXY0R5h83bE",
+          "amount": 21450,
+          "currency": "usd",
+          "description": "Charge for service",
+          "created": "2024-02-20T21:14:05.000Z"
+        },
+        "stages": {
+          "live": false,
+          "accepted": true,
+          "started": true,
+          "complete": true
         }
       }
-    ],
-    "completed": []
+    ]
   }
 }

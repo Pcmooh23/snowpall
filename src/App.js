@@ -6,6 +6,8 @@ import SubmitRequest from './components/SubmitRequest';
 import { SnowPallProvider } from './components/SnowPallContext';
 import LoginPage from './components/LoginPage';
 import SnowTech from './components/SnowTech';
+import SnowtechOnboarding from './components/SnowtechOnboarding';
+
 
 
 
@@ -19,6 +21,7 @@ function App() {
             <Route exact path='/home' element={<Homepage/>}/>
             <Route exact path='/submit-request' element={<SubmitRequest/>}/>
             <Route exact path='/snowtech' element={<SnowTech/>}/>
+            <Route exact path='/onboarding' element={<SnowtechOnboarding/>}/>
           </Routes>
         </div>
       </SnowPallProvider>
