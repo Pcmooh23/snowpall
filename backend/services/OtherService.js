@@ -104,7 +104,7 @@ const deleteOtherService = async (req, res) => {
         }
 
         user.userCart.splice(otherIndex, 1);
-        await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+        await user.save();
         res.status(200).json({ message: 'Other service object deleted from the DB.' });
 
     } catch (error) {
