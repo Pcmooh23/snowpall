@@ -2,28 +2,27 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
+const mongoose = require('mongoose');
+const db = require("./keys").mongoURI
+const { User, Customer, Snowtech, Request, ActiveRequest, CompletedRequest } = require('./schemas');
 const fsPromises = require('fs').promises;
 const path = require('path');
 const cors = require('cors');
 const { body, validationResult } = require('express-validator');
-const multer = require('multer');
 const https = require('https');
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { v4: uuidv4 } = require('uuid');
-const upload = multer({
-    dest: 'uploads/',
-    limits: {
-      fileSize: 1024 * 1024 * 5, // for 5MB
-    },
-    fileFilter: (req, file, cb) => {
-      if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
-        cb(null, true);
-      } else {
-        cb(new Error('Only .jpeg or .png files are accepted'), false);
-      }
-    },
-});
+const upload = require('./middleware/upload');
+const verifyToken = require('./middleware/verifyToken');
+const loadData = require('./middleware/loadData');
+const { postCarService, updateCarService, deleteCarService } = require('./services/CarService');
+const { postDrivewayService, updateDrivewayService, deleteDrivewayService } = require('./services/DrivewayService');
+const { postLawnService, updateLawnService, deleteLawnService } = require('./services/LawnService');
+const { postStreetService, updateStreetService, deleteStreetService } = require('./services/StreetService');
+const { postOtherService, updateOtherService, deleteOtherService } = require('./services/OtherService');
+const getUserServices = require('./services/Services');
+
 const corsOptions = {
     origin: 'https://localhost:3000', // Allow only your frontend to make requests
     credentials: true, // Allow cookies to be sent and received
@@ -32,6 +31,13 @@ const corsOptions = {
 };
 
 const app = express();
+app.use(express.json()); // Middleware to parse JSON body
+app.use(cookieParser()); // middleware for cookies
+app.use(cors(corsOptions)); // Enable CORS for all routes
+
+mongoose.connect(db);
+
+app.use(loadData); // Then use it before routes.
 
 // SSL certificate paths
 async function loadCredentials() {
@@ -66,128 +72,11 @@ async function startHttpsServer() {
 // Serve static files from 'public' directory
 app.use(express.static(path.join(__dirname, '../public')));
 
-// Enable CORS for all routes
-app.use(cors(corsOptions));
-  
-// middleware for cookies
-app.use(cookieParser());
-
-// Middleware to parse JSON body
-app.use(express.json());
-
 // a line that serves static files from the 'uploads' directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // The file that stores user info.
 const DB_FILE = path.join(__dirname, './DB.json');
-
-// Verify token middleware.
-const verifyToken = (req, res, next) => {
-    const authHeader = req.headers.authorization;
-    
-    if (authHeader)  {
-        const token = authHeader.split(' ')[1] // Extract the token from the Authorization header
-
-        jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-            if (err) {
-                return res.status(403).json({ error: 'Token is not valid or has expired' });
-            }
-
-            req.user = user; // Attach the user to the request for further use
-            next();
-        });
-    } else {
-        res.status(401).json({ error: 'Access token is missing' });
-    }
-}
-
-// Middleware function that loads and parses user data from JSON file, 
-// and then attaches it to the request object ('req') so that subsequent route handlers 
-// can access it directly, thus eliminating need to repeat the file reading and parsing logic in each route.
-const loadData = async (req, res, next) => {
-    try {
-        const data = await fsPromises.readFile(DB_FILE, 'utf8');
-        const db = JSON.parse(data);
-        req.db = db; // Attach the database object to the request object
-        req.combinedUsers = [...db.customers, ...db.snowtechs];
-        req.customerUsers = [...db.customers];
-        req.snowtechUsers = [...db.snowtechs];
-        req.activeRequests = [...db.requests.active]
-        req.completedRequests = [...db.requests.completed]
-        next(); // Proceed to the next middleware/route handler
-    } catch (err) {
-        console.error("Error loading user data:", err);
-        res.status(500).send('An error occurred while loading user data.');
-    }
-};
-// Then use it before routes.
-app.use(loadData);
-
-// POST route for new users
-app.post('/registerUser', async (req, res) => {
-    try {
-        const usersList = req.body.accountType === 'customer' ? req.db.customers : req.db.snowtechs;
-
-        if (usersList.some(user => user.userEmail === req.body.userEmail)) {
-            return res.status(400).send('User already exists.');
-        }
-        
-        const hashedPassword = await bcrypt.hash(req.body.userPassword, 10);
-
-        const newUser = {
-            id: uuidv4(),
-            userName: req.body.userName,
-            userEmail: req.body.userEmail,
-            accountType: req.body.accountType,
-            userNumber: req.body.userNumber,
-            userStreet: req.body.userStreet,
-            userUnit: req.body.userUnit,
-            userCity: req.body.userCity,
-            userState: req.body.userState,
-            userZip: req.body.userZip,
-            userPasswordHash: hashedPassword,
-            userAddresses: [],
-            userNotifications: []
-        };
-
-        if (newUser.accountType === 'customer') {
-            newUser.userCart = [];
-            newUser.userRequests = [];
-        } else if (newUser.accountType === 'snowtech') {
-            newUser.completedRequests = [];
-        }
-
-        const tokenPayload = { id: newUser.id, userEmail: newUser.userEmail };
-        const accessToken = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '15m' });
-        const refreshToken = jwt.sign(tokenPayload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
-
-        newUser.refreshToken = refreshToken;
-
-        usersList.push(newUser);
-
-        await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
-
-        res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 7 * 24 * 60 * 60 * 1000 });
-
-        res.status(201).json({ valid: true, message: 'User successfully created.', accessToken: accessToken, 
-            user: {
-                id: newUser.id,
-                userName: newUser.userName,
-                userEmail: newUser.userEmail,
-                accountType: newUser.accountType,
-                userNumber: newUser.userNumber,
-                userStreet: newUser.userStreet,
-                userUnit: newUser.userUnit,
-                userCity: newUser.userCity,
-                userState: newUser.userState,
-                userZip: newUser.userZip
-            }
-        });
-    } catch (err) {
-        console.error("Error processing request:", err);
-        res.status(500).send('An error occurred during account creation.');
-    }
-});
 
 app.put('/update-stripe-link', verifyToken, async (req, res) => {
     try {
@@ -234,12 +123,96 @@ app.put('/update-stripe-link', verifyToken, async (req, res) => {
     }
 });
 
+// POST route for new users
+app.post('/registerUser', async (req, res) => {
+    try {
+        const { userName, userEmail, accountType, userPassword, userNumber, userStreet, userUnit, userCity, userState, userZip } = req.body;
+
+        // Check if user already exists in the database
+        const existingUser = await User.findOne({ userEmail: userEmail });
+        if (existingUser) {
+            return res.status(400).send('User already exists.');
+        }
+        
+        // Hash password
+        const hashedPassword = await bcrypt.hash(userPassword, 10);
+
+        // Create a new user object with the hashed password
+        const baseUserData = {
+            userName,
+            userEmail,
+            accountType,
+            userNumber,
+            userStreet,
+            userUnit,
+            userCity,
+            userState,
+            userZip,
+            userPasswordHash: hashedPassword,
+        };
+
+        let newUser;
+        if (accountType === 'customer') {
+            newUser = new Customer(baseUserData);
+        } else if (accountType === 'snowtech') {
+            // If accountType is snowtech, create a Snowtech document
+            newUser = new Snowtech(baseUserData);
+        } else {
+            // Handle other account types or throw an error
+            return res.status(400).send('Invalid account type.');
+        }
+
+        // Save the new user to DB to get an _id.
+        await newUser.save();
+
+        // Create JWT tokens
+        const tokenPayload = { id: newUser._id, userEmail: newUser.userEmail };
+        const accessToken = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '15m' });
+        const refreshToken = jwt.sign(tokenPayload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
+        
+        newUser.refreshToken = refreshToken; // Save the refresh token with the user
+        await newUser.save(); // Ensure refreshToken is saved
+
+        // Set the refreshToken in a cookie
+        res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 7 * 24 * 60 * 60 * 1000 });
+
+        // Send back a response
+        res.status(201).json({
+            valid: true,
+            message: 'User successfully created.',
+            accessToken: accessToken,
+            user: {
+                id: newUser._id,
+                userName: newUser.userName,
+                userEmail: newUser.userEmail,
+                accountType: newUser.accountType,
+                userNumber: newUser.userNumber,
+                userStreet: newUser.userStreet,
+                userUnit: newUser.userUnit,
+                userCity: newUser.userCity,
+                userState: newUser.userState,
+                userZip: newUser.userZip
+            }
+        });
+    } catch (err) {
+        console.error("Error processing request:", err);
+        res.status(500).send('An error occurred during account creation.');
+    }
+});
+
 // POST route to validate the user
 app.post('/validateLogin', async (req, res) => {
     const { userEmail, userPassword } = req.body;
     try {
-        const user = req.combinedUsers.find(u => u.userEmail === userEmail);
-        
+
+        const [customer, snowtech] = await Promise.all([
+            Customer.findOne({ userEmail }),
+            Snowtech.findOne({ userEmail })
+        ]);
+
+        // Check which one returned a user
+        const user = customer || snowtech;
+
         if (!user) {
             return res.status(404).send('Account not found.');
         }
@@ -250,12 +223,12 @@ app.post('/validateLogin', async (req, res) => {
         }
 
         // Passwords match, proceed with login
-        const tokenPayload = { id: user.id, userEmail: user.userEmail };
+        const tokenPayload = { id: user._id, userEmail: user.userEmail };
         const accessToken = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '15m' });
         const refreshToken = jwt.sign(tokenPayload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
         user.refreshToken = refreshToken;
-        await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
+        await user.save();
 
         // Send refresh token as secure HttpOnly cookie
         res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 7 * 24 * 60 * 60 * 1000 });
@@ -264,7 +237,7 @@ app.post('/validateLogin', async (req, res) => {
         res.status(200).json({ 
             valid: true, 
             message: 'Login successful.', 
-            userId: user.id, 
+            userId: user._id, 
             username: user.userName, 
             accountType: user.accountType, 
             userZip: user.userZip,
@@ -348,25 +321,6 @@ app.get('/verify-stripe-onboarding', verifyToken, async (req, res) => {
     }
 });
 
-// GET route for all services
-app.get('/services', verifyToken, async (req, res) => {
-    try {
-        const userId = req.user.id; // Extract userId from user set by verifyToken
-        const user = req.customerUsers.find(user => user.id === userId);
-
-        if (!user) {
-            return res.status(404).send('User not found.');
-        }
-    
-        const userServices = user.userCart;
-
-        res.json(userServices); // Send filtered services as JSON
-    } catch (error) {
-        console.error("Error reading services data:", error);
-        res.status(500).send('An error occurred while fetching services.');
-    }
-});
-
 // Get route for all active requests
 app.get('/requestsLog', verifyToken, async (req, res) => {
     try {
@@ -423,6 +377,8 @@ app.get('/addresses', verifyToken, async (req, res) => {
         res.status(500).send('An error occurred while fetching addresses.');
     }
 });
+
+app.get('/services', verifyToken, getUserServices);
 
 // POST endpoint for the requests
 app.post('/submit-request', verifyToken, async (req, res) => {
@@ -509,29 +465,29 @@ app.post('/address', verifyToken,
 
         try {
             const userId = req.user.id; // Extract userId from the verified token
-            const user = req.combinedUsers.find(user => user.id === userId);  // Find the user by their ID
-
+            
+            // Find the user by their ID using Mongoose's findOne method
+            const user = await User.findById(userId);
+            
             if (!user) {
                 return res.status(404).send({ message: 'User not found.' });
             }
 
             // New address entry
             const newAddress = {
-                id: uuidv4(),
-                userName: req.body.userName,
-                userNumber: req.body.userNumber,
-                userStreet: req.body.userStreet,
-                userUnit: req.body.userUnit ? req.body.userUnit : '',
-                userCity: req.body.userCity,
-                userState: req.body.userState,
-                userZip: req.body.userZip,
+                name: req.body.userName,
+                number: req.body.userNumber,
+                unit: req.body.userUnit ? req.body.userUnit : '',
+                street: req.body.userStreet,
+                city: req.body.userCity,
+                state: req.body.userState,
+                zip: req.body.userZip,
             };
 
             // Add the new address to the user's addresses array
             user.userAddresses.push(newAddress);
-            // Save the updated users back to the file
-            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
-            // Respond with the newly created address entry
+            await user.save();
+
             res.status(201).json({ message: 'New address added to user profile', newAddress });
         
         } catch (err) {
@@ -541,56 +497,29 @@ app.post('/address', verifyToken,
     }
 );
 
-// POST route for car service
 app.post('/car', verifyToken, upload.single('image'), 
     [
         body('checkedService').isBoolean().withMessage('Checked service must be a boolean value.'),
         body('makeAndModel').trim().isLength({ min: 1 }).withMessage('Make and model are required.'),
         body('color').trim().isLength({ min: 1 }).withMessage('Color is required.'),
-        body('licensePlate').optional({ checkFalsy: true }).trim(), // Optional field
+        body('licensePlate').optional({ checkFalsy: true }).trim(),
         body('carMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
         body('price').isFloat({ min: 0 }).withMessage('Price must be a positive number.'),
         body('objectType').equals('car').withMessage('ObjectType is car.'),
     ], 
-    async (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
+postCarService);
+app.put('/car/:id', verifyToken, upload.single('image'), 
+    [
+        body('checkedService').isBoolean().withMessage('Checked Service must be a boolean value.'),
+        body('makeAndModel').not().isEmpty().trim().escape().withMessage('Make and Model is required.'),
+        body('color').not().isEmpty().trim().escape().withMessage('Color is required.'),
+        body('licensePlate').optional({ checkFalsy: true }).trim().escape(),
+        body('carMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
+        body('objectType').equals('car').withMessage('ObjectType is car.'),
+    ],
+updateCarService);
+app.delete('/car/:id', verifyToken, deleteCarService);
 
-        try {
-            const userId = req.user.id; // Extract userId from the verified token
-            const user = req.customerUsers.find(user => user.id === userId);
-            if (!user) {
-                return res.status(404).json({ message: 'User not found.' });
-            }
-            
-            // Create the new car service object
-            const newCarService = {
-                id: uuidv4(),
-                userId: userId,
-                checkedService: req.body.checkedService === 'true', // Convert string to boolean
-                makeAndModel: req.body.makeAndModel,
-                color: req.body.color,
-                licensePlate: req.body.licensePlate || '', // Include license plate if provided
-                carMessage: req.body.carMessage || '', // Include car message if provided
-                price: req.body.price,
-                objectType: req.body.objectType,
-                imagePath: req.file ? req.file.path : null, // Include image path if file uploaded
-            };
-            
-            user.userCart.push(newCarService);
-            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
-            res.status(201).json({ message: 'New car service object added to the user cart.', newCarService });
-       
-        } catch (err) {
-            console.error("Error handling car service submission:", err);
-            res.status(500).send('Failed to process car service submission.');
-        }
-    }
-); 
-
-// POST route for driveway service
 app.post('/driveway', verifyToken, upload.single('image'),
     [
         body('selectedSize').not().isEmpty().withMessage('Selected size is required'),
@@ -601,44 +530,20 @@ app.post('/driveway', verifyToken, upload.single('image'),
         body('objectType').equals('driveway').withMessage('ObjectType is driveway'),
         body('drivewayMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
     ], 
-    async (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
+postDrivewayService);
+app.put('/driveway/:id', verifyToken, upload.single('image'), 
+    [ 
+        body('selectedSize').not().isEmpty().withMessage('Selected size is required'),
+        body('size1Price').isFloat({ min: 0 }).withMessage('Price must be a positive number.'),
+        body('size2Price').isFloat({ min: 0 }).withMessage('Price must be a positive number.'),
+        body('size3Price').isFloat({ min: 0 }).withMessage('Price must be a positive number.'),
+        body('size4Price').isFloat({ min: 0 }).withMessage('Price must be a positive number.'),
+        body('objectType').equals('driveway').withMessage('ObjectType is driveway'),
+        body('drivewayMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
+    ],
+updateDrivewayService);
+app.delete('/driveway/:id', verifyToken, deleteDrivewayService);
 
-        try {
-            const userId = req.user.id; 
-            const user = req.customerUsers.find(user => user.id === userId);
-            if (!user) {
-                return res.status(404).json({ message: 'User not found.' });
-            }
-
-            const newDrivewayService = {
-                id: uuidv4(),
-                userId: userId,
-                selectedSize: req.body.selectedSize,
-                size1Price: req.body.size1Price,
-                size2Price: req.body.size2Price,
-                size3Price: req.body.size3Price,
-                size4Price: req.body.size4Price,
-                drivewayMessage: req.body.drivewayMessage || '',
-                objectType: req.body.objectType,
-                imagePath: req.file ? req.file.path : null,
-            };
-
-            user.userCart.push(newDrivewayService);
-            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
-            res.status(201).json({ message: 'New driveway service object added to the user cart.', newDrivewayService });
-      
-        } catch (error) {
-            console.error("Error processing request:", error);
-            res.status(500).send('An error occurred processing your request.');
-        }
-    }
-);
-
-// POST route for lawn service
 app.post('/lawn', verifyToken, upload.single('image'), 
     [
         body('walkway').optional({ checkFalsy: true }).isBoolean().withMessage('Walkway must be a boolean'),
@@ -650,45 +555,18 @@ app.post('/lawn', verifyToken, upload.single('image'),
         body('lawnMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
         body('objectType').equals('lawn').withMessage('ObjectType is lawn'),
     ],
-    async (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
+postLawnService);
+app.put('/lawn/:id', verifyToken, upload.single('image'), 
+    [
+        body('walkway').optional({ checkFalsy: true }).isBoolean().withMessage('Walkway must be a boolean'),
+        body('frontYard').optional({ checkFalsy: true }).isBoolean().withMessage('Front yard must be a boolean'),
+        body('backyard').optional({ checkFalsy: true }).isBoolean().withMessage('Backyard must be a boolean'),
+        body('lawnMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
+        body('objectType').equals('lawn').withMessage('ObjectType is lawn'),
+    ],
+updateLawnService);
+app.delete('/lawn/:id', verifyToken, deleteLawnService);
 
-        try {
-            const userId = req.user.id;
-            const user = req.customerUsers.find(user => user.id === userId);
-            if (!user) {
-                return res.status(404).json({ message: 'User not found.' });
-            }
-
-            const newLawnService = {
-                id: uuidv4(),
-                userId: userId,
-                walkway: req.body.walkway === 'true',
-                frontYard: req.body.frontYard === 'true',
-                backyard: req.body.backyard === 'true', 
-                lawnMessage: req.body.lawnMessage,
-                walkwayPrice: req.body.walkwayPrice,
-                frontYardPrice: req.body.frontYardPrice,
-                backyardPrice: req.body.backyardPrice,
-                objectType: req.body.objectType,
-                imagePath: req.file ? req.file.path : null, 
-            };
-
-            user.userCart.push(newLawnService);
-            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
-            res.status(201).json({ message: 'New lawn service object added to the user cart.', newLawnService });
-
-        } catch (error) {
-            console.error("Error processing request:", error);
-            res.status(500).send('An error occurred processing your request.');
-        }
-    }
-);
-
-// POST route for street service
 app.post('/street', verifyToken, upload.single('image'), 
     [
         body('from').notEmpty().withMessage('From address is required'),
@@ -697,42 +575,17 @@ app.post('/street', verifyToken, upload.single('image'),
         body('streetMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
         body('objectType').equals('street').withMessage('ObjectType is street'),
     ], 
-    async (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
+postStreetService);
+app.put('/street/:id', verifyToken, upload.single('image'), 
+    [
+        body('from').notEmpty().withMessage('From address is required'),
+        body('to').optional({ checkFalsy: true }).notEmpty().withMessage('Please include a to address'),
+        body('streetMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
+        body('objectType').equals('street').withMessage('ObjectType is street'),
+    ],
+updateStreetService);
+app.delete('/street/:id', verifyToken, deleteStreetService);
 
-        try {
-            const userId = req.user.id;
-            const user = req.customerUsers.find(user => user.id === userId);
-            if (!user) {
-                return res.status(404).json({ message: 'User not found.' });
-            }
-
-            const newStreetService = {
-                id: uuidv4(),
-                userId: userId,
-                from: req.body.from,
-                to: req.body.to, // "to" field is optional
-                price: req.body.price,
-                streetMessage: req.body.streetMessage,
-                objectType: req.body.objectType,
-                imagePath: req.file ? req.file.path : null,
-            };
-
-            user.userCart.push(newStreetService);
-            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
-            res.status(201).json({ message: 'New street service object added to the DB: ', newStreetService });
-
-        } catch (error) {
-            console.error("Error processing request:", error);
-            res.status(500).send('An error occurred processing your request.');
-        }
-    }
-);
-
-// POST route for other service
 app.post('/other', verifyToken, upload.single('image'), 
     [
         body('selectedSize').notEmpty().withMessage('Selected size is required'),
@@ -743,42 +596,15 @@ app.post('/other', verifyToken, upload.single('image'),
         body('otherMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
         body('objectType').equals('other').withMessage('ObjectType is other'),
     ], 
-    async (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-
-        try {
-            const userId = req.user.id;
-            const user = req.customerUsers.find(user => user.id === userId);
-            if (!user) {
-                return res.status(404).send('User not found.');
-            }
-
-            const newOtherService = {
-                id: uuidv4(),
-                userId: userId,
-                selectedSize: req.body.selectedSize,
-                job1Price: req.body.job1Price,
-                job2Price: req.body.job2Price,
-                job3Price: req.body.job3Price,
-                job4Price: req.body.job4Price,
-                otherMessage: req.body.otherMessage,
-                objectType: req.body.objectType,
-                imagePath: req.file ? req.file.path : null,
-            };
-
-            user.userCart.push(newOtherService);
-            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
-            res.status(201).json({ message: 'New other service object added to the DB: ', newOtherService });
-
-        } catch (error) {
-            console.error("Error processing request:", error);
-            res.status(500).send('An error occurred processing your request.');
-        }
-    }
-);
+postOtherService);
+app.put('/other/:id', verifyToken, upload.single('image'), 
+    [
+        body('selectedSize').notEmpty().withMessage('Selected size is required'),
+        body('otherMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
+        body('objectType').equals('other').withMessage('ObjectType is other'),
+    ], 
+updateOtherService);
+app.delete('/other/:id', verifyToken, deleteOtherService);
 
 app.put('/requests/:id/cancel', verifyToken, async (req, res) => {
         try {
@@ -1029,242 +855,6 @@ app.put('/address/:id', verifyToken,
     }
 );
 
-// PUT route to update an existing car service entry.
-app.put('/car/:id', verifyToken, upload.single('image'),
-    [
-        body('checkedService').isBoolean().withMessage('Checked Service must be a boolean value.'),
-        body('makeAndModel').not().isEmpty().trim().escape().withMessage('Make and Model is required.'),
-        body('color').not().isEmpty().trim().escape().withMessage('Color is required.'),
-        body('licensePlate').optional({ checkFalsy: true }).trim().escape(), // Optional
-        body('carMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
-        body('objectType').equals('car').withMessage('ObjectType is car.'),
-    ], 
-    async (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-
-        try {
-            const userId = req.user.id; // Assuming your verifyToken middleware sets req.user
-            const carId = req.params.id; // The ID of the car service object to update
-            const user = req.customerUsers.find(u => u.id === userId); // Find the user by their ID
-            if (!user) {
-                return res.status(404).json({ message: 'User not found.' });
-            }
-
-            // Find the index of the car service object by its ID within the user's cart
-            const carIndex = user.userCart.findIndex(car => car.id === carId);
-            if (carIndex === -1) {
-                return res.status(404).json({ message: 'Car service object not found.' });
-            }
-
-            // Update the car service object
-            user.userCart[carIndex] = {
-                ...user.userCart[carIndex],
-                checkedService: req.body.checkedService,
-                makeAndModel: req.body.makeAndModel,
-                color: req.body.color,
-                licensePlate: req.body.licensePlate || user.userCart[carIndex].licensePlate,
-                carMessage: req.body.carMessage || user.userCart[carIndex].carMessage,
-                objectType: req.body.objectType,
-                imagePath: req.file ? req.file.path : user.userCart[carIndex].imagePath,
-            };
-
-            // Write the updated users data back to the DB_FILE
-            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
-            res.status(200).json({ message: 'Car service object updated.', car: user.userCart[carIndex] });
-
-        } catch (error) {
-            console.error("Error updating car service object:", err);
-            res.status(500).send('An error occurred while updating the car service object.');
-        }
-    }
-);
-
-// PUT route to update an existing driveway service entry
-app.put('/driveway/:id', verifyToken, upload.single('image'), 
-    [ 
-        body('selectedSize').not().isEmpty().withMessage('Selected size is required'),
-        body('objectType').equals('driveway').withMessage('ObjectType is driveway'),
-        body('drivewayMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
-    ],
-    async (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-
-        try {
-            const userId = req.user.id;
-            const drivewayId = req.params.id;
-            const user = req.customerUsers.find(u => u.id === userId);
-            if (!user) {
-                return res.status(404).json({ message: 'User not found.' });
-            }
-
-            const drivewayIndex = user.userCart.findIndex(driveway => driveway.id === drivewayId);
-            if (drivewayIndex === -1) {
-                return res.status(404).json({ message: 'Driveway service object not found.' });
-            }
-
-            user.userCart[drivewayIndex] = {
-                ...user.userCart[drivewayIndex],
-                selectedSize: req.body.selectedSize || user.userCart[drivewayIndex].selectedSize,
-                drivewayMessage: req.body.drivewayMessage || user.userCart[drivewayIndex].drivewayMessage,
-                objectType: req.body.objectType,
-                imagePath: req.file ? req.file.path : user.userCart[drivewayIndex].imagePath, 
-            }
-
-            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
-            res.status(200).json({ message: 'Driveway service object updated in the DB: ', driveway: user.userCart[drivewayIndex]});
-        
-        } catch (error) {
-            console.error("Error processing request:", error);
-            res.status(500).send('An error occurred processing your request.');
-        }
-    }
-);
-
-// PUT route to update an existing lawn service entry
-app.put('/lawn/:id', verifyToken, upload.single('image'), 
-    [
-        body('walkway').optional({ checkFalsy: true }).isBoolean().withMessage('Walkway must be a boolean'),
-        body('frontYard').optional({ checkFalsy: true }).isBoolean().withMessage('Front yard must be a boolean'),
-        body('backyard').optional({ checkFalsy: true }).isBoolean().withMessage('Backyard must be a boolean'),
-        body('lawnMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
-        body('objectType').equals('lawn').withMessage('ObjectType is lawn'),
-    ],
-    async (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-
-        try {
-            const userId = req.user.id;
-            const lawnId = req.params.id;
-            const user = req.customerUsers.find(u => u.id === userId);
-            if (!user) {
-                return res.status(404).json({ message: 'User not found.' });
-            }
-
-            const lawnIndex = user.userCart.findIndex(lawn => lawn.id === lawnId);
-            if (lawnIndex === -1) {
-                return res.status(404).json({ message: 'Lawn service object not found.' });
-            }
-
-            user.userCart[lawnIndex] = {
-                ...user.userCart[lawnIndex],
-                walkway: req.body.walkway !== undefined ? req.body.walkway === 'true' : user.userCart[lawnIndex].walkway === 'true',
-                frontYard: req.body.frontYard !== undefined ? req.body.frontYard === 'true' : user.userCart[lawnIndex].frontYard === 'true',
-                backyard: req.body.backyard !== undefined ? req.body.backyard === 'true' : user.userCart[lawnIndex].backyard === 'true',
-                lawnMessage: req.body.lawnMessage || user.userCart[lawnIndex].lawnMessage,
-                objectType: req.body.objectType,
-                imagePath: req.file ? req.file.path : user.userCart[lawnIndex].imagePath,
-            };            
-
-            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
-            res.status(200).json({ message: 'Lawn service object updated.', lawn: user.userCart[lawnIndex] });
-
-        } catch (error) {
-            console.error("Error processing request:", error);
-            res.status(500).send('An error occurred processing your request.');
-        }
-    }
-);
-
-// PUT route to update an existing street service entry
-app.put('/street/:id', verifyToken, upload.single('image'), 
-    [
-        body('from').notEmpty().withMessage('From address is required'),
-        body('to').optional({ checkFalsy: true }).notEmpty().withMessage('Please include a to address'),
-        body('streetMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
-        body('objectType').equals('street').withMessage('ObjectType is street'),
-    ],
-    async (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-
-        try {
-            const userId = req.user.id;
-            const streetId = req.params.id;
-            const user = req.customerUsers.find(u => u.id === userId);
-            if (!user) {
-                return res.status(404).json({ message: 'User not found.' });
-            }
-
-            const streetIndex = user.userCart.findIndex(street => street.id === streetId);
-            if (streetIndex === -1) {
-                return res.status(404).json({ message: 'Street service object not found.' });
-            }
-
-            user.userCart[streetIndex] = {
-                ...user.userCart[streetIndex],
-                from: req.body.from,
-                to: req.body.to || user.userCart[streetIndex].to, 
-                streetMessage: req.body.streetMessage || user.userCart[streetIndex].streetMessage,
-                objectType: req.body.objectType,
-                imagePath: req.file ? req.file.path : user.userCart[streetIndex].imagePath,
-            }
-
-
-            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
-            res.status(200).json({ message: 'Street service object updated in the DB: ', street: user.userCart[streetIndex] });
-
-        } catch (error) {
-            console.error("Error processing request:", error);
-            res.status(500).send('An error occurred processing your request.');
-        }
-    }
-);
-
-// PUT route to update an existing other service entry
-app.put('/other/:id', verifyToken, upload.single('image'), 
-    [
-        body('selectedSize').notEmpty().withMessage('Selected size is required'),
-        body('otherMessage').optional({ checkFalsy: true }).isLength({ max: 500 }).withMessage('Message must be under 500 characters'),
-        body('objectType').equals('other').withMessage('ObjectType is other'),
-    ], 
-    async (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-
-        try {
-            const userId = req.user.id;
-            const otherId = req.params.id;
-            const user = req.customerUsers.find(u => u.id === userId);
-            if (!user) {
-                return res.status(404).json({ message: 'User not found.' });
-            }
-
-            const otherIndex = user.userCart.findIndex(other => other.id === otherId);
-            if (otherIndex === -1) {
-                return res.status(404).json({ message: 'Other service object not found.' });
-            }
-
-            user.userCart[otherIndex] = {
-                ...user.userCart[otherIndex],
-                selectedSize: req.body.selectedSize,
-                otherMessage: req.body.otherMessage,
-                objectType: req.body.objectType,
-                imagePath: req.file ? req.file.path : user.userCart[otherIndex].imagePath,
-            }
-
-            await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
-            res.status(200).json({ message: 'Other service object updated in the DB: ', other: user.userCart[otherIndex] });
-
-        } catch (error) {
-            console.error("Error processing request:", error);
-            res.status(500).send('An error occurred processing your request.');
-        }
-    }
-);
-
 // DELETE route for other service object
 app.delete('/address/:id', verifyToken, async (req, res) => {
     try {
@@ -1291,131 +881,6 @@ app.delete('/address/:id', verifyToken, async (req, res) => {
     } catch (error) {
         console.error("Error processing request:", error);
         res.status(500).send('An error occurred while processing your request.');
-    }
-});
-
-// DELETE route for car service
-app.delete('/car/:id', verifyToken, async (req, res) => {
-    try {
-        const userId = req.user.id; 
-        const carId = req.params.id; 
-        const user = req.customerUsers.find(user => user.id === userId);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found.' });
-        }
-
-        const carIndex = user.userCart.findIndex(car => car.id === carId);
-        if (carIndex === -1) {
-            return res.status(404).json({ message: 'Car service object not found.' });
-        }
-
-        user.userCart.splice(carIndex, 1);
-        await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
-        res.status(200).json({ message: 'Car service object deleted successfully.' });
-
-    } catch (error) {
-        console.error("Error processing the deletion request:", error);
-        res.status(500).send('An error occurred while processing the deletion request.');
-    }
-});
-
-// DELETE route for driveway service object
-app.delete('/driveway/:id', verifyToken, async (req, res) => {
-    try {
-        const userId = req.user.id; 
-        const drivewayId = req.params.id;
-        const user = req.customerUsers.find(user => user.id === userId);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found.' });
-        }
-
-        const drivewayIndex = user.userCart.findIndex(driveway => driveway.id === drivewayId);
-        if (drivewayIndex === -1) {
-            return res.status(404).json({ message: 'Driveway service object not found.' });
-        }
-
-        user.userCart.splice(drivewayIndex, 1);
-        await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
-        res.status(200).json({ message: 'Driveway service object deleted from the DB.' });
-
-    } catch (error) {
-        console.error("Error processing request:", error);
-        res.status(500).send('An error occurred processing your request.');
-    }
-});
-
-// DELETE route for lawn service object
-app.delete('/lawn/:id', verifyToken, async (req, res) => {
-    try {
-        const userId = req.user.id; 
-        const lawnId = req.params.id;        
-        const user = req.customerUsers.find(user => user.id === userId);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found.' });
-        }
-
-        const lawnIndex = user.userCart.findIndex(lawn => lawn.id === lawnId);
-        if (lawnIndex  === -1) {
-            return res.status(404).json({ message: 'Lawn service object not found.' });
-        }
-
-        user.userCart.splice(lawnIndex, 1);
-        await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
-        res.status(200).json({ message: 'Lawn service object deleted from the DB.' });
-
-    } catch (error) {
-        console.error("Error processing request:", error);
-        res.status(500).send('An error occurred processing your request.');
-    }
-});
-
-// DELETE route for street service
-app.delete('/street/:id', verifyToken, async (req, res) => {
-    try {
-        const userId = req.user.id; 
-        const streetId = req.params.id;
-        const user = req.customerUsers.find(user => user.id === userId);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found.' });
-        }
-  
-        const streetIndex = user.userCart.findIndex(street => street.id === streetId);
-        if (streetIndex === -1) {
-            return res.status(404).json({ message: 'Street service object not found.' });
-        }
-
-        user.userCart.splice(streetIndex, 1);
-        await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');        
-        res.status(200).json({ message: 'Street service object deleted from the DB.' });
-
-    } catch (error) {
-        console.error("Error processing request:", error);
-        res.status(500).send('An error occurred processing your request.');
-    }
-});
-
-// DELETE route for other service object
-app.delete('/other/:id', verifyToken, async (req, res) => {
-    try {
-        const userId = req.user.id; 
-        const otherId = req.params.id;
-        const user = req.customerUsers.find(user => user.id === userId);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found.' });
-        }
-  
-        const otherIndex = user.userCart.findIndex(other => other.id === otherId);
-        if (otherIndex === -1) {
-            return res.status(404).json({ message: 'Other service object not found.' });
-        }
-
-        user.userCart.splice(otherIndex, 1);
-        await fsPromises.writeFile(DB_FILE, JSON.stringify(req.db, null, 2), 'utf8');
-        res.status(200).json({ message: 'Other service object deleted from the DB.' });
-
-    } catch (error) {
-        console.error("Error processing request:", error);
-        res.status(500).send('An error occurred processing your request.');
     }
 });
 

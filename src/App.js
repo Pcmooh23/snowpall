@@ -7,6 +7,7 @@ import { SnowPallProvider } from './components/SnowPallContext';
 import LoginPage from './components/LoginPage';
 import SnowTech from './components/SnowTech';
 import SnowtechOnboarding from './components/SnowtechOnboarding';
+import Notfound from './components/Notfound';
 
 function App() {
   return (

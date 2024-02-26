@@ -130,16 +130,13 @@ export const SnowPallProvider = ({ children }) => {
           total += Number(item.price);
         } else if (item.objectType === 'driveway') {
           total += Number(item[`${item.selectedSize}Price`]);
-          console.log('driveway: ',Number(item[`${item.selectedSize}Price`]))
         } else if (item.objectType === 'lawn') {
           if (item.walkway) total += Number(item.walkwayPrice);
           if (item.frontYard) total += Number(item.frontYardPrice);
           if (item.backyard) total += Number(item.backyardPrice);
         } else if (item.objectType === 'street') {
-          console.log('street: ',Number(item.price))
           total += Number(item.price);
         } else if (item.objectType === 'other') {
-          console.log('other: ',item[`${item.selectedSize}Price`])
           total += Number(item[`${item.selectedSize}Price`]);
         }
       });
