@@ -8,7 +8,7 @@ export const SnowPallContext = createContext();
 // Provider component.
 export const SnowPallProvider = ({ children }) => {
 
-   // The main url endpoint for my backend server.
+  // The main url endpoint for my backend server.
   const baseUrl = process.env.REACT_APP_SERVER_URL;
 
   // So each service component has access to the weather data when the user either logs in or registers.

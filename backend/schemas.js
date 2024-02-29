@@ -2,38 +2,16 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const { v4: uuidv4 } = require('uuid');
 
-const requestSchema = new Schema({});
-
 const addressSchema = new Schema({
-  name: String,
-  number: String,
-  unit: String,
-  street: String,
-  city: String,
-  state: String,
-  zip: String
-});
-
-const userSchema = new Schema({
+  id: { type: String, required: true },
   userName: String,
-  userEmail: { type: String, unique: true },
-  accountType: String,
   userNumber: String,
-  userStreet: String,
   userUnit: String,
+  userStreet: String,
   userCity: String,
   userState: String,
-  userZip: String,
-  userPasswordHash: String,
-  userAddresses: [addressSchema], 
-  userNotifications: [{ 
-    id: { type: String, default: () => uuidv4() },
-    message: String,
-    created: Date,
-    read: Boolean
-  }],
-  refreshToken: String,
-});
+  userZip: String
+}, {_id: false});
 
 const cartItemSchema = new Schema({
   id: { type: String, required: true },
@@ -80,36 +58,89 @@ const cartItemSchema = new Schema({
 
 }, { timestamps: true, _id: false }); 
 
+const userSchema = new Schema({
+  userName: String,
+  userEmail: { type: String, unique: true },
+  accountType: String,
+  userNumber: String,
+  userStreet: String,
+  userUnit: String,
+  userCity: String,
+  userState: String,
+  userZip: String,
+  userPasswordHash: String,
+  userAddresses: [addressSchema], 
+  userNotifications: [{ 
+    id: { type: String, default: () => uuidv4() },
+    message: String,
+    created: Date,
+    read: Boolean
+  }],
+  refreshToken: String,
+});
+
 const customerSchema = new Schema({
-  userCart: [cartItemSchema], 
-  userRequests: []
-}, {_id: false});
+  userCart: [cartItemSchema],
+  activeRequests: [{
+    type: Schema.Types.ObjectId,
+    ref: 'ActiveRequests' 
+  }],
+  completedRequests: [{
+    type: Schema.Types.ObjectId,
+    ref: 'CompletedRequests' 
+  }]
+}, { _id: false });
 
 const snowtechSchema = new Schema({
   completedRequests: [{
       type: Schema.Types.ObjectId,
-      ref: 'Request' // Assuming 'Request' is a model you've defined elsewhere
+      ref: 'CompletedRequests' 
     }],
+  stripeAccountId: { 
+    type: String, 
+    default: null 
+  }
 }, {_id: false});
 
+const completedRequestsSchema = new Schema({
+  completionDate: { type: Date, default: Date.now },
+});
 
-const activeRequestSchema = new Schema({});
-
-const completedRequestSchema = new Schema({});
+const requestsSchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: 'User' },
+  id: { type: String, default: uuidv4 },
+  cart: [{ type: Object, required: true }],
+  selectedAddress: { type: Object, required: true },
+  charge: {
+    id: String,
+    amount: Number,
+    currency: String,
+    description: String,
+    created: Date,
+  },
+  status: { type: String, required: true, enum: ['active', 'completed'] },
+  stages: {
+    live: Boolean,
+    accepted: Boolean,
+    started: Boolean,
+    complete: Boolean,
+  },
+  orderDate: { type: Date, default: Date.now }
+}, {_id: false});
 
 // Models from these schemas
 const User = mongoose.model('User', userSchema);
 const Customer = User.discriminator('Customer', customerSchema); 
 const Snowtech = User.discriminator('Snowtech', snowtechSchema); 
-const Request = mongoose.model('Request', requestSchema);
-const ActiveRequest = Request.discriminator('ActiveRequest', activeRequestSchema);
-const CompletedRequest = Request.discriminator('CompletedRequest', completedRequestSchema);
+const Requests = mongoose.model('Requests', requestsSchema);
+const ActiveRequests = Requests.discriminator('ActiveRequests', new Schema({}));
+const CompletedRequests = Requests.discriminator('CompletedRequests', completedRequestsSchema);
 
 module.exports = { 
     User, 
     Customer, 
     Snowtech, 
-    Request, 
-    ActiveRequest,
-    CompletedRequest
+    Requests, 
+    ActiveRequests,
+    CompletedRequests
 };

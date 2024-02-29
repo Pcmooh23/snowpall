@@ -1,4 +1,4 @@
-const { Customer, Snowtech, ActiveRequest, CompletedRequest } = require("../schemas");
+const { Customer, Snowtech, ActiveRequests, CompletedRequests } = require("../schemas");
 
 // Middleware function that loads and parses user data from JSON file, 
 // and then attaches it to the request object ('req') so that subsequent route handlers 
@@ -8,8 +8,8 @@ const loadData = async (req, res, next) => {
         // Assume Customer and Snowtech are Mongoose models for your collections
         const customers = await Customer.find();
         const snowtechs = await Snowtech.find();
-        const activeRequests = await ActiveRequest.find();
-        const completedRequests = await CompletedRequest.find(); 
+        const activeRequests = await ActiveRequests.find();
+        const completedRequests = await CompletedRequests.find(); 
 
         // Attach the data to the request object
         req.db = {
