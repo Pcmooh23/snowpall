@@ -23,7 +23,7 @@ const Reviews = () => {
                 better than a kick in the teeth."
               </p>
               <div className='stars house'>
-                {[...Array(5)].map((star, index) => <Star key={index} />)}  // Add a key prop here
+                {[...Array(5)].map((star, index) => <Star key={index} />)} 
               </div>
             </div>
           </div>
@@ -42,7 +42,7 @@ const Reviews = () => {
                 oneself."
               </p>
               <div className='stars marcus'>
-                {[...Array(5)].map((star, index) => <Star key={index} />)}  =
+                {[...Array(5)].map((star, index) => <Star key={index} />)}  
               </div>
             </div>
           </div>
