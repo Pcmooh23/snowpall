@@ -54,7 +54,7 @@ const LawnService = () => {
     if (currentWeather) {
       setDynamicPrices(calculatePrices());
     }
-  }, [currentWeather]);
+  }, [currentWeather, calculatePrices]);
 
   const handleInputChange = (event) => {
     const { name, value, type, checked } = event.target;

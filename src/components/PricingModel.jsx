@@ -1,5 +1,3 @@
-import React from 'react'
-
 const accuWeatherApiKey = process.env.REACT_APP_ACCUWEATHER_API_KEY;
 
 export const getLocationKeyFromZipcode = async (userZipcode) => {
@@ -64,7 +62,7 @@ export const SnowPall_Pricing_Model = (temp, precipitation_type, precipitation_i
     let size_multiplier = 1.0; 
  
     if (job_size === 'small') {
-        size_multiplier = size_multiplier;
+        size_multiplier = 1.0;
     } else if (job_size === 'medium') {
         size_multiplier = 1.2;
     } else if (job_size === 'large') {

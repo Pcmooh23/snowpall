@@ -10,7 +10,7 @@ const Hero = () => {
               <h1>Clear Snow, Get Paid</h1>
               <h2>You never have to do it yourself again, stay snug this winter and let someone do the work for you.</h2>
           </div>
-          <img className='cleaningSnow' src={cleaningSnow}/>
+          <img className='cleaningSnow' alt='cleaning-snow' src={cleaningSnow}/>
       </section>
     </>
   )

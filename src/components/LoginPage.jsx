@@ -119,7 +119,7 @@ const LoginPage = () => {
 
       window.removeEventListener('scroll', scrollPage);
     };
-  }, []); 
+  }, [iconCloseRef, loginFormRef, loginLinkRef, loginRef, pageFormRef, registerFormRef, registerLinkRef, signUpRef]); 
 
   const handleScroll = () => {
     window.scrollTo({top: (0,0), behavior: 'smooth'});
@@ -135,9 +135,9 @@ const LoginPage = () => {
       <Reviews/>
       <UserForms/>
       <Footer />
-      <a onClick={handleScroll} className={`to-top-button ${scroll ? 'active' : ''}`}>
+      <button onClick={handleScroll} className={`to-top-button ${scroll ? 'active' : ''}`}>
         <ChevronUp size="1.5em" className='top-icon'/>
-      </a>
+      </button>
     </>
   )
 }

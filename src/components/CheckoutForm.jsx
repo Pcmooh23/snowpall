@@ -260,7 +260,7 @@ const CheckoutForm = () => {
         if (shouldRefetch) { 
           fetchServicesData();
         }
-    }, [shouldRefetch]);
+    }, [shouldRefetch, customFetch, setCart, setShouldRefetch]);
 
   return (
     <>

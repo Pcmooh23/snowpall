@@ -44,7 +44,7 @@ const MainHeader = () => {
       
         // Cleanup function for removing the click outside listener
         return () => document.removeEventListener("mousedown", handleClickOutside);
-      }, [dropdownRef]); // This effect depends on dropdownRef
+    }, [dropdownRef, setLoginName]); // This effect depends on dropdownRef
       
     const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 

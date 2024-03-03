@@ -1,4 +1,4 @@
-import React, {useContext, useRef, useState, use} from 'react';
+import React, {useContext, useRef, useState } from 'react';
 import { ChevronUp, ImageIcon } from 'lucide-react';
 import { SnowPallContext } from './SnowPallContext';
 import { useApi } from '../useApi';

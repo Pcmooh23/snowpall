@@ -24,8 +24,8 @@ const Footer = () => {
             </div>
           </div>
           <div className='top-footer-links'>
-            <img className='app-store' src={appstore}/>
-            <img className='google-play' src={googleplay}/>
+            <img className='app-store' alt='apple-store' src={appstore}/>
+            <img className='google-play' alt='google-play-store' src={googleplay}/>
           </div>
         </div>
         <div className='middle-footer'>
@@ -85,19 +85,19 @@ const Footer = () => {
         <div className='bottom-footer'>
           <div className='bottom-links'>
             <button className='meta'>
-              <img src={meta}/>
+              <img alt='meta-platforms' src={meta}/>
             </button>
             <button className='twitter'>
-              <img src={twitter}/>
+              <img alt='twitter' src={twitter}/>
             </button>
             <button className='youtube'>
-              <img src={youtube}/>
+              <img alt='youtube' src={youtube}/>
             </button>
             <button className='instagram'>
-              <img src={insta}/>
+              <img alt='instagram' src={insta}/>
             </button>
             <button className='linkedin'>
-              <img src={linkedin}/>
+              <img alt='linkedin' src={linkedin}/>
             </button>
           </div>
           <div className='language'>

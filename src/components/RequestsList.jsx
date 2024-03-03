@@ -3,7 +3,6 @@ import { SnowPallContext } from './SnowPallContext';
 import { useApi } from '../useApi';
 import { X } from 'lucide-react';
 
-/* global google */ //This is needed to use the google object 
 const RequestsList = () => {
         
     const { 
@@ -77,7 +76,7 @@ const RequestsList = () => {
         if (refetchRequests) {
             fetchRequestsData();
         }
-    }, [refetchRequests])
+    }, [refetchRequests, calculateRoute, customFetch, requestsLog, selectedTravelMode, setRefetchRequests, setRequestsLog, snowtechLocation])
       
     const handleAccept = async (request) => {
         setAcceptedRequest(request)

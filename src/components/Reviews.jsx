@@ -12,7 +12,7 @@ const Reviews = () => {
         <div className='review-area'>
           <div className='review'>
             <div className='cover'>
-              <img className='character' src={greg}/>
+              <img className='character' alt='house' src={greg}/>
               <p> <span className='name'> Gregory House </span><br/>New Jersey</p>
             </div>
             <div className='review-details'>
@@ -29,7 +29,7 @@ const Reviews = () => {
           </div>
           <div className='review'>
             <div className='cover marcus'>
-              <img className='character' src={mark}/>
+              <img className='character' alt='marcus' src={mark}/>
               <p> <span className='name'> Marcus Aurelius</span><br/> Rome </p>
             </div>
             <div className='review-details'>
