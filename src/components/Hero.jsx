@@ -1,9 +1,11 @@
 import React from 'react';
 import cleaningSnow from '../assets/cleaningSnow.webp';
+import { SparklesCore } from '../utils/sparkles.tsx';
 
 const Hero = () => {
   return (
     <>
+
       <section className='snowfall-cover'>
           <div className='cover-title'>
               <h1>Clear Snow, Get Paid</h1>
