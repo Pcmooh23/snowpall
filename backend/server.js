@@ -73,7 +73,7 @@ async function startHttpsServer() {
 
 // Define a route for the root path
 app.get('/', (req, res) => {
-    res.send('Welcome to my App Engine Application!');
+    res.send('Hello, world! The server is up and running!');
 });
 
 // Serve static files from 'public' directory
