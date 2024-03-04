@@ -62,7 +62,7 @@ async function startHttpsServer() {
       const credentials = await loadCredentials();
       const httpsServer = https.createServer(credentials, app);
   
-      const PORT = 3500; // Default port for HTTPS is 443, but you can choose another port
+      const PORT = process.env.PORT || 3500; 
       httpsServer.listen(PORT, () => {
         console.log(`HTTPS Server running on port ${PORT}`);
       });
@@ -343,4 +343,13 @@ app.delete('/other/:id', verifyToken, deleteOtherService);
 // });
 
 // Start the server
-startHttpsServer();
+if (process.env.NODE_ENV !== 'production') {
+    // Start HTTPS server for local development
+    startHttpsServer();
+ } else {
+    // Start HTTP server for production environment on App Engine
+    const PORT = process.env.PORT || 3500;
+    app.listen(PORT, () => {
+      console.log(`HTTP Server running on port ${PORT}`);
+    });
+}
