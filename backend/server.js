@@ -73,8 +73,15 @@ async function startHttpsServer() {
 // Serve static files from 'public' directory
 app.use(express.static(path.join(__dirname, '../public')));
 
+const uploadsDir = path.join(__dirname, 'uploads');
+
+// Check if the uploads directory exists, and if not, create it
+if (!fs.existsSync(uploadsDir)){
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 // a line that serves static files from the 'uploads' directory
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(uploadsDir));
 
 app.post('/registerUser', userRegistration);
 app.post('/validateLogin', validateUser);
