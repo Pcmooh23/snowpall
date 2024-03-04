@@ -1,0 +1,13 @@
+runtime: nodejs20 
+env: standard
+instance_class: F1 
+automatic_scaling:
+  max_instances: 1 
+
+# Environment variables:
+env_variables:
+  STRIPE_SECRET_KEY: 'sk_test_51OeMdKBWC1e9EDXYIAyuNOW6zJJafHMTP3U6PnSymmHrAMdyPDNJsqz1nmq17EPS9BmXafFFU3Da4n3n2ml5N3PH00hekP6aVX'
+  JWT_SECRET: 'JJKkKAeIUzDsl/IojvNfbBIUx6BFtyjVlxRdeL8IuOo= '
+  REFRESH_TOKEN_SECRET: '7G+ldnpzw85unwv9fJCITsBU1n8mb6KAciFIMzSsTaA='
+  MONGO_PASSWORD: 'catbat0223'
+  # Define other environment variables as needed
