@@ -33,6 +33,7 @@ const corsOptions = {
     methods: 'GET,POST,PUT,DELETE,OPTIONS', // Specify allowed methods
     allowedHeaders: 'Content-Type, Authorization', // Specify allowed headers
 };
+console.log(`CORS origin set to: ${corsOptions.origin}`);
 
 const app = express();
 app.use(express.json()); // Middleware to parse JSON body
