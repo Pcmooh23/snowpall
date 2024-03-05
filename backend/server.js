@@ -33,7 +33,6 @@ const corsOptions = {
     methods: 'GET,POST,PUT,DELETE,OPTIONS', // Specify allowed methods
     allowedHeaders: 'Content-Type, Authorization', // Specify allowed headers
 };
-console.log(`CORS origin set to: ${corsOptions.origin}`);
 
 const app = express();
 app.use(express.json()); // Middleware to parse JSON body
@@ -239,8 +238,6 @@ app.put('/address/:id', verifyToken,
 updateAddress);
 app.delete('/address/:id', verifyToken, deleteAddress);
 
-app.get('/services', verifyToken, getUserServices);
-
 app.post('/car', verifyToken, upload.single('image'), 
     [
         body('checkedService').isBoolean().withMessage('Checked service must be a boolean value.'),
@@ -349,6 +346,8 @@ app.put('/other/:id', verifyToken, upload.single('image'),
     ], 
 updateOtherService);
 app.delete('/other/:id', verifyToken, deleteOtherService);
+
+app.get('/services', verifyToken, getUserServices);
 
 // Start the server
 // app.listen(port, () => {
