@@ -26,7 +26,9 @@ const { getAddresses, postAddress, updateAddress, deleteAddress } = require('./a
 const { getRequests, submitRequest, cancelRequest, completeRequest, startRequest, acceptRequest, } = require('./requests/requests');
 
 const corsOptions = {
-    origin: 'https://localhost:3000', // Allow only your frontend to make requests
+    origin: process.env.NODE_ENV !== 'production'
+    ? 'http://localhost:3000' // Development frontend origin
+    : 'https://snowpall.com', // Production frontend origin
     credentials: true, // Allow cookies to be sent and received
     methods: 'GET,POST,PUT,DELETE,OPTIONS', // Specify allowed methods
     allowedHeaders: 'Content-Type, Authorization', // Specify allowed headers
