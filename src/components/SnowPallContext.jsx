@@ -32,6 +32,29 @@ export const SnowPallProvider = ({ children }) => {
   const loginFormRef = useRef(null);
   const registerFormRef = useRef(null);
 
+  const loginActive = () => {
+    const pageForm = pageFormRef.current;
+    const loginForm = loginFormRef.current;
+    const registerForm = registerFormRef.current;
+    if (pageForm && loginForm && registerForm) {
+      pageForm.classList.add('active-popup');
+      pageForm.classList.remove('register-active');
+      loginForm.classList.add('active');
+      registerForm.classList.remove('active');
+    }
+  };
+
+  const registerActive = () => {
+    const pageForm = pageFormRef.current;
+    const loginForm = loginFormRef.current;
+    const registerForm = registerFormRef.current;
+    if (pageForm && loginForm && registerForm) {
+      pageForm.classList.add('active-popup', 'register-active');
+      registerForm.classList.add('active');
+      loginForm.classList.remove('active');
+    }
+  };
+
   const [loginName, setLoginName] = useState('');
   // Props for HomePage services.
   const [active, setActive] = useState('');
@@ -251,6 +274,7 @@ const calculateRoute = async (origin, destination, travelMode) => {
       iconCloseRef, signUpRef,
       loginFormRef, registerFormRef,
       loginName, setLoginName,
+      registerActive, loginActive,
       // Services and checkout form props.
       active, setActive,
       toggleActive, cart, setCart,

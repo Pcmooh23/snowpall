@@ -14,8 +14,7 @@ const LoginPage = () => {
   
   const {
     registerLinkRef, loginLinkRef,
-    pageFormRef, loginRef,
-    iconCloseRef, signUpRef,
+    pageFormRef, iconCloseRef,
     loginFormRef, registerFormRef
   } = useContext(SnowPallContext);
 
@@ -25,8 +24,6 @@ const LoginPage = () => {
     const registerLink = registerLinkRef.current;
     const loginLink = loginLinkRef.current;
     const pageForm = pageFormRef.current;
-    const loginButton = loginRef.current;
-    const signUpButton = signUpRef.current;
     const closeButton = iconCloseRef.current;
     const loginForm = loginFormRef.current;
     const registerForm = registerFormRef.current;
@@ -44,23 +41,6 @@ const LoginPage = () => {
         loginForm.classList.add('active');
         registerForm.classList.remove('active');
         pageForm.classList.remove('register-active');
-      }
-    };
-
-    const loginActive = () => {
-      if (pageForm) {
-        pageForm.classList.add('active-popup');
-        pageForm.classList.remove('register-active');
-        loginForm.classList.add('active');
-        registerForm.classList.remove('active');
-      }
-    };
-    
-    const registerActive = () => {
-      if (pageForm) {
-        pageForm.classList.add('active-popup', 'register-active');
-        registerForm.classList.add('active');
-        loginForm.classList.remove('active');
       }
     };
 
@@ -87,15 +67,7 @@ const LoginPage = () => {
     if (loginLink) {
       loginLink.addEventListener('click', handleLoginClick);
     }
-  
-    if (loginButton) {
-      loginButton.addEventListener('click', loginActive);
-    }
-  
-    if (signUpButton) {
-      signUpButton.addEventListener('click', registerActive);
-    }
-  
+
     if (closeButton) {
       closeButton.addEventListener('click', closeForm);
     }
@@ -107,19 +79,13 @@ const LoginPage = () => {
       if (loginLink) {
         loginLink.removeEventListener('click', handleLoginClick);
       }
-      if (loginButton) {
-        loginButton.removeEventListener('click', loginActive);
-      }
-      if (signUpButton) {
-        signUpButton.removeEventListener('click', registerActive);
-      }
       if (closeButton) {
         closeButton.removeEventListener('click', closeForm);
       }
 
       window.removeEventListener('scroll', scrollPage);
     };
-  }, [iconCloseRef, loginFormRef, loginLinkRef, loginRef, pageFormRef, registerFormRef, registerLinkRef, signUpRef]); 
+  }, [iconCloseRef, loginFormRef, loginLinkRef, pageFormRef, registerFormRef, registerLinkRef ]); 
 
   const handleScroll = () => {
     window.scrollTo({top: (0,0), behavior: 'smooth'});

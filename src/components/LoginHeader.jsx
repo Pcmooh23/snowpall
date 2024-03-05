@@ -4,17 +4,17 @@ import { SnowPallContext } from './SnowPallContext';
 
 const LoginHeader = () => {
 
-  const {loginRef, signUpRef} = useContext(SnowPallContext);
+  const { loginActive, registerActive } = useContext(SnowPallContext);
   
   return (
     <>
         <header className='login-header'>
           <h1>SnowPall</h1>
           <div className='register-buttons'>
-              <button className='login' ref={loginRef}>
+              <button className='login' onClick={loginActive}>
                   Login
               </button>
-              <button className='sign-up' ref={signUpRef}>
+              <button className='sign-up' onClick={registerActive}>
                   Sign Up
               </button>
           </div>

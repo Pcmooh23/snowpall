@@ -1,4 +1,4 @@
-import React, {useContext, useRef, useState, useEffect} from 'react';
+import React, {useContext, useRef, useState, useEffect, useCallback} from 'react';
 import { ChevronUp, ImageIcon, Check } from 'lucide-react';
 import { SnowPallContext } from './SnowPallContext';
 import { useApi } from '../useApi';
@@ -26,7 +26,7 @@ const LawnService = () => {
     });
 
   // Function to calculate prices
-  const calculatePrices = () => {
+  const calculatePrices = useCallback(() => {
     return {
       walkway: SnowPall_Pricing_Model(
         currentWeather.temperature,
@@ -47,7 +47,7 @@ const LawnService = () => {
         'medium'
       )
     };
-  };
+  }, [currentWeather]);
 
   // Calculate and set prices when currentWeather changes
   useEffect(() => {
