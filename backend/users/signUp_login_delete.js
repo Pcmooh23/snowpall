@@ -120,10 +120,12 @@ const validateUser = async (req, res) => {
             message: 'Login successful.', 
             userId: user._id, 
             username: user.userName, 
-            accountType: user.accountType, 
+            userStreet: user.userStreet,
             userZip: user.userZip,
+            userCity: user.userCity,
+            userState: user.userState,
+            accountType: user.accountType, 
             accessToken: accessToken, 
-            addressInfo: user.userAddresses[0]
         });
 
     } catch (err) {
