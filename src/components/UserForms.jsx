@@ -108,13 +108,13 @@ const UserForms = () => {
                     }
                     navigate('/home');
                 } else if (accountType === 'snowtech' && addressInfo) {
+                    navigate('/snowtech');
                     localStorage.setItem(`${userId}_snowtechLocation`, JSON.stringify({
                         userStreet: addressInfo.userStreet,
                         userCity:   addressInfo.userCity,
                         userState: addressInfo.userState,
                         userZip: addressInfo.userZip
                     }))
-                    navigate('/snowtech');
                 }
 
             } else {
