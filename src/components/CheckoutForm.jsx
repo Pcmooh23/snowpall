@@ -244,7 +244,11 @@ const CheckoutForm = () => {
     useEffect(() => {
         const fetchServicesData = async () => {
           try {
-            const response = await customFetch('/services');
+            const url = '/services';
+            const options = {
+                method: 'GET',
+            };
+            const response = await customFetch(url, options);
             if (!response.ok) {
               throw new Error('Failed to fetch services data');
             }
@@ -260,7 +264,7 @@ const CheckoutForm = () => {
         if (shouldRefetch) { 
           fetchServicesData();
         }
-    }, [shouldRefetch, customFetch, setCart, setShouldRefetch]);
+    }, [shouldRefetch]);
 
   return (
     <>

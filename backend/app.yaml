@@ -11,4 +11,4 @@ env_variables:
   JWT_SECRET: 'JJKkKAeIUzDsl/IojvNfbBIUx6BFtyjVlxRdeL8IuOo='
   REFRESH_TOKEN_SECRET: '7G+ldnpzw85unwv9fJCITsBU1n8mb6KAciFIMzSsTaA='
   MONGO_PASSWORD: 'catbat0223'
-  # Define other environment variables as needed
+  

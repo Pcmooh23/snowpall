@@ -1,4 +1,4 @@
-import React, { createContext, useState, useRef, useEffect } from 'react';
+import React, { createContext, useState, useRef, useEffect, useCallback } from 'react';
 import { useJsApiLoader } from '@react-google-maps/api';
 /* global google */ //This is needed to use the google object 
 const libraries = ['places']; 
@@ -117,7 +117,7 @@ export const SnowPallProvider = ({ children }) => {
     userZip: ''
   });
 
-  const fetchAddresses = async () => {
+  const fetchAddresses = useCallback(async () => {
     try {
       const accessToken = localStorage.getItem('currentUserId') ? localStorage.getItem(`${localStorage.getItem('currentUserId')}_accessToken`) : null;
       if (!accessToken) {
@@ -140,7 +140,7 @@ export const SnowPallProvider = ({ children }) => {
     } catch (error) {
       console.error('Error fetching addresses:', error);
     }
-  };
+  }, [baseUrl]);
   
   // Use useRef to make a reference to the PaymentArea component itself.
   const paymentRef = useRef();

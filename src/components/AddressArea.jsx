@@ -148,7 +148,7 @@ const AddressArea = () => {
         if (savedAddress) {
             setSelectedAddressForUse(JSON.parse(savedAddress));
         }
-    }, [fetchAddresses, setSelectedAddressForUse, setSelectedAddressIndex, userId]);
+    }, [fetchAddresses, userId]);
 
   return (
     <>

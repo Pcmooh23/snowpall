@@ -26,9 +26,7 @@ const { getAddresses, postAddress, updateAddress, deleteAddress } = require('./a
 const { getRequests, submitRequest, cancelRequest, completeRequest, startRequest, acceptRequest, } = require('./requests/requests');
 
 const corsOptions = {
-    origin: process.env.NODE_ENV !== 'production'
-    ? 'https://localhost:3000' // Development frontend origin
-    : 'https://snowpall.com', // Production frontend origin
+    origin: process.env.NODE_ENV !== 'production' ? 'https://localhost:3000' : 'https://snowpall.com', 
     credentials: true, // Allow cookies to be sent and received
     methods: 'GET,POST,PUT,DELETE,OPTIONS', // Specify allowed methods
     allowedHeaders: 'Content-Type, Authorization', // Specify allowed headers
@@ -64,7 +62,7 @@ async function startHttpsServer() {
       const credentials = await loadCredentials();
       const httpsServer = https.createServer(credentials, app);
   
-      const PORT = process.env.PORT || 3500; 
+      const PORT = 3500; 
       httpsServer.listen(PORT, () => {
         console.log(`HTTPS Server running on port ${PORT}`);
       });
@@ -73,6 +71,8 @@ async function startHttpsServer() {
     }
 }
 
+app.get('/services', verifyToken, getUserServices);
+
 // Define a route for the root path
 app.get('/', (req, res) => {
     res.send('Hello, world! The server is up and running.');
@@ -80,11 +80,6 @@ app.get('/', (req, res) => {
 
 // Serve static files from 'public' directory
 app.use(express.static(path.join(__dirname, '../public')));
-
-// The "catchall" handler: for any request that doesn't match one above, send back the React index.html file.
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public', 'index.html'));
-});
 
 const uploadsDir = path.join(__dirname, 'uploads');
 
@@ -347,7 +342,10 @@ app.put('/other/:id', verifyToken, upload.single('image'),
 updateOtherService);
 app.delete('/other/:id', verifyToken, deleteOtherService);
 
-app.get('/services', verifyToken, getUserServices);
+// The "catchall" handler: for any request that doesn't match one above, send back the React index.html file.
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public', 'index.html'));
+});
 
 // Start the server
 // app.listen(port, () => {
