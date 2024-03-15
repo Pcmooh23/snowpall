@@ -85,7 +85,7 @@ const UserForms = () => {
             const data = await response.json();
             if (response.ok) {
                 const { userId, accessToken, username, accountType, userZip, addressInfo } = data;
-            
+                console.log('This is the address info:', addressInfo);
                 localStorage.setItem('currentUserId', userId);
                 setUserId(userId);
             
@@ -105,7 +105,7 @@ const UserForms = () => {
                         console.log("Retrieved weatherData", localStorage.getItem(`${localStorage.getItem('currentUserId')}_currentWeather`));
                     }
                     navigate('/home');
-                } else if (accountType === 'snowtech') {
+                } else if (accountType === 'snowtech' && addressInfo) {
                     localStorage.setItem(`${userId}_snowtechLocation`, JSON.stringify({
                         userStreet: addressInfo.userStreet,
                         userCity:   addressInfo.userCity,
