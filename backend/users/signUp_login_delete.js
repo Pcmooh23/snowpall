@@ -122,8 +122,8 @@ const validateUser = async (req, res) => {
             username: user.userName, 
             accountType: user.accountType, 
             userZip: user.userZip,
-            accessToken: accessToken
-     
+            accessToken: accessToken, 
+            addressInfo: user.userAddresses[0]
         });
 
     } catch (err) {

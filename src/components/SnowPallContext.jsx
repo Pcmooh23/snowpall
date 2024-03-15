@@ -177,7 +177,7 @@ export const SnowPallProvider = ({ children }) => {
   const [distance, setDistance] = useState('');
   const [duration, setDuration] = useState('');
   const [selectedDestination, setSelectedDestination] = useState(null);
-  const selectedTravelMode = localStorage.getItem('selectedTravelMode');
+  const selectedTravelMode =  localStorage.getItem('selectedTravelMode') ? localStorage.getItem('selectedTravelMode') : 'WALKING';
   const [directionsService, setDirectionsService] = useState(null);
   const [weatherData, setWeatherData] = useState(null);
   const {isLoaded} = useJsApiLoader({

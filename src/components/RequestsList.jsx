@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { SnowPallContext } from './SnowPallContext';
 import { useApi } from '../useApi';
 import { X } from 'lucide-react';
@@ -34,49 +34,51 @@ const RequestsList = () => {
         setSelectedItemDetails(null);
     };
 
-    useEffect(() => {
-        const fetchRequestsData = async () => {
-            try {
-                const response = await customFetch('/requestsLog');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch requests data');
-                }
-                const data = await response.json();
-                setRequestsLog(data.activeRequests);
-            } catch (error) {
-                console.error('Error:', error);
-            } finally {
-                setRefetchRequests(false);
+    const fetchRequestsData = useCallback(async () => {
+        try {
+            const response = await customFetch('/requestsLog');
+            if (!response.ok) {
+                throw new Error('Failed to fetch requests data');
             }
+            const data = await response.json();
+            setRequestsLog(data.activeRequests);
+        } catch (error) {
+            console.error('Error:', error);
+        } finally {
+            setRefetchRequests(false);
         }
-
-        const calculateAllRoutes = async () => {
-            const updatedRequests = await Promise.all(requestsLog.map(async (request) => {
-                // Format the destination address from the request
-                const destination = {
-                    userStreet: request.address.userStreet,
-                    userCity: request.address.userCity,
-                    userState: request.address.userState,
-                    userZip: request.address.userZip
-                };
-                const routeInfo = await calculateRoute(snowtechLocation, destination, selectedTravelMode);
-                return {
-                    ...request,
-                    distance: routeInfo ? routeInfo.distance : 'Unavailable',
-                    duration: routeInfo ? routeInfo.duration : 'Unavailable'
-                };
-            }));
-            setRequestsLog(updatedRequests); // Update state with new requests including distance and duration
-        };
-
-        if (requestsLog.length > 0) {
-            calculateAllRoutes();
-        }
-
+      }, [customFetch, setRequestsLog, setRefetchRequests]);
+      
+      const calculateAllRoutes = useCallback(async () => {
+        const updatedRequests = await Promise.all(requestsLog.map(async (request) => {
+          // Format the destination address from the request
+          const destination = {
+              userStreet: request.address.userStreet,
+              userCity: request.address.userCity,
+              userState: request.address.userState,
+              userZip: request.address.userZip
+          };
+          const routeInfo = await calculateRoute(snowtechLocation, destination, selectedTravelMode);
+          return {
+              ...request,
+              distance: routeInfo ? routeInfo.distance : 'Unavailable',
+              duration: routeInfo ? routeInfo.duration : 'Unavailable'
+          };
+        }));
+        setRequestsLog(updatedRequests);
+      }, [requestsLog, calculateRoute, selectedTravelMode, setRequestsLog, snowtechLocation]);
+      
+      useEffect(() => {
         if (refetchRequests) {
             fetchRequestsData();
         }
-    }, [refetchRequests, calculateRoute, customFetch, requestsLog, selectedTravelMode, setRefetchRequests, setRequestsLog, snowtechLocation])
+      }, [refetchRequests, fetchRequestsData]);
+      
+      useEffect(() => {
+        if (requestsLog.length > 0) {
+            calculateAllRoutes();
+        }
+      }, [requestsLog, calculateAllRoutes]);
       
     const handleAccept = async (request) => {
         setAcceptedRequest(request)

@@ -160,10 +160,15 @@ const SnowTech = () => {
           currentLocation.lat, currentLocation.lng, 
           destinationLat, destinationLng
         );
+        
+        if (distance*3.28084 > 5280) {
+          const inMiles = distance/1609;
+          setDistance(inMiles.toFixed(2));
+        } else if (distance*3.28084 < 5280) {
+          setDistance(distance)
+        }
 
-        console.log('This is the distance: ', distance);
         const distanceInFeet = distance * 3.28084;
-        console.log('This is the distance in feet: ', distanceInFeet);
   
         // Check if the distance is less than or equal to approximately 200 feet or 61 meters.
         if (distanceInFeet <= 500) {
@@ -178,6 +183,7 @@ const SnowTech = () => {
         const routeInfo = await calculateRoute(currentLocation, destination, selectedTravelMode);
         if (routeInfo) {
           setDirectionResponse(routeInfo.directions); // set in context state
+          setDuration(routeInfo.duration)
         }
       },
       (error) => {

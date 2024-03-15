@@ -84,7 +84,7 @@ const UserForms = () => {
     
             const data = await response.json();
             if (response.ok) {
-                const { userId, accessToken, username, accountType, userZip } = data;
+                const { userId, accessToken, username, accountType, userZip, addressInfo } = data;
             
                 localStorage.setItem('currentUserId', userId);
                 setUserId(userId);
@@ -106,6 +106,12 @@ const UserForms = () => {
                     }
                     navigate('/home');
                 } else if (accountType === 'snowtech') {
+                    localStorage.setItem(`${userId}_snowtechLocation`, JSON.stringify({
+                        userStreet: addressInfo.userStreet,
+                        userCity:   addressInfo.userCity,
+                        userState: addressInfo.userState,
+                        userZip: addressInfo.userZip
+                    }))
                     navigate('/snowtech');
                 }
 
