@@ -26,7 +26,7 @@ const { getAddresses, postAddress, updateAddress, deleteAddress } = require('./a
 const { getRequests, submitRequest, cancelRequest, completeRequest, startRequest, acceptRequest, } = require('./requests/requests');
 
 const corsOptions = {
-    origin: process.env.NODE_ENV !== 'production' ? 'https://localhost:3000' : 'https://snowpall.com', 
+    origin: process.env.NODE_ENV !== 'production' ? 'https://localhost:3000' : ['https://snowpall.com', 'https://main--snowpall.netlify.app'],
     credentials: true, // Allow cookies to be sent and received
     methods: 'GET,POST,PUT,DELETE,OPTIONS', // Specify allowed methods
     allowedHeaders: 'Content-Type, Authorization', // Specify allowed headers
