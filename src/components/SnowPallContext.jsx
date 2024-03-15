@@ -243,7 +243,8 @@ const calculateRoute = async (origin, destination, travelMode) => {
 
   // Snowtech tools.
   const userID = localStorage.getItem('currentUserId');
-  const snowtechLocation = JSON.parse(localStorage.getItem(`${userID}_snowtechLocation`));
+  const snowtechLocationRaw = localStorage.getItem(`${userID}_snowtechLocation`);
+  const snowtechLocation = snowtechLocationRaw ? JSON.parse(snowtechLocationRaw) : null;
   const formatAddress = (address) => {
     return `${address.userStreet}, ${address.userCity}, ${address.userState} ${address.userZip}`;
   };
