@@ -246,8 +246,8 @@ const calculateRoute = async (origin, destination, travelMode) => {
   const snowtechLocationRaw = localStorage.getItem(`${userID}_snowtechLocation`);
   const snowtechLocation = snowtechLocationRaw ? JSON.parse(snowtechLocationRaw) : null;
   const formatAddress = (address) => {
-    return `${address.userStreet}, ${address.userCity}, ${address.userState} ${address.userZip}`;
-  };
+    return `${address?.userStreet}, ${address?.userCity}, ${address?.userState} ${address?.userZip}`;
+  };  
   const [currentJob, setCurrentJob] = useState({
     requestId: null,
     userId: null
