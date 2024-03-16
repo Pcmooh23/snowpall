@@ -334,10 +334,6 @@ const SnowTech = () => {
               <label htmlFor='car' className='icon-container'>
                 <FaCar className='transpo-icon'/>
               </label>
-              <input type="radio" id="bus" name="transport" value="TRANSIT" onChange={handleTravelModeChange} className="transpo-input" />
-              <label htmlFor='bus' className='icon-container'>
-                <FaBus className='transpo-icon'/>
-              </label>
               <input type="radio" id="walking" name="transport" value="WALKING" onChange={handleTravelModeChange} className="transpo-input" />
               <label htmlFor='walking' className='icon-container'>
                 <FaWalking className='transpo-icon'/>
