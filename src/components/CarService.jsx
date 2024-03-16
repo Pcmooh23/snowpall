@@ -62,10 +62,6 @@ const CarService = () => {
             formData.append('image', carFormData.image); // This is the File object
         }
 
-        for (let [key, value] of formData.entries()) {
-            console.log(key, value);
-        }
-
         // Determine the API URL and HTTP method based on the operation (add new or update)
         const url = editingIndex === null ? '/car' : `/car/${cart[editingIndex].id}`;
         const options = {
