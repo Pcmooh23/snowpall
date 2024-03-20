@@ -90,15 +90,15 @@ async function ensureUploadsDirExists() {
       await fsPromises.access(uploadsDir, fs.constants.F_OK);
       console.log('Uploads directory exists.');
     } catch (error) {
-      if (error.code === 'ENOENT') {
+        if (error.code === 'ENOENT') {
         // If the uploads directory does not exist, create it
         console.log('Uploads directory does not exist, creating...');
         await fsPromises.mkdir(uploadsDir, { recursive: true });
         console.log('Uploads directory created.');
-      } else {
+        } else {
         // Re-throw the error if it is not related to the existence of the directory
         throw error;
-      }
+        }
     }
 }
   
