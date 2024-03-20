@@ -14,13 +14,14 @@ const libraries = ['places'];
 const SnowTech = () => {
   
   const [map, setMap] = useState(/** @type google.maps.Map */ (null)); // Re-centering the map 
-  
+  const [inMiles, setInMiles] = useState(0);
+  const [inFeet, setInFeet] = useState(0);
   const [localCenter, setLocalCenter] = useState(null);
   const proximityCloseRef = useRef(null);
 
   const { 
     snowtechLocation, formatAddress, directionResponse, acceptedRequest,
-    setDirectionResponse, selectedTravelMode, calculateRoute,
+    setDirectionResponse, selectedTravelMode, calculateRoute, setRefetchRequests,
     distance, setDistance, duration, setDuration, setRequestsLog,
     selectedDestination, setSelectedDestination, cancelRequestGlobal, setAcceptedRequestId, acceptedRequestId
   } = useContext(SnowPallContext);
@@ -162,10 +163,9 @@ const SnowTech = () => {
         );
         
         if (distance*3.28084 > 5280) {
-          const inMiles = distance/1609;
-          setDistance(inMiles.toFixed(2));
+           setInMiles(distance/1609);
         } else if (distance*3.28084 < 5280) {
-          setDistance(distance)
+          setInFeet(distance*3.28084)
         }
 
         const distanceInFeet = distance * 3.28084;
@@ -315,7 +315,7 @@ const SnowTech = () => {
   
       const responseData = await response.json();
       console.log('Job complete:', responseData);
-  
+      setRefetchRequests(true)
     } catch (error) {
       console.error('Error completing the request:', error);
     }
@@ -388,7 +388,7 @@ const SnowTech = () => {
             </ButtonGroup>
           </HStack>
           <HStack className='eta-area' >
-            <Text>Distance: {distance} </Text>
+            <Text>Distance: {distance*3.28084 > 5280 ? `${inMiles.toFixed(2)} miles` :`${inFeet.toFixed(2)} feet`} </Text>
             <Text>ETA: {duration} </Text>
           </HStack>
           </Box>
