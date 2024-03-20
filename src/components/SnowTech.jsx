@@ -358,7 +358,6 @@ const SnowTech = () => {
             }}
             onLoad={(map) => {setMap(map)}}
             >
-              <Marker position={localCenter}/>
               {directionResponse && <DirectionsRenderer directions={directionResponse}/>}
             </GoogleMap>
           </Box>
