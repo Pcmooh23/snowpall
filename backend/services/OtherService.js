@@ -16,6 +16,8 @@ const postOtherService = async (req, res) => {
             return res.status(404).send('User not found.');
         }
 
+        const imagePath = req.file ? `uploads/${req.file.filename}` : null;
+
         const newOtherService = {
             id: uuidv4(),
             userId: userId,
@@ -26,7 +28,7 @@ const postOtherService = async (req, res) => {
             job4Price: req.body.job4Price,
             otherMessage: req.body.otherMessage,
             objectType: req.body.objectType,
-            imagePath: req.file ? req.file.path : null,
+            imagePath: imagePath,
         };
 
         user.userCart.push(newOtherService);
@@ -60,7 +62,7 @@ const updateOtherService = async (req, res) => {
 
         const selectedSize = req.body.selectedSize;
         const otherMessage = req.body.otherMessage;
-        const imagePath = req.file ? req.file.path : undefined;
+        const imagePath = req.file ? `uploads/${req.file.filename}` : user.userCart[otherIndex].imagePath;
 
         const updateData = {
             ...(selectedSize) && { selectedSize },

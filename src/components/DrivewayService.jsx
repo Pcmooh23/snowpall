@@ -231,7 +231,28 @@ const DrivewayService = () => {
                 </label>
               </div>
             </div> 
-           
+            <div className='driveway-upload-area'>
+              {drivewayPreview ? (
+                <img 
+                src={drivewayPreview} 
+                alt="Preview" 
+                className="uploaded-image-preview"
+                style={{ maxWidth: '100px', cursor: 'pointer' }}
+                onClick={handleIconClick}/>) : (
+                <div htmlFor='image-upload' className='driveway-upload-label' onClick={handleIconClick}>
+                <ImageIcon size={90} className='imageIcon'/>
+                <p className='words'>Optional: Upload Image</p>
+                </div> )}
+              {<input 
+                id='image-upload'
+                type='file' 
+                name='image'
+                className='image-upload' 
+                accept="image/*" 
+                ref={fileInputRef}
+                onChange={handleImageChange}
+                style={{ display: 'none' }}/>} 
+            </div>
           </div>
           <textarea 
             rows='5' 

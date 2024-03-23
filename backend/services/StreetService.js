@@ -16,6 +16,8 @@ const postStreetService = async (req, res) => {
             return res.status(404).json({ message: 'User not found.' });
         }
 
+        const imagePath = req.file ? `uploads/${req.file.filename}` : null;
+
         const newStreetService = {
             id: uuidv4(),
             userId: userId,
@@ -24,7 +26,7 @@ const postStreetService = async (req, res) => {
             price: req.body.price,
             streetMessage: req.body.streetMessage,
             objectType: req.body.objectType,
-            imagePath: req.file ? req.file.path : null,
+            imagePath: imagePath,
         };
 
         user.userCart.push(newStreetService);
@@ -59,7 +61,7 @@ const updateStreetService = async (req, res) => {
         const from  = req.body.from;
         const to = req.body.to ? req.body.to : '';
         const streetMessage = req.body.streetMessage;
-        const imagePath = req.file ? req.file.path : undefined;
+        const imagePath = req.file ? `uploads/${req.file.filename}` : user.userCart[streetIndex].imagePath;
 
         const updateData = {
             ...(from) && { from },

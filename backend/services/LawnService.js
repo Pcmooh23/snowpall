@@ -16,6 +16,8 @@ const postLawnService = async (req, res) => {
             return res.status(404).json({ message: 'User not found.' });
         }
 
+        const imagePath = req.file ? `uploads/${req.file.filename}` : null;
+
         const newLawnService = {
             id: uuidv4(),
             userId: userId,
@@ -27,7 +29,7 @@ const postLawnService = async (req, res) => {
             frontYardPrice: req.body.frontYardPrice,
             backyardPrice: req.body.backyardPrice,
             objectType: req.body.objectType,
-            imagePath: req.file ? req.file.path : null, 
+            imagePath: imagePath, 
         };
 
         user.userCart.push(newLawnService);
@@ -63,7 +65,7 @@ const updateLawnService = async (req, res) => {
         const frontYard = req.body.frontYard === 'true';
         const backyard = req.body.backyard === 'true';
         const lawnMessage = req.body.lawnMessage;
-        const imagePath = req.file ? req.file.path : undefined;
+        const imagePath = req.file ? `uploads/${req.file.filename}` : user.userCart[lawnIndex].imagePath;
 
 
         const updateData = {

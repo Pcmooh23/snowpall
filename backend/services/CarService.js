@@ -15,7 +15,9 @@ const postCarService = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found.' });
         }
-        
+
+        const imagePath = req.file ? `uploads/${req.file.filename}` : null;
+
         // Create the new car service object
         const newCarService = {
             id: uuidv4(),
@@ -27,7 +29,7 @@ const postCarService = async (req, res) => {
             carMessage: req.body.carMessage || '', // Include car message if provided
             price: req.body.price,
             objectType: req.body.objectType,
-            imagePath: req.file ? req.file.path : null, // Include image path if file uploaded
+            imagePath: imagePath, // Include image path if file uploaded
         };
 
         user.userCart.push(newCarService);
@@ -56,8 +58,8 @@ const updateCarService = async (req, res) => {
         }
 
         // Find the index of the cart item in the user's cart.
-        const cartIndex = user.userCart.findIndex(item => item.id === carId);
-        if (cartIndex === -1) {
+        const carIndex = user.userCart.findIndex(item => item.id === carId);
+        if (carIndex === -1) {
             return res.status(404).json({ message: 'Car service object not found in user cart.' });
         }
 
@@ -66,7 +68,7 @@ const updateCarService = async (req, res) => {
         const color = req.body.color;
         const licensePlate = req.body.licensePlate;
         const carMessage = req.body.carMessage;
-        const imagePath = req.file ? req.file.path : undefined;
+        const imagePath = req.file ? `uploads/${req.file.filename}` : user.userCart[carIndex].imagePath;
 
         const updateData = {
             ...(checkedService !== undefined) && { checkedService },
@@ -77,15 +79,15 @@ const updateCarService = async (req, res) => {
             ...(imagePath) && { imagePath },
         };
 
-        const cartItemToUpdate = user.userCart[cartIndex];
+        const carItemToUpdate = user.userCart[carIndex];
 
         // Update only the fields that were passed in the request body, keeping the rest intact.
         Object.keys(updateData).forEach(key => {
-            cartItemToUpdate[key] = updateData[key];
+            carItemToUpdate[key] = updateData[key];
         });
 
         const requiredFields = ['objectType', 'userId', 'id'];
-        const hasRequiredFields = requiredFields.every(field => user.userCart[cartIndex][field] !== undefined);
+        const hasRequiredFields = requiredFields.every(field => user.userCart[carIndex][field] !== undefined);
 
         if (!hasRequiredFields) {
             return res.status(400).json({ message: 'Missing required fields in cart item.' });

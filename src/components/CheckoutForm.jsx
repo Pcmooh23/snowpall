@@ -252,19 +252,23 @@ const CheckoutForm = () => {
             if (!response.ok) {
               throw new Error('Failed to fetch services data');
             }
-            const data = await response.json();
-            setCart(data);
+            const servicesData = await response.json();
+            setCart(servicesData);
+            servicesData.forEach((service, index) => {
+              console.log(`Image path for service ${index}:`, service.imagePath);
+            });
           } catch (error) {
             console.error('Error:', error);
           } finally {
-            setShouldRefetch(false); 
+            setShouldRefetch(false);
           }
         };
       
-        if (shouldRefetch) { 
+        if (shouldRefetch) {
           fetchServicesData();
         }
-    }, [shouldRefetch]);
+      }, [shouldRefetch]);
+      
 
   return (
     <>

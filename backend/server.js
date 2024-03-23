@@ -81,31 +81,8 @@ app.get('/', (req, res) => {
 // Serve static files from 'public' directory
 app.use(express.static(path.join(__dirname, '../public')));
 
-const uploadsDir = path.join(__dirname, 'uploads');
-
-// Check if the uploads directory exists, and if not, create it
-async function ensureUploadsDirExists() {
-    try {
-      // Check if the directory exists
-      await fsPromises.access(uploadsDir, fs.constants.F_OK);
-      console.log('Uploads directory exists.');
-    } catch (error) {
-        if (error.code === 'ENOENT') {
-        // If the uploads directory does not exist, create it
-        console.log('Uploads directory does not exist, creating...');
-        await fsPromises.mkdir(uploadsDir, { recursive: true });
-        console.log('Uploads directory created.');
-        } else {
-        // Re-throw the error if it is not related to the existence of the directory
-        throw error;
-        }
-    }
-}
-  
-ensureUploadsDirExists().catch(console.error);
-
-// a line that serves static files from the 'uploads' directory
-app.use('/uploads', express.static(uploadsDir));
+// Serve static files from the 'uploads' directory
+app.use('/uploads', express.static(path.join(__dirname, './uploads')));
 
 app.post('/registerUser', userRegistration);
 app.post('/validateLogin', validateUser);

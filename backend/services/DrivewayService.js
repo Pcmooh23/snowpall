@@ -16,6 +16,8 @@ const postDrivewayService = async (req, res) => {
             return res.status(404).json({ message: 'User not found.' });
         }
 
+        const imagePath = req.file ? `uploads/${req.file.filename}` : null;
+
         const newDrivewayService = {
             id: uuidv4(),
             userId: userId,
@@ -26,7 +28,7 @@ const postDrivewayService = async (req, res) => {
             size4Price: req.body.size4Price,
             drivewayMessage: req.body.drivewayMessage || '',
             objectType: req.body.objectType,
-            imagePath: req.file ? req.file.path : null,
+            imagePath: imagePath,
         };
 
         user.userCart.push(newDrivewayService);
@@ -61,7 +63,7 @@ const updateDrivewayService = async (req, res) => {
 
         const selectedSize = req.body.selectedSize;
         const drivewayMessage = req.body.drivewayMessage;
-        const imagePath = req.file ? req.file.path : undefined;
+        const imagePath = req.file ? `uploads/${req.file.filename}` : user.userCart[cartIndex].imagePath;
 
         const updateData = {
             ...(selectedSize) && { selectedSize },
