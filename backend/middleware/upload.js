@@ -25,7 +25,7 @@ ensureLocalUploadDirExists();
 // Set up multer storage
 const storage = process.env.NODE_ENV === 'production'
   ? multerGoogleStorage.storageEngine({
-      bucket: 'staging.snowpall-map.appspot.com',
+      bucket: 'snowpall-map.appspot.com',
       projectId: 'snowpall-map',
       keyFilename: '../service-account.json',
     })
