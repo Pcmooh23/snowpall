@@ -45,7 +45,7 @@ export const getWeatherForecast = async (locationKey) => {
     }
 };
 
-export const SnowPall_Pricing_Model = (temp, precipitation_type, precipitation_intensity, job_size) => {
+export const SnowPall_Pricing_Model = (temp = 32, precipitation_type = 'snow', precipitation_intensity = 'heavy', job_size = 'small') => {
   
     const base_price = 15;
     let weather_multiplier = 1.0;

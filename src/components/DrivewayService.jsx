@@ -7,7 +7,7 @@ import { SnowPall_Pricing_Model } from './PricingModel';
 const DrivewayService = () => {
 
   const {
-    cart, setCart, setShouldRefetch,
+    cart, setCart, setShouldRefetch, defaultWeather,
     active, toggleActive, currentWeather, basePrice,
     editingIndex, setEditingIndex,
     drivewayFormData, setDrivewayFormData, 
@@ -22,11 +22,12 @@ const DrivewayService = () => {
   });
 
   useEffect(() => {
+    const weather = currentWeather || defaultWeather;
     const prices = {
-      size1: SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'small'),
-      size2: SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'medium'),
-      size3: SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'large'),
-      size4: SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'x-large'),
+      size1: SnowPall_Pricing_Model(weather.temperature, weather.precipitationType, weather.precipitationIntensity, 'small'),
+      size2: SnowPall_Pricing_Model(weather.temperature, weather.precipitationType, weather.precipitationIntensity, 'medium'),
+      size3: SnowPall_Pricing_Model(weather.temperature, weather.precipitationType, weather.precipitationIntensity, 'large'),
+      size4: SnowPall_Pricing_Model(weather.temperature, weather.precipitationType, weather.precipitationIntensity, 'x-large'),
     };
     setDynamicPrices(prices);
   }, [currentWeather, basePrice]);
@@ -43,18 +44,19 @@ const DrivewayService = () => {
   
     if (name === 'selectedSize') {
       // Assign newPrice based on the case
+      const weather = currentWeather || defaultWeather;
       switch (value) {
         case 'size1':
-          newPrice = SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'small');
+          newPrice = SnowPall_Pricing_Model(weather.temperature, weather.precipitationType, weather.precipitationIntensity, 'small');
           break;
         case 'size2':
-          newPrice = SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'medium');
+          newPrice = SnowPall_Pricing_Model(weather.temperature, weather.precipitationType, weather.precipitationIntensity, 'medium');
           break;
         case 'size3':
-          newPrice = SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'large');
+          newPrice = SnowPall_Pricing_Model(weather.temperature, weather.precipitationType, weather.precipitationIntensity, 'large');
           break;
         case 'size4':
-          newPrice = SnowPall_Pricing_Model(currentWeather.temperature, currentWeather.precipitationType, currentWeather.precipitationIntensity, 'x-large');
+          newPrice = SnowPall_Pricing_Model(weather.temperature, weather.precipitationType, weather.precipitationIntensity, 'x-large');
           break;
         default:
           newPrice = basePrice;

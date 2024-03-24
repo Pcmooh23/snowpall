@@ -12,9 +12,21 @@ export const SnowPallProvider = ({ children }) => {
   const baseUrl = process.env.REACT_APP_SERVER_URL;
 
   // So each service component has access to the weather data when the user either logs in or registers.
-  const currentWeather = localStorage.getItem(`${localStorage.getItem('currentUserId')}_currentWeather`);
-  const basePrice = 15;
+  let currentWeather;
 
+  try {
+    const currentWeatherString = localStorage.getItem(`${localStorage.getItem('currentUserId')}_currentWeather`);
+    currentWeather = currentWeatherString ? JSON.parse(currentWeatherString) : null;
+  } catch (error) {
+    console.error("Parsing error in currentWeather:", error);
+    currentWeather = null; // Default to null if parsing fails
+  }
+  const basePrice = 15;
+  const defaultWeather = {
+    temperature: 32,
+    precipitationType: 'snow',
+    precipitationIntensity: 'heavy',
+  };
 
   // Set userID upon login.
   const [userId, setUserId] = useState(null);
@@ -291,7 +303,7 @@ const calculateRoute = async (origin, destination, travelMode) => {
       lawnFormData, setLawnFormData,
       streetFormData, setStreetFormData,
       otherFormData, setOtherFormData,
-      currentWeather, basePrice,
+      currentWeather, basePrice,  defaultWeather,
       
       // SubmitRequest area props.
       addressLog, setAddressLog,

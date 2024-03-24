@@ -2,14 +2,14 @@ import React, { useState, useContext } from 'react';
 import { Mail, LockKeyhole, X, CircleUserRound } from 'lucide-react';
 import { SnowPallContext } from './SnowPallContext';
 import { useNavigate } from 'react-router-dom';
-import { getLocationKeyFromZipcode, getWeatherForecast, SnowPall_Pricing_Model } from './PricingModel';
+import { getLocationKeyFromZipcode, getWeatherForecast, } from './PricingModel';
 
 const UserForms = () => {
     const {
         pageFormRef, iconCloseRef, baseUrl,
         loginFormRef, registerLinkRef, fetchAddresses, 
         registerFormRef, loginLinkRef,
-        setAccessToken, setUserId, setLoginName, setWeatherData, weatherData
+        setAccessToken, setUserId, setLoginName, 
     } = useContext(SnowPallContext);
 
     const navigate = useNavigate();
@@ -85,9 +85,6 @@ const UserForms = () => {
             const data = await response.json();
             if (response.ok) {
                 const { userId, accessToken, username, accountType, userStreet ,userZip, userCity, userState } = data;
-                if (userCity) {
-                    console.log('This is the address info:', userStreet ,userZip, userCity, userState);
-                }
                 localStorage.setItem('currentUserId', userId);
                 setUserId(userId);
             
@@ -104,7 +101,6 @@ const UserForms = () => {
                     const weatherInfo = await getWeatherForecast(locationKey);
                     if (weatherInfo) {
                         localStorage.setItem(`${userId}_currentWeather`, weatherInfo[0])
-                        console.log("Retrieved weatherData", localStorage.getItem(`${localStorage.getItem('currentUserId')}_currentWeather`));
                     }
                     navigate('/home');
                 } else if (accountType === 'snowtech') {
@@ -166,8 +162,6 @@ const UserForms = () => {
             const registrationData = await registrationResponse.json();
     
             if (registrationData) {
-                console.log('User Object:', registrationData.user);
-
                 const { id, userName, userNumber, userStreet, userUnit, userCity, userState, userZip, accountType } = registrationData.user;                
                 const { accessToken } = registrationData;
 
@@ -183,11 +177,9 @@ const UserForms = () => {
 
                 if (accountType === 'customer') {
                     const locationKey = await getLocationKeyFromZipcode(userZip);
-                    console.log("Retrieved location key: ", locationKey);
                     const weatherInfo = await getWeatherForecast(locationKey);
                     if (weatherInfo) {
-                        localStorage.setItem(`${id}_currentWeather`, weatherInfo[0])
-                        console.log("Retrieved weatherData", localStorage.getItem(`${localStorage.getItem('currentUserId')}_currentWeather`));
+                        localStorage.setItem(`${id}_currentWeather`, JSON.stringify(weatherInfo[0]))
                     }
                     navigate('/home');
                 } else if (accountType === 'snowtech') {
