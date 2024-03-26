@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+
+  web:
+    depends_on:
+      - api
+    build: .
+    ports:
+      - 3000:3000
+    environment:
+      REACT_APP_SERVER_URL: https://localhost:3500
+      REACT_APP_STRIPE_PUBLISHABLE_KEY: pk_test_51OeMdKBWC1e9EDXYxom2wYKQWyAQFpGSI8Qn7k8sFFw2yey7MwhRBB3knAJ83L4naOhebZiAZScS5DDYBSVyhQgl00LhIdqqd5
+      REACT_APP_SNOWPALL_GOOGLE_MAPS_API_KEY: AIzaSyC9ZrevEMZUh1IYd2nxZO3CfKYUTsI2DLU
+      REACT_APP_ACCUWEATHER_API_KEY: Gp1CoFlUhCB0s8OeKPbeZNkeVqAu3BdB
+    develop:
+      watch:
+        - path: ./package.json
+          action: rebuild
+        - path: ./package-lock.json
+          action: rebuild
+        - path: ./src
+          target: /app
+          action: sync
+
+  api:
+    build: ./backend
+    ports:
+      - 3500:3500
+    environment:
+      STRIPE_SECRET_KEY: sk_test_51OeMdKBWC1e9EDXYIAyuNOW6zJJafHMTP3U6PnSymmHrAMdyPDNJsqz1nmq17EPS9BmXafFFU3Da4n3n2ml5N3PH00hekP6aVX
+      JWT_SECRET: JJKkKAeIUzDsl/IojvNfbBIUx6BFtyjVlxRdeL8IuOo=
+      REFRESH_TOKEN_SECRET: 7G+ldnpzw85unwv9fJCITsBU1n8mb6KAciFIMzSsTaA=
+      MONGO_PASSWORD: catbat0223
+    develop:
+      watch:
+        - path: ./backend/package.json
+          action: rebuild
+        - path: ./backend/package-lock.json
+          action: rebuild
+        - path: ./backend
+          target: /app
+          action: sync
+
+volumes:
+  snowman:

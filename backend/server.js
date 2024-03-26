@@ -43,8 +43,8 @@ app.use(loadData); // Then use it before routes.
 
 // SSL certificate paths
 async function loadCredentials() {
-    const privateKeyPath = path.join(__dirname, '../localhost-key.pem');
-    const certificatePath = path.join(__dirname, '../localhost.pem');
+    const privateKeyPath = path.join(__dirname, './localhost-key.pem');
+    const certificatePath = path.join(__dirname, './localhost.pem');
   
     try {
       const privateKey = await fsPromises.readFile(privateKeyPath, 'utf8');
