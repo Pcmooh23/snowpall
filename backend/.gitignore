@@ -1,2 +1,4 @@
 app.yaml
 keys.js
+localhost-key.pem
+localhost.pem
