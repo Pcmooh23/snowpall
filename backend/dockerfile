@@ -14,6 +14,6 @@ ARG NODE_ENV
 
 ENV NODE_ENV=${NODE_ENV}
 
-COPY ./entrypoint.sh /
+COPY ./backend-entrypoint.sh /
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/backend-entrypoint.sh"]

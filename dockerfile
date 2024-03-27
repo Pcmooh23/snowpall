@@ -5,9 +5,14 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-COPY . . 
+COPY . .
+
+ARG NODE_ENV
+ENV NODE_ENV=${NODE_ENV}
 
 EXPOSE 3000
-
 ENV HTTPS=true
-CMD ["npm", "start"]
+
+COPY ./frontend-entrypoint.sh /
+
+ENTRYPOINT ["/frontend-entrypoint.sh"]
