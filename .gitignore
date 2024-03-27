@@ -26,3 +26,5 @@ yarn-debug.log*
 yarn-error.log*
 
 service-account.json
+
+backend/app.yaml
