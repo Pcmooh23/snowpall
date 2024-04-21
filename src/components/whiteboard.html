@@ -1,0 +1,147 @@
+<html>
+
+<head> 
+
+<title>Image File Viewer</title>
+
+   <script>
+
+       function swapImage(name) {
+           fetch('/get_thumbnail?obj='
++ name)
+
+               .then(response
+=> response.blob())
+
+               .then(blob
+=> {
+
+                   const url
+= 
+URL.createObjectURL(blob);
+
+                   document.getElementById("pic").src=
+ url;
+
+               })
+
+               .catch(error
+=> 
+console.error('Error fetching thumbnail:', error));
+
+       }
+
+   </script>
+
+</head> 
+
+<body> 
+
+   <h1>ContainerX1: Upload a new file?</h1>
+
+   <!-- <form action = "/upload" method = "post" enctype="multipart/form-data">
+
+<input type="file" name="file" /> 
+
+<input type = "submit" value="Upload"> 
+
+</form>  -->
+
+   <form id="uploadForm" enctype="multipart/form-data">
+
+       <input type="file" id="fileInput" name="file">
+
+       <button type="button" onclick="uploadFile()">Upload</button>
+
+   </form>
+
+   <h1>List of Files on the server:</h1>
+
+   <table border="1">
+
+       <tr>
+
+           <td>Object Name</td>
+
+           <td>Last Modified</td>
+
+           <td>Size</td>
+
+       </tr>
+
+       {% for file in imagefiles %}
+
+       <tr>
+
+           <td>
+
+               <button onclick="swapImage('{{file["Name"]}}')">{{file['Name']}}</button>
+
+               <!-- {{file[0]}} -->
+
+           </td>
+
+           <!-- <td>
+
+               <img src="/static/images/{{file[0]}}">
+
+           </td> -->
+
+           <td>
+
+               {{file["LastModified"]}}
+
+           </td>
+
+           <td>
+
+               {{file["Size"]}}
+
+           </td>
+
+       </tr>
+
+       {% endfor %}
+
+   </table>
+
+   <img id="pic" src="">
+
+
+   <script>
+       function uploadFile() {
+
+           var fileInput = document.getElementById('fileInput');
+
+           var file = fileInput.files[0];
+
+           if (!file) {
+
+               alert("Please select a file to upload.");
+
+               return;
+           }
+           var formData = new FormData();
+
+           formData.append('file', file);
+
+           var xhr = new XMLHttpRequest();
+
+           xhr.open('POST',
+'/upload', 
+true);
+           // xhr.upload.onload = function () {
+           //     if (xhr.status === 200) {
+           //         alert("File uploaded successfully!");
+           //     } else {
+           //         alert("Error uploading file.");
+           //     }
+           // };
+           xhr.send(formData);
+       }
+
+   </script>
+
+</body> 
+
+</html>

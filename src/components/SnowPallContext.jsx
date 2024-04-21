@@ -15,10 +15,19 @@ export const SnowPallProvider = ({ children }) => {
   let currentWeather;
 
   try {
-    const currentWeatherString = localStorage.getItem(`${localStorage.getItem('currentUserId')}_currentWeather`);
+    const currentUserId = localStorage.getItem('currentUserId');
+    console.log("Current User ID:", currentUserId); // Log the currentUserId for debugging
+  
+    const currentWeatherString = localStorage.getItem(`${currentUserId}_currentWeather`);
+    console.log("Current Weather String:", currentWeatherString); // Log the string to be parsed
+  
     currentWeather = currentWeatherString ? JSON.parse(currentWeatherString) : null;
   } catch (error) {
     console.error("Parsing error in currentWeather:", error);
+    // Log the string that caused the error if it's a parsing issue
+    if (error instanceof SyntaxError) {
+      console.error("String that failed to parse:", currentWeatherString);
+    }
     currentWeather = null; // Default to null if parsing fails
   }
   const basePrice = 15;
