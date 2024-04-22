@@ -144,7 +144,6 @@ const SnowTech = () => {
           userZip: acceptedRequest.address.userZip
         }
         const geocodedDestination = await geocodeAddress(destination);
-        console.log('Geocoded destination:', geocodedDestination); 
 
         if (!geocodedDestination || typeof geocodedDestination.lat !== 'function' || typeof geocodedDestination.lng !== 'function') {
           console.error('Invalid geocoded destination:', geocodedDestination);
@@ -154,8 +153,6 @@ const SnowTech = () => {
         const destinationLat = geocodedDestination.lat();
         const destinationLng = geocodedDestination.lng();
         // Check if the snowtech is within one foot of the destination
-
-        console.log('This is the destination Coords:', destinationLat, destinationLng);
 
         const distance = calculateDistance(
           currentLocation.lat, currentLocation.lng, 
@@ -173,11 +170,9 @@ const SnowTech = () => {
         // Check if the distance is less than or equal to approximately 200 feet or 61 meters.
         if (distanceInFeet <= 500) {
           proximityCloseRef.current = true;
-          console.log('Proximity close:', proximityCloseRef.current);
         
         } else if (distanceInFeet > 500) {
           proximityCloseRef.current = false;
-          console.log('Proximity not close:', proximityCloseRef.current);
         }
         // Recalculate the route from the current location to the destination
         const routeInfo = await calculateRoute(currentLocation, destination, selectedTravelMode);
@@ -280,7 +275,6 @@ const SnowTech = () => {
       }
   
       const responseData = await response.json();
-      console.log('Job started:', responseData);
   
     } catch (error) {
       console.error('Error starting the request:', error);
@@ -314,7 +308,6 @@ const SnowTech = () => {
       }
   
       const responseData = await response.json();
-      console.log('Job complete:', responseData);
       setRefetchRequests(true)
     } catch (error) {
       console.error('Error completing the request:', error);

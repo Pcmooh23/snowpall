@@ -49,36 +49,11 @@ const RequestsList = () => {
         }
       }, [customFetch, setRequestsLog, setRefetchRequests]);
       
-      const calculateAllRoutes = useCallback(async () => {
-        const updatedRequests = await Promise.all(requestsLog.map(async (request) => {
-          // Format the destination address from the request
-          const destination = {
-              userStreet: request.address.userStreet,
-              userCity: request.address.userCity,
-              userState: request.address.userState,
-              userZip: request.address.userZip
-          };
-          const routeInfo = await calculateRoute(snowtechLocation, destination, selectedTravelMode);
-          return {
-              ...request,
-              distance: routeInfo ? routeInfo.distance : 'Unavailable',
-              duration: routeInfo ? routeInfo.duration : 'Unavailable'
-          };
-        }));
-        setRequestsLog(updatedRequests);
-      }, [requestsLog, calculateRoute, selectedTravelMode, setRequestsLog, snowtechLocation]);
-      
       useEffect(() => {
         if (refetchRequests) {
             fetchRequestsData();
         }
       }, [refetchRequests, fetchRequestsData]);
-      
-      useEffect(() => {
-        if (requestsLog.length > 0) {
-            calculateAllRoutes();
-        }
-      }, [requestsLog, calculateAllRoutes]);
       
     const handleAccept = async (request) => {
         setAcceptedRequest(request)
@@ -117,8 +92,6 @@ const RequestsList = () => {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const responseData = await response.json();
-            console.log('Job accepted:', responseData);
-
             setRequestsLog((currentRequests) => currentRequests.map((req) => {
                 if (req.id === request.id) {
                     return {...req, stages: {...req.stages, accepted:true}};
@@ -159,7 +132,6 @@ const RequestsList = () => {
                                     </button>
                                     <p>${amount}</p>
                                 </div>
-                                <div className='distance'>{request.distance || 'Calculating...'}</div>
                             </div>
                         </div>
                     );

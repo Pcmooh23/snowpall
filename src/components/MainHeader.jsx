@@ -15,12 +15,11 @@ const MainHeader = () => {
 
     const handleLogout = async () => {
         try {
-            await logout(); // Call the logout function from useApi
+            await logout(); 
             console.log('User logged out successfully');
-            setUserId(null); // Clear user-specific state
-            setAccessToken(null); // Also clear access token from context
-            localStorage.removeItem('combinedToken'); // Remove the token from local storage if you're using it
-            navigate('/'); // Redirect to login page
+            setUserId(null); 
+            setAccessToken(null); 
+            navigate('/'); 
         } catch (error) {
             console.error('Logout error:', error);
         }

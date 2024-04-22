@@ -7,7 +7,7 @@ import { SnowPall_Pricing_Model } from './PricingModel';
 const LawnService = () => {
 
     const {
-      cart, setCart, setShouldRefetch,
+      cart, setCart, setShouldRefetch, defaultWeather,
       active, toggleActive, currentWeather,
       editingIndex, setEditingIndex,
       lawnFormData, setLawnFormData,
@@ -20,41 +20,43 @@ const LawnService = () => {
 
     // Initialize state for dynamic prices
     const [dynamicPrices, setDynamicPrices] = useState({
-      walkway: null,
-      frontYard: null,
-      backyard: null
+      walkway: 0,
+      frontYard: 0,
+      backyard: 0
     });
+
+    const weather = currentWeather || defaultWeather;
 
   // Function to calculate prices
   const calculatePrices = useCallback(() => {
     return {
       walkway: SnowPall_Pricing_Model(
-        currentWeather.temperature,
-        currentWeather.precipitationType,
-        currentWeather.precipitationIntensity,
+        weather.temperature,
+        weather.precipitationType,
+        weather.precipitationIntensity,
         'small'
       ),
       frontYard: SnowPall_Pricing_Model(
-        currentWeather.temperature,
-        currentWeather.precipitationType,
-        currentWeather.precipitationIntensity,
+        weather.temperature,
+        weather.precipitationType,
+        weather.precipitationIntensity,
         'medium'
       ),
       backyard: SnowPall_Pricing_Model(
-        currentWeather.temperature,
-        currentWeather.precipitationType,
-        currentWeather.precipitationIntensity,
+        weather.temperature,
+        weather.precipitationType,
+        weather.precipitationIntensity,
         'medium'
       )
     };
-  }, [currentWeather]);
+  }, [weather]);
 
   // Calculate and set prices when currentWeather changes
   useEffect(() => {
-    if (currentWeather) {
+    if (weather) {
       setDynamicPrices(calculatePrices());
     }
-  }, [currentWeather, calculatePrices]);
+  }, [weather, calculatePrices]);
 
   const handleInputChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -67,7 +69,6 @@ const LawnService = () => {
     }
   };
   
-
   const resetLawnForm = () => {
     setLawnFormData({
       walkway: false,
@@ -85,8 +86,6 @@ const LawnService = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    console.log(lawnFormData.lawnMessage)
-
     const formData = new FormData();
     formData.append('walkway', lawnFormData.walkway);
     formData.append('frontYard',lawnFormData.frontYard);
@@ -98,7 +97,6 @@ const LawnService = () => {
     formData.append('objectType', 'lawn');
     if (lawnFormData.image) {
       formData.append('image', lawnFormData.image);
-      console.log('this is the lawn image', lawnFormData.image)
     }
 
     const url = editingIndex === null ? `/lawn` : `/lawn/${cart[editingIndex].id}`;
@@ -128,7 +126,6 @@ const LawnService = () => {
       setEditingIndex(null);
       setError('');
       setShouldRefetch(true);
-      console.log('Success:', data.message || 'Lawn service saved successfully.');
     } catch (error) {
       console.error('Error:', error);
       setError(error.message || 'An error occurred.');

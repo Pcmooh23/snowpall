@@ -83,7 +83,6 @@ const OtherService = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log('handle prices: ', dynamicPrices.size1.toFixed(2).toString(), dynamicPrices.size2.toFixed(2).toString(), dynamicPrices.size3.toFixed(2).toString(), dynamicPrices.size4.toFixed(2).toString())
     const formData = new FormData();
     formData.append('selectedSize', otherFormData.selectedSize);
     formData.append('job1Price', dynamicPrices.size1.toFixed(2).toString());
@@ -108,7 +107,6 @@ const OtherService = () => {
         throw new Error(`Failed to ${editingIndex === null ? 'create' : 'update'} other service: ${response.statusText}`);
       }
       const data = await response.json();
-      console.log('Success:', data);
       setCart(currentCart => {
         const updatedCart = [...currentCart];
         if (editingIndex != null) {
@@ -122,7 +120,6 @@ const OtherService = () => {
       setEditingIndex(null);
       setError('');
       setShouldRefetch(true);
-      console.log('Success:', data.message || 'Other service saved successfully.');
     } catch (error) {
       console.error('Error:', error);
       setError(error.message || 'An error occurred.');

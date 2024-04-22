@@ -38,7 +38,7 @@ const StreetService = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        const weather = currentWeather || defaultWeather;
+        const weather = currentWeather || defclaultWeather;
         const price = SnowPall_Pricing_Model(
             weather.temperature,
             weather.precipitationType,
@@ -82,6 +82,7 @@ const StreetService = () => {
             setEditingIndex(null);
             setError(''); 
             setShouldRefetch(true);
+            console.log('Success:', data.message || 'Street service saved successfully.');
         } catch (error) {
             console.error('Error:', error);
             setError(error.message || 'An error occurred.');

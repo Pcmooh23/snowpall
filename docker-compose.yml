@@ -2,14 +2,13 @@ version: "3.8"
 
 services:
   web:
+    depends_on:
+      - api
     build: .
     ports:
       - 3000:3000
     env_file:
       - .env
-    volumes:
-      - ./app
-      - /app/nodules
     develop:
       watch:
         - path: ./package.json
@@ -35,6 +34,5 @@ services:
         - path: ./backend
           target: /app
           action: sync
-
 volumes:
   snowman: {}

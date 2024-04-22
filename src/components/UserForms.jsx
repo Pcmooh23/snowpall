@@ -100,7 +100,7 @@ const UserForms = () => {
                     const locationKey = await getLocationKeyFromZipcode(userZip);
                     const weatherInfo = await getWeatherForecast(locationKey);
                     if (weatherInfo) {
-                        localStorage.setItem(`${userId}_currentWeather`, weatherInfo[0])
+                        localStorage.setItem(`${userId}_currentWeather`, JSON.stringify(weatherInfo[0]));
                     }
                     navigate('/home');
                 } else if (accountType === 'snowtech') {
@@ -211,7 +211,6 @@ const UserForms = () => {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     const data = await response.json();
-                    console.log('New address added:', data.newAddress);
                     await fetchAddresses();
                 } catch (error) {
                     console.error('Error adding new address:', error);
