@@ -8,10 +8,11 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 3500
+ENV PORT=$PORT
+ARG PORT=3500
+EXPOSE $PORT
 
 ARG NODE_ENV
-
 ENV NODE_ENV=${NODE_ENV}
 
 COPY ./backend-entrypoint.sh /
